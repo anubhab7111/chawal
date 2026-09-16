@@ -1,0 +1,285 @@
+#!/bin/bash
+# ~/.config/hypr/scripts/swww_parallax_effect.sh
+# Workspace-specific wallpapers with parallax effects
+
+# Configuration
+WALLPAPER_DIR="$HOME/Pictures/wallpapers/walls-catppuccin-mocha/"  # Change this to your wallpaper directory
+CONFIG_FILE="$HOME/.config/hypr/workspace_wallpapers.conf"
+CACHE_DIR="$HOME/.cache/swww"
+
+# Create cache directory
+mkdir -p "$CACHE_DIR"
+
+# Function to log messages
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >&2
+}
+
+# Function to create default wallpaper config
+create_default_config() {
+    log "Creating default wallpaper configuration..."
+    cat > "$CONFIG_FILE" << EOF
+# Workspace Wallpaper Configuration
+# Format: workspace_id:wallpaper_path
+# Use absolute paths or paths relative to WALLPAPER_DIR
+# Examples:
+# 1:nature.jpg
+# 2:city.png
+# 3:/absolute/path/to/wallpaper.jpg
+# special:default.jpg  # fallback wallpaper
+
+# Default configuration - modify these paths
+1:wallpaper1.jpg
+2:wallpaper2.jpg
+3:wallpaper3.jpg
+4:wallpaper4.jpg
+5:wallpaper5.jpg
+special:default.jpg
+EOF
+    log "Created config file at: $CONFIG_FILE"
+    log "Please edit this file to set your wallpaper paths"
+}
+
+# Function to get wallpaper for workspace
+get_wallpaper_for_workspace() {
+    local workspace="$1"
+    local wallpaper_path=""
+
+    # Check if config file exists
+    if [ ! -f "$CONFIG_FILE" ]; then
+        create_default_config
+        return 1
+    fi
+
+    # Look for specific workspace wallpaper
+    wallpaper_path=$(grep "^${workspace}:" "$CONFIG_FILE" | cut -d':' -f2- | tr -d ' ')
+
+    # If not found, try fallback
+    if [ -z "$wallpaper_path" ]; then
+        wallpaper_path=$(grep "^special:" "$CONFIG_FILE" | cut -d':' -f2- | tr -d ' ')
+    fi
+
+    # If still not found, try to find any wallpaper in the directory
+    if [ -z "$wallpaper_path" ]; then
+        wallpaper_path=$(find "$WALLPAPER_DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" -o -iname "*.gif" \) | head -n1)
+    fi
+
+    # Convert relative path to absolute
+    if [ -n "$wallpaper_path" ] && [[ "$wallpaper_path" != /* ]]; then
+        wallpaper_path="$WALLPAPER_DIR/$wallpaper_path"
+    fi
+
+    echo "$wallpaper_path"
+}
+
+# Function to apply wallpaper with parallax effect
+apply_wallpaper_parallax() {
+    local wallpaper_path="$1"
+    local output="$2"
+    local workspace="$3"
+
+    if [ ! -f "$wallpaper_path" ]; then
+        log "Warning: Wallpaper not found: $wallpaper_path"
+        return 1
+    fi
+
+    log "Applying wallpaper for workspace $workspace: $(basename "$wallpaper_path")"
+
+    # Apply wallpaper with parallax transition
+    swww img "$wallpaper_path" \
+        --transition-type grow \
+        --transition-duration 0.65 \
+        --transition-fps 60 \
+        --transition-bezier 0.25, 1.0, 0.5, 1.0 \
+        --transition-pos "$(get_transition_position "$workspace")" \
+        ${output:+--outputs "$output"}
+
+    # Cache the current wallpaper
+    echo "$wallpaper_path" > "$CACHE_DIR/current_wallpaper"
+    echo "$workspace" > "$CACHE_DIR/current_workspace"
+}
+
+# Function to get transition position based on workspace
+get_transition_position() {
+    local workspace="$1"
+
+    case "$workspace" in
+        1) echo "0.1,0.1" ;;     # Top-left
+        2) echo "0.9,0.1" ;;     # Top-right
+        3) echo "0.1,0.9" ;;     # Bottom-left
+        4) echo "0.9,0.9" ;;     # Bottom-right
+        5) echo "0.5,0.1" ;;     # Top-center
+        6) echo "0.5,0.9" ;;     # Bottom-center
+        7) echo "0.1,0.5" ;;     # Left-center
+        8) echo "0.9,0.5" ;;     # Right-center
+        9) echo "0.5,0.5" ;;     # Center
+        10) echo "0.3,0.3" ;;    # Off-center
+        *) echo "0.5,0.5" ;;     # Default center
+    esac
+}
+
+# Function to cycle through transition types for variety
+get_transition_type() {
+    local workspace="$1"
+    local types=("grow" "outer" "wipe" "wave")
+    local index=$((workspace % ${#types[@]}))
+    echo "${types[$index]}"
+}
+
+# Enhanced parallax effect with workspace-specific transitions
+apply_enhanced_parallax() {
+    local wallpaper_path="$1"
+    local output="$2"
+    local workspace="$3"
+    local transition_type="$4"
+
+    if [ ! -f "$wallpaper_path" ]; then
+        log "Warning: Wallpaper not found: $wallpaper_path"
+        return 1
+    fi
+
+    # Get transition type if not provided
+    if [ -z "$transition_type" ]; then
+        transition_type=$(get_transition_type "$workspace")
+    fi
+
+    log "Applying enhanced parallax for workspace $workspace with transition: $transition_type"
+
+    swww img "$wallpaper_path" \
+        --transition-type "$transition_type" \
+        --transition-duration 0.6 \
+        --transition-fps 60 \
+        --transition-bezier 0.25,1.0,0.5,1.0 \
+        --transition-pos "$(get_transition_position "$workspace")" \
+        --transition-angle "$(( (workspace * 45) % 360 ))" \
+        ${output:+--outputs "$output"}
+
+    # Update cache
+    echo "$wallpaper_path" > "$CACHE_DIR/current_wallpaper"
+    echo "$workspace" > "$CACHE_DIR/current_workspace"
+}
+
+# Check prerequisites
+check_prerequisites() {
+    if ! pgrep -x "Hyprland" > /dev/null; then
+        log "Error: Hyprland is not running"
+        exit 1
+    fi
+
+    if ! command -v swww >/dev/null; then
+        log "Error: swww is not installed"
+        exit 1
+    fi
+
+    if ! pgrep -x "swww-daemon" > /dev/null; then
+        log "Starting swww daemon..."
+        swww-daemon &
+        sleep 2
+    fi
+
+    if [ ! -d "$WALLPAPER_DIR" ]; then
+        log "Warning: Wallpaper directory not found: $WALLPAPER_DIR"
+        log "Please create it or update WALLPAPER_DIR in the script"
+        mkdir -p "$WALLPAPER_DIR"
+    fi
+}
+
+# Find Hyprland socket
+find_hyprland_socket() {
+    local socket_dirs=(
+        "$HOME/.cache/hypr"
+        "/tmp/hypr/$USER"
+        "$XDG_RUNTIME_DIR/hypr"
+        "/run/user/$(id -u)/hypr"
+    )
+
+    for cache_dir in "${socket_dirs[@]}"; do
+        if [ -d "$cache_dir" ]; then
+            local socket_file=$(find "$cache_dir" -name "*.socket2.sock" 2>/dev/null | head -n1)
+            if [ -n "$socket_file" ]; then
+                echo "$(dirname "$socket_file")"
+                return 0
+            fi
+        fi
+    done
+
+    # Fallback search
+    local socket_file=$(find /tmp /run/user/$(id -u) "$HOME/.cache" -name "*.socket2.sock" 2>/dev/null | head -n1)
+    if [ -n "$socket_file" ]; then
+        echo "$(dirname "$socket_file")"
+        return 0
+    fi
+
+    return 1
+}
+
+# Main execution
+main() {
+    log "Starting workspace wallpaper parallax script..."
+
+    check_prerequisites
+
+    HYPRLAND_SOCKET_DIR=$(find_hyprland_socket)
+    if [ -z "$HYPRLAND_SOCKET_DIR" ]; then
+        log "Error: Could not find Hyprland IPC socket"
+        exit 1
+    fi
+
+    HYPRLAND_EVENT_SOCKET="$HYPRLAND_SOCKET_DIR/.socket2.sock"
+    log "Found Hyprland event socket: $HYPRLAND_EVENT_SOCKET"
+
+    # Set initial wallpaper for current workspace
+    if command -v hyprctl >/dev/null; then
+        CURRENT_WS=$(hyprctl activeworkspace -j 2>/dev/null | jq -r '.id // 1')
+        INITIAL_WALLPAPER=$(get_wallpaper_for_workspace "$CURRENT_WS")
+        if [ -f "$INITIAL_WALLPAPER" ]; then
+            log "Setting initial wallpaper for workspace $CURRENT_WS"
+            apply_enhanced_parallax "$INITIAL_WALLPAPER" "" "$CURRENT_WS"
+        fi
+    fi
+
+    log "Listening for workspace changes..."
+
+    # Listen for events
+    socat -U - UNIX-CONNECT:"$HYPRLAND_EVENT_SOCKET" | while read -r line; do
+        if [[ "$line" == workspace\>\>* ]]; then
+            NEW_WS=$(echo "$line" | cut -d'>' -f3)
+            log "Switched to workspace: $NEW_WS"
+
+            # Get wallpaper for this workspace
+            WALLPAPER_PATH=$(get_wallpaper_for_workspace "$NEW_WS")
+
+            if [ -f "$WALLPAPER_PATH" ]; then
+                # Get active monitor
+                if command -v hyprctl >/dev/null && command -v jq >/dev/null; then
+                    ACTIVE_MONITOR=$(hyprctl activeworkspace -j 2>/dev/null | jq -r '.monitor // empty')
+                    apply_enhanced_parallax "$WALLPAPER_PATH" "$ACTIVE_MONITOR" "$NEW_WS"
+                else
+                    apply_enhanced_parallax "$WALLPAPER_PATH" "" "$NEW_WS"
+                fi
+            else
+                log "No wallpaper configured for workspace $NEW_WS"
+            fi
+
+        elif [[ "$line" == focusedmon\>\>* ]]; then
+            MON_INFO=$(echo "$line" | cut -d'>' -f3)
+            MON_NAME=$(echo "$MON_INFO" | cut -d',' -f1)
+            log "Focused monitor: $MON_NAME"
+
+            # Re-apply current wallpaper to new monitor
+            if [ -f "$CACHE_DIR/current_wallpaper" ] && [ -f "$CACHE_DIR/current_workspace" ]; then
+                CURRENT_WALLPAPER=$(cat "$CACHE_DIR/current_wallpaper")
+                CURRENT_WS=$(cat "$CACHE_DIR/current_workspace")
+                apply_enhanced_parallax "$CURRENT_WALLPAPER" "$MON_NAME" "$CURRENT_WS"
+            fi
+        fi
+    done
+}
+
+# Handle script termination gracefully
+trap 'log "Script terminated"; exit 0' SIGTERM SIGINT
+
+# Run main function
+main
+
+

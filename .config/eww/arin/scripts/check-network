@@ -1,0 +1,18 @@
+#!/bin/bash
+# Rewired for NetworkManager (nmcli) — original used iwgetid.
+net_stat() {
+	conn="$(nmcli -t -f TYPE,STATE device status 2>/dev/null | awk -F: '$2=="connected"{print $1; exit}')"
+	if [[ -z "$conn" ]]; then
+		echo "Offline"; echo "images/icons/system/no-wifi.png"; return
+	fi
+	if [[ "$conn" == "wifi" ]]; then
+		ssid="$(nmcli -t -f active,ssid dev wifi 2>/dev/null | awk -F: '$1=="yes"{print $2; exit}')"
+		echo "${ssid:-Online}"; echo "images/icons/system/wifi.png"
+	else
+		echo "Online"; echo "images/icons/system/wifi.png"
+	fi
+}
+case "$1" in
+	--stat) net_stat | head -n1 ;;
+	--icon) net_stat | tail -n1 ;;
+esac

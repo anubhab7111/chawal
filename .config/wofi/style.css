@@ -1,0 +1,183 @@
+@import url("/home/ushtro/.config/theming/current/wofi-colors.css");
+
+/* --- GLOBAL STYLES --- */
+* {
+  transition:
+    background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  /* transform 0.15s cubic-bezier(0.4, 0, 0.2, 1); */
+}
+
+/* Base window styling with improved backdrop */
+window {
+  font-family: "JetbrainsMono Nerd Font", monospace;
+  font-size: 18px;
+  background-color: alpha(@base, 0.98);
+  border: 3px solid @mauve;
+  border-radius: 24px;
+  margin: 0px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    0 0 0 1px alpha(@mauve, 0.1) inset;
+  animation: fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    /* transform: scale(0.96); */
+  }
+  to {
+    opacity: 1;
+    /* transform: scale(1); */
+  }
+}
+
+/* --- BOXES & CONTAINERS --- */
+#outer-box {
+  margin: 0px;
+  padding: 0px;
+  border: none;
+  border-radius: 21px;
+}
+
+#inner-box {
+  margin: 20px;
+  margin-top: 0px;
+  border: none;
+  border-radius: 16px;
+}
+
+#scroll {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  border: none;
+  border-radius: 16px;
+}
+
+/* --- INPUT FIELD --- */
+#input {
+  background: linear-gradient(
+    135deg,
+    alpha(@surface1, 0.9) 0%,
+    @surface1 100%
+  );
+  color: @text;
+  border: 2.5px solid @teal;
+  outline: none;
+  border-radius: 16px;
+  padding: 14px 24px;
+  margin: 20px;
+  margin-bottom: 10px;
+  font-weight: 600;
+  font-size: 18px;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    0 0 0 1px alpha(@teal, 0.1) inset;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#input:focus {
+  border-color: @sky;
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.4),
+    0 0 0 1px alpha(@sky, 0.2) inset,
+    0 0 20px alpha(@sky, 0.15);
+  /* transform: translateY(-1px); */
+}
+
+#input #text {
+  color: @text;
+  background: transparent;
+  margin: 0px;
+  padding: 0px;
+  border: none;
+}
+
+#input image {
+  color: @teal;
+  margin-right: 12px;
+}
+
+/* --- ENTRY ITEMS --- */
+#entry {
+  background-color: transparent;
+  border: none;
+  border-radius: 12px;
+  margin: 3px 8px;
+  padding: 10px 16px;
+  min-height: 40px;
+  font-weight: 500;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#entry:hover {
+  background-color: alpha(@blue, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  /* transform: translateX(4px); */
+}
+
+#entry:selected {
+  outline: none;
+  margin: 3px 8px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, @peach 0%, @mauve 100%);
+  box-shadow:
+    0 4px 16px alpha(@mauve, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  /* transform: translateX(6px) scale(1.02); */
+}
+
+/* --- TEXT & IMAGES --- */
+#text {
+  color: @text;
+  background: transparent;
+  margin-left: 12px;
+  padding: 0px;
+  border: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  transition: color 0.15s ease;
+}
+
+#text:selected {
+  color: @base;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+#img {
+  margin-right: 12px;
+  background: transparent;
+  /* transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1); */
+}
+
+/* --- SCROLLBAR --- */
+scrollbar {
+  background-color: transparent;
+  border-radius: 8px;
+  margin: 4px;
+}
+
+scrollbar slider {
+  background: linear-gradient(
+    180deg,
+    alpha(@blue, 0.4) 0%,
+    alpha(@blue, 0.6) 100%
+  );
+  border-radius: 8px;
+  min-width: 6px;
+  border: 1px solid alpha(@blue, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+scrollbar slider:hover {
+  background: linear-gradient(
+    180deg,
+    alpha(@blue, 0.6) 0%,
+    alpha(@blue, 0.8) 100%
+  );
+  min-width: 8px;
+}

@@ -1,0 +1,37 @@
+#!/bin/bash
+# Rewired for playerctl/MPRIS — original used mpc/MPD.
+COVER="/tmp/.music_cover.jpg"
+
+get_status() {
+	if [[ "$(playerctl status 2>/dev/null)" == "Playing" ]]; then
+		echo "images/icons/music/pause-button.png"
+	else
+		echo "images/icons/music/play-button.png"
+	fi
+}
+get_song() {
+	s="$(playerctl metadata title 2>/dev/null)"
+	[[ -z "$s" ]] && echo "Offline" || echo "$s"
+}
+get_artist() {
+	a="$(playerctl metadata artist 2>/dev/null)"
+	[[ -z "$a" ]] && echo "Offline" || echo "$a"
+}
+get_cover() {
+	url="$(playerctl metadata mpris:artUrl 2>/dev/null)"
+	case "$url" in
+		file://*) echo "${url#file://}" ;;
+		http*)    curl -sf "$url" -o "$COVER" 2>/dev/null && echo "$COVER" || echo "images/music.png" ;;
+		*)        echo "images/music.png" ;;
+	esac
+}
+case "$1" in
+	--status) get_status ;;
+	--song)   get_song ;;
+	--artist) get_artist ;;
+	--cover)  get_cover ;;
+	--toggle) playerctl play-pause 2>/dev/null ;;
+	--next)   playerctl next 2>/dev/null ;;
+	--prev)   playerctl previous 2>/dev/null ;;
+	*)        get_song ;;
+esac

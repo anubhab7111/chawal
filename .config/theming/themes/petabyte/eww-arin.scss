@@ -1,0 +1,240 @@
+/** petabyte reskin of the arin floating dock ****************************
+ * Symlinked to ~/.config/eww/arin/eww.scss by apply-theme.sh when petabyte
+ * is active. Design system: "Velvet Pulse" - dark crimson/rose "boudoir"
+ * palette with a heartbeat-rhythm glow as the one signature move, and a
+ * thin muted rose-gold hairline as trim (never a fill).
+ * Palette: base #1a0e14  surface #2b1620/#3a1d2b  text #f5dde3
+ *          rose #ff8fa3  crimson #ff4d6d  hot #ff2d55  gild #d9a86c
+ *
+ * NOTE: keep this file plain ASCII. A stray em-dash here once made eww's
+ * SCSS compiler emit a leading @charset rule that GTK's CSS parser
+ * rejects, silently breaking every rule in the file - use "-" not em-dash.
+ ***********************************************************************/
+
+/** Global *******************************************/
+* {
+	all: unset;
+	font-family: feather;
+	font-family: "JetBrains Mono";
+	color: #f5dde3;
+}
+
+/** Motion ******************************************************
+ * Signature move: an asymmetric "lub-dub" double pulse (two quick beats,
+ * then a rest), not a generic single sine-wave breathing glow. Thematically
+ * tied to the theme's existing intimate/pulse copy ("Been yours for...").
+ ******************************************************************/
+@keyframes heartbeat {
+	0%   { box-shadow: 0 6px 22px rgba(255, 45, 85, 0.28), 0 0 0 1px rgba(255, 143, 163, 0.10) inset; }
+	14%  { box-shadow: 0 6px 30px rgba(255, 45, 85, 0.42), 0 0 0 1px rgba(255, 143, 163, 0.18) inset; }
+	28%  { box-shadow: 0 6px 22px rgba(255, 45, 85, 0.28), 0 0 0 1px rgba(255, 143, 163, 0.10) inset; }
+	42%  { box-shadow: 0 6px 34px rgba(255, 45, 85, 0.48), 0 0 0 1px rgba(255, 143, 163, 0.22) inset; }
+	70%  { box-shadow: 0 6px 22px rgba(255, 45, 85, 0.28), 0 0 0 1px rgba(255, 143, 163, 0.10) inset; }
+	100% { box-shadow: 0 6px 22px rgba(255, 45, 85, 0.28), 0 0 0 1px rgba(255, 143, 163, 0.10) inset; }
+}
+
+/* Same lub-dub rhythm, expressed as a gold ring-glow instead of a shadow
+   swell - used only on the album art, only while music is actually
+   playing (see .album_art.is-playing below). */
+@keyframes heartbeat-ring {
+	0%   { box-shadow: 0 0 0 0 rgba(217, 168, 108, 0); }
+	14%  { box-shadow: 0 0 10px 2px rgba(217, 168, 108, 0.55); }
+	28%  { box-shadow: 0 0 0 0 rgba(217, 168, 108, 0); }
+	42%  { box-shadow: 0 0 14px 3px rgba(217, 168, 108, 0.65); }
+	70%  { box-shadow: 0 0 0 0 rgba(217, 168, 108, 0); }
+	100% { box-shadow: 0 0 0 0 rgba(217, 168, 108, 0); }
+}
+
+/* NOTE: a staggered fade-in entrance (opacity 0->1, `animation-fill-mode:
+   both`, combined with heartbeat via a comma-separated `animation:` list)
+   was tried and dropped - it left the whole bar stuck fully transparent
+   (confirmed via `hyprctl layers` showing alpha 0 instead of 1). This GTK
+   CSS engine doesn't reliably support that combination. An invisible bar
+   is a worse regression than skipping the entrance, so this theme ships
+   with the heartbeat pulse only - each pod still gets a slightly staggered
+   heartbeat start time below, a small echo of the original idea. */
+
+/** Bar / pods ***********************************/
+.dockbox {
+	background-color: rgba(26, 14, 20, 0.92);
+	border: 1px solid #ff4d6d;
+	/* Gild hairline: trim only, on the top edge, like a gilded frame -
+	   never a fill, keeps crimson as the dominant identity. */
+	border-top: 1px solid #d9a86c;
+	border-radius: 16px;
+	padding: 6px 16px;
+	box-shadow: 0 6px 22px rgba(255, 45, 85, 0.28),
+	            0 0 0 1px rgba(255, 143, 163, 0.10) inset;
+	/* Hover feedback uses margin-top/border-color, not box-shadow - the
+	   heartbeat keyframes already own box-shadow continuously, and a
+	   transition on the same property would fight the animation every
+	   frame instead of blending with it. (No `transform` in this GTK CSS
+	   engine - confirmed by a compile error - so the "lift" is a small
+	   margin-top nudge instead of translateY.) */
+	transition: margin-top .25s cubic-bezier(0.34, 1.56, 0.64, 1),
+	            border-color .25s ease;
+}
+.dockbox:hover {
+	margin-top: -2px;
+	border-color: #ffb8c6;
+}
+
+/* Each pod's heartbeat starts at a slightly different offset - a small
+   rolling-wave echo of the entrance idea that was dropped above. */
+.pod-search {
+	animation: heartbeat 2.8s ease-in-out infinite;
+}
+.pod-apps {
+	animation: heartbeat 2.8s ease-in-out .15s infinite;
+}
+.pod-weather {
+	animation: heartbeat 2.8s ease-in-out .3s infinite;
+}
+.pod-music {
+	animation: heartbeat 2.8s ease-in-out .45s infinite;
+}
+.pod-system {
+	animation: heartbeat 2.8s ease-in-out .6s infinite;
+}
+
+/** Icons ***********************************/
+/* No `transform` in this GTK CSS engine (confirmed by a compile error),
+   so hover "growth" is a background-size bump instead of scale(). */
+.genicon, .appicon, .trackbutton, .playbutton, .trayicon, .face {
+	transition: background-size .18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.genicon {
+	background-repeat: no-repeat;
+	background-size: 20px;
+	min-height: 20px;
+	min-width: 20px;
+}
+.genicon:hover { background-size: 23px; }
+
+.appicon {
+	background-repeat: no-repeat;
+	background-size: 40px;
+	min-height: 40px;
+	min-width: 40px;
+}
+.appicon:hover { background-size: 44px; }
+
+.workspace {
+	background-color: #ff4d6d;
+	color: #1a0e14;
+	border: 2px solid #ff8fa3;
+	border-radius: 16px;
+	font-size: 14px;
+	padding: 0px 8px 0px 8px;
+	margin: -2px 0px 0px 0px;
+	font-weight: bold;
+}
+
+/** Clock ********************************************/
+/* Slightly opened letter-spacing - reads more like an engraved plaque
+   than default monospace density, without swapping the typeface. */
+.clockbox { margin: 0px 0px 0px 15px; }
+.time { font-size: 14px; font-weight: bold; color: #ffd9e0; letter-spacing: 1px; }
+.date { font-size: 12px; font-weight: bold; color: #dba9ba; letter-spacing: .5px; }
+
+/** Weather ********************************************/
+/* Positive gap, not the original's -90px: that hack relied on the old
+   fixed-width (300px) window giving the pod far more space than its
+   content needed. The merged bar sizes each pod to its content, so a
+   negative margin here would pull this into the clock instead. */
+.weatherbox { margin: 0px 0px 0px 15px; }
+.weathericon {
+	font-family: Iosevka Nerd Font;
+	font-size: 32px;
+	font-weight: normal;
+}
+.weathertemp { font-size: 14px; font-weight: bold; margin: 0px 0px 0px -5px; }
+
+/** Music *************************************************/
+.album_art {
+	background-repeat: no-repeat;
+	background-size: 40px;
+	min-height: 40px;
+	min-width: 40px;
+	margin: 8px;
+	border-radius: 8px;
+}
+/* Reflects real state, not decoration for its own sake: only pulses
+   while something is actually playing. */
+.album_art.is-playing {
+	animation: heartbeat-ring 2.8s ease-in-out infinite;
+}
+.musicbox { margin: 0px 0px 0px 5px; }
+.song { font-size: 14px; font-weight: bold; color: #ffd9e0; }
+.artist { font-size: 12px; font-weight: bold; color: #dba9ba; }
+/* Same fix as .weatherbox above - replaces the old -90px hack. */
+.musicbuttons { margin: 0px 0px 0px 15px; }
+.playbutton {
+	background-repeat: no-repeat;
+	background-size: 24px;
+	min-height: 24px;
+	min-width: 24px;
+	margin: 0px;
+}
+.playbutton:hover { background-size: 27px; }
+.trackbutton {
+	background-repeat: no-repeat;
+	background-size: 18px;
+	min-height: 18px;
+	min-width: 18px;
+	margin: 3px 0px 0px 0px;
+}
+.trackbutton:hover { background-size: 20px; }
+
+/** System *************************************************/
+.mails {
+	background-color: #3a1d2b;
+	color: #ff8fa3;
+	border-radius: 16px;
+	font-size: 14px;
+	padding: 0px 6px 0px 6px;
+	margin: 10px 0px 10px 0px;
+	font-weight: bold;
+}
+.trayicon {
+	background-repeat: no-repeat;
+	background-size: 24px;
+	min-height: 24px;
+	min-width: 24px;
+	margin: 8px 0px 0px 0px;
+}
+.trayicon:hover { background-size: 27px; }
+.infotext {
+	background-color: #2b1620;
+	color: #f5dde3;
+	border-radius: 16px;
+	font-size: 14px;
+	padding: 0px 6px 0px 6px;
+	margin: 10px 0px 10px 0px;
+	font-weight: bold;
+}
+.face {
+	background-size: 24px;
+	min-height: 24px;
+	min-width: 24px;
+	margin: 8px 0px 8px 0px;
+	border-radius: 100%;
+}
+.face:hover { background-size: 27px; }
+
+/** Theme-switch button (replaces the hidden waybar theme button) *****/
+.themeswitch {
+	color: #ff2d55;
+	background-color: #3a1d2b;
+	border: 1px solid #ff8fa3;
+	border-radius: 100%;
+	font-size: 18px;
+	font-weight: bold;
+	padding: 2px 8px 2px 8px;
+	margin: 8px 0px 8px 0px;
+	transition: all .2s ease;
+}
+.themeswitch:hover { color: #1a0e14; background-color: #ff4d6d; }
+
+/** EOF *************************************************/

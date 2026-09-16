@@ -1,0 +1,6 @@
+[General]
+theme=Slot-Dark-Kvantum
+
+[Applications]
+Default=Dolphin
+Slot-Dark-Kvantum=Dolphin

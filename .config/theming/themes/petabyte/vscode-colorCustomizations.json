@@ -1,0 +1,14 @@
+{
+    "activityBar.background": "#1a0e14",
+    "activityBar.foreground": "#f5dde3",
+    "activityBar.activeBorder": "#ff4d6d",
+    "statusBar.background": "#2b1620",
+    "statusBar.foreground": "#f5dde3",
+    "titleBar.activeBackground": "#1a0e14",
+    "titleBar.activeForeground": "#f5dde3",
+    "editorCursor.foreground": "#ff4d6d",
+    "tab.activeBorderTop": "#ff4d6d",
+    "focusBorder": "#ff4d6d",
+    "editor.selectionBackground": "#3a1d2b88",
+    "sideBar.background": "#150b10"
+}

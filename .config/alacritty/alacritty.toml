@@ -1,0 +1,213 @@
+[general]
+# Points at a real (non-symlinked) file that apply-theme.sh overwrites with
+# the active theme's colors. Alacritty's live-reload file-watcher locks onto
+# the inode it starts watching; a symlink retarget (theming/current -> a
+# different theme dir) doesn't fire that watch, so already-open windows
+# would keep the old theme's colors forever. Writing real content to a
+# stable path fixes that.
+import = ["~/.config/alacritty/current-theme.toml"]
+
+[font]
+size = 15
+# normal = { family = "JetBrains Mono", style = "Regular" }
+normal = { family = "JetBrainsMono Nerd Font", style = "Regular" }
+bold = { family = "JetBrainsMono Nerd Font", style = "Bold" }
+italic = { family = "JetBrainsMono Nerd Font", style = "Italic" }
+bold_italic = { family = "JetBrainsMono Nerd Font", style = "Bold Italic" }
+
+[window]
+padding = {x = 5, y = 0}
+opacity = 1
+
+
+# [bell]
+# animation = "EaseOutSine"
+# duration = 200
+# color = "#f38ba8"
+
+[mouse]
+hide_when_typing = true
+ bindings = [
+{ mouse = "Right", mods = "Control", action = "Paste" },
+]
+
+[keyboard]
+bindings = [
+    # # Window Management
+    # { key = "N", mods = "Control|Shift", action = "CreateNewWindow" },
+    # { key = "W", mods = "Control|Shift", action = "Quit" },
+    # { key = "F11", action = "ToggleFullscreen" },
+    # { key = "F10", action = "ToggleMaximized" },
+    # { key = "H", mods = "Control|Shift", action = "Hide" },
+    # { key = "M", mods = "Control|Shift", action = "Minimize" },
+
+    # Font Size Control
+    { key = "Plus", mods = "Control", action = "IncreaseFontSize" },
+    { key = "Minus", mods = "Control", action = "DecreaseFontSize" },
+    { key = "0", mods = "Control", action = "ResetFontSize" },
+    { key = "NumpadAdd", mods = "Control", action = "IncreaseFontSize" },
+    { key = "NumpadSubtract", mods = "Control", action = "DecreaseFontSize" },
+
+    # # Scrolling
+    # { key = "K", mods = "Control|Shift", action = "ScrollLineUp" },
+    # { key = "J", mods = "Control|Shift", action = "ScrollLineDown" },
+    # { key = "U", mods = "Control|Shift", action = "ScrollHalfPageUp" },
+    # { key = "D", mods = "Control|Shift", action = "ScrollHalfPageDown" },
+    # { key = "PageUp", mods = "Shift", action = "ScrollPageUp" },
+    # { key = "PageDown", mods = "Shift", action = "ScrollPageDown" },
+    # { key = "Home", mods = "Control|Shift", action = "ScrollToTop" },
+    # { key = "End", mods = "Control|Shift", action = "ScrollToBottom" },
+
+    # Copy/Paste
+    { key = "C", mods = "Control|Shift", action = "Copy" },
+    { key = "V", mods = "Control|Shift", action = "Paste" },
+    { key = "Insert", mods = "Shift", action = "Paste" },
+
+    # # Selection
+    { key = "A", mods = "Control|Shift", action = "ToggleViMode" },
+    # { key = "Escape", action = "ClearSelection" },
+
+    # Search
+    { key = "F", mods = "Control|Shift", action = "SearchForward" },
+    { key = "B", mods = "Control|Shift", action = "SearchBackward" },
+
+    # Vi Mode Navigation (when in Vi mode)
+    { key = "H", mods = "None", mode = "Vi", action = "Left" },
+    { key = "J", mods = "None", mode = "Vi", action = "Down" },
+    { key = "K", mods = "None", mode = "Vi", action = "Up" },
+    { key = "L", mods = "None", mode = "Vi", action = "Right" },
+    { key = "W", mods = "None", mode = "Vi", action = "SemanticRight" },
+    { key = "E", mods = "None", mode = "Vi", action = "SemanticRightEnd" },
+    { key = "B", mods = "None", mode = "Vi", action = "SemanticLeft" },
+    { key = "G", mods = "Shift", mode = "Vi", action = "High" },
+    { key = "G", mods = "None", mode = "Vi", action = "Low" },
+    { key = "0", mods = "None", mode = "Vi", action = "First" },
+    { key = "4", mods = "Shift", mode = "Vi", action = "Last" },  # $ key
+    { key = "6", mods = "Shift", mode = "Vi", action = "FirstOccupied" },  # ^ key
+
+    # Vi Mode Selection
+    { key = "V", mods = "None", mode = "Vi", action = "ToggleNormalSelection" },
+    { key = "V", mods = "Shift", mode = "Vi", action = "ToggleLineSelection" },
+    { key = "V", mods = "Control", mode = "Vi", action = "ToggleBlockSelection" },
+
+    # Vi Mode Search
+    { key = "N", mods = "None", mode = "Vi", action = "SearchNext" },
+    { key = "N", mods = "Shift", mode = "Vi", action = "SearchPrevious" },
+
+    # Search Mode Actions
+    { key = "Return", mods = "None", mode = "Search", action = "SearchConfirm" },
+    { key = "Escape", mods = "None", mode = "Search", action = "SearchCancel" },
+    { key = "C", mods = "Control", mode = "Search", action = "SearchCancel" },
+    { key = "U", mods = "Control", mode = "Search", action = "SearchClear" },
+    { key = "W", mods = "Control", mode = "Search", action = "SearchDeleteWord" },
+    { key = "P", mods = "Control", mode = "Search", action = "SearchHistoryPrevious" },
+    { key = "N", mods = "Control", mode = "Search", action = "SearchHistoryNext" },
+
+    # Clear Screen and History
+    { key = "K", mods = "Control|Alt", action = "ClearHistory" },
+
+    # Spawn New Instance
+    { key = "T", mods = "Control|Shift", action = "SpawnNewInstance" },
+
+    # Quick Commands (examples - customize these for your workflow)
+    { key = "1", mods = "Control|Alt", chars = "cd ~\r" },
+    { key = "2", mods = "Control|Alt", chars = "ls -la\r" },
+    { key = "3", mods = "Control|Alt", chars = "git status\r" },
+    { key = "4", mods = "Control|Alt", chars = "htop\r" },
+
+    # Arch Linux Package Management
+    { key = "S", mods = "Control|Alt", chars = "sudo pacman -S " },
+    { key = "U", mods = "Control|Alt", chars = "sudo pacman -Syu\r" },
+    { key = "R", mods = "Control|Alt", chars = "sudo pacman -R " },
+    { key = "Q", mods = "Control|Alt", chars = "pacman -Q " },
+    { key = "F", mods = "Control|Alt", chars = "pacman -Ss " },
+    { key = "I", mods = "Control|Alt", chars = "pacman -Si " },
+    { key = "O", mods = "Control|Alt", chars = "pacman -Qo " },
+    { key = "D", mods = "Control|Alt", chars = "pacman -Qdtq | sudo pacman -Rs -\r" },
+
+    # AUR Helper shortcuts (using yay - adjust if using different AUR helper)
+    { key = "Y", mods = "Control|Alt", chars = "yay -S " },
+    { key = "Y", mods = "Control|Alt|Shift", chars = "yay -Syu\r" },
+
+    # System Monitoring and Management
+    # { key = "M", mods = "Control|Alt", chars = "free -h\r" },
+    # { key = "J", mods = "Control|Alt", chars = "sudo journalctl -f\r" },
+    # { key = "T", mods = "Control|Alt", chars = "systemctl status " },
+    # { key = "E", mods = "Control|Alt", chars = "sudo systemctl enable " },
+    # { key = "X", mods = "Control|Alt", chars = "sudo systemctl start " },
+    # { key = "Z", mods = "Control|Alt", chars = "sudo systemctl stop " },
+
+    # File System and Disk Management
+    { key = "Space", mods = "Control|Alt", chars = "df -h\r" },
+    { key = "L", mods = "Control|Alt", chars = "lsblk\r" },
+    { key = "B", mods = "Control|Alt", chars = "sudo fdisk -l\r" },
+
+    # Network and Process Management
+    { key = "N", mods = "Control|Alt", chars = "ip addr show\r" },
+    { key = "P", mods = "Control|Alt", chars = "ps aux | grep " },
+    { key = "K", mods = "Control|Alt", chars = "sudo kill -9 " },
+    #
+    # Development shortcuts
+    # { key = "G", mods = "Control|Shift", chars = "git " },
+    # { key = "P", mods = "Control|Shift", chars = "python3 " },
+    # { key = "R", mods = "Control|Shift", chars = "./run.sh\r" },
+
+    # Navigation shortcuts
+    { key = "Period", mods = "Control|Alt", chars = "cd ..\r" },
+    { key = "Slash", mods = "Control|Alt", chars = "find . -name " },
+
+    # Arch Linux specific directories
+    # { key = "C", mods = "Control|Alt|Shift", chars = "cd /etc\r" },
+    # { key = "V", mods = "Control|Alt|Shift", chars = "cd /var/log\r" },
+    # { key = "H", mods = "Control|Alt|Shift", chars = "cd /home\r" },
+    # { key = "S", mods = "Control|Alt|Shift", chars = "cd /usr/share\r" },
+
+    # macOS specific bindings (uncomment if using macOS)
+    # { key = "F", mods = "Command|Control", action = "ToggleSimpleFullscreen" },
+    # { key = "H", mods = "Command", action = "HideOtherApplications" },
+    # { key = "T", mods = "Command", action = "CreateNewTab" },
+    # { key = "1", mods = "Command", action = "SelectTab1" },
+    # { key = "2", mods = "Command", action = "SelectTab2" },
+    # { key = "3", mods = "Command", action = "SelectTab3" },
+    # { key = "9", mods = "Command", action = "SelectLastTab" },
+
+    # Linux/BSD specific bindings (uncomment if using Linux/BSD)
+    { key = "Insert", mods = "Control", action = "CopySelection" },
+    { key = "Insert", mods = "Shift", action = "PasteSelection" },
+]
+
+# Useful Arch Linux Keybinding Reference:
+#
+# Package Management:
+# Ctrl+Alt+S  = sudo pacman -S (install package)
+# Ctrl+Alt+U  = sudo pacman -Syu (system update)
+# Ctrl+Alt+R  = sudo pacman -R (remove package)
+# Ctrl+Alt+Q  = pacman -Q (query installed packages)
+# Ctrl+Alt+F  = pacman -Ss (search packages)
+# Ctrl+Alt+I  = pacman -Si (package info)
+# Ctrl+Alt+O  = pacman -Qo (which package owns file)
+# Ctrl+Alt+D  = remove orphaned packages
+# Ctrl+Alt+Y  = yay -S (AUR install)
+# Ctrl+Alt+Shift+Y = yay -Syu (AUR update)
+#
+# System Management:
+# Ctrl+Alt+M  = free -h (memory usage)
+# Ctrl+Alt+J  = sudo journalctl -f (live system logs)
+# Ctrl+Alt+T  = systemctl status (service status)
+# Ctrl+Alt+E  = sudo systemctl enable (enable service)
+# Ctrl+Alt+X  = sudo systemctl start (start service)
+# Ctrl+Alt+Z  = sudo systemctl stop (stop service)
+#
+# System Info:
+# Ctrl+Alt+Space = df -h (disk usage)
+# Ctrl+Alt+L  = lsblk (list block devices)
+# Ctrl+Alt+B  = sudo fdisk -l (disk partitions)
+# Ctrl+Alt+N  = ip addr show (network interfaces)
+# Ctrl+Alt+P  = ps aux | grep (search processes)
+# Ctrl+Alt+K  = sudo kill -9 (force kill process)
+#
+# Quick Navigation:
+# Ctrl+Alt+Shift+C = cd /etc
+# Ctrl+Alt+Shift+V = cd /var/log
+# Ctrl+Alt+Shift+H = cd /home
+# Ctrl+Alt+Shift+S = cd /usr/share

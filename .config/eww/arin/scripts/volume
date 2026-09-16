@@ -1,0 +1,28 @@
+#!/bin/bash
+# Rewired for PipeWire (wpctl) — original used amixer/ALSA.
+SINK="@DEFAULT_AUDIO_SINK@"
+
+get_volume() {
+	raw="$(wpctl get-volume "$SINK" 2>/dev/null)"
+	if [[ "$raw" == *MUTED* ]]; then
+		echo "Mute"
+	else
+		awk '{printf "%d%%\n", $2*100}' <<<"$raw"
+	fi
+}
+get_icon() {
+	raw="$(wpctl get-volume "$SINK" 2>/dev/null)"
+	if [[ "$raw" == *MUTED* ]]; then
+		echo "images/icons/volume/mute.png"
+	else
+		echo "images/icons/volume/volume.png"
+	fi
+}
+case "$1" in
+	--get)    get_volume ;;
+	--icon)   get_icon ;;
+	--inc)    wpctl set-volume "$SINK" 5%+ ;;
+	--dec)    wpctl set-volume "$SINK" 5%- ;;
+	--toggle) wpctl set-mute "$SINK" toggle ;;
+	*)        get_volume ;;
+esac

@@ -1,0 +1,159 @@
+@import url("/home/ushtro/.config/theming/current/wlogout-colors.css");
+
+/* ================================
+   GLOBAL STYLES
+   ================================ */
+* {
+  background-image: none;
+  box-shadow: none;
+  font-family: "JetBrainsMono Nerd Font", monospace;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ================================
+   WINDOW BACKGROUND
+   ================================ */
+window {
+  background-color: rgba(30, 30, 46, 0.75);
+  /* background-image: url("/tmp/shot_blurred.png"); */
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ================================
+   BUTTON BASE STYLES
+   ================================ */
+button {
+  border-radius: 16px;
+  border-style: solid;
+  border-width: 2.5px;
+  border-color: rgba(137, 180, 250, 0.3);
+  background-color: rgba(49, 50, 68, 0.95);
+  color: @text;
+  text-decoration-color: @text;
+  background-repeat: no-repeat;
+  background-position: center 20%;
+  padding-top: 120px;
+  background-size: 35%;
+  margin: 30px;
+  padding: 20px;
+  min-width: 120px;
+  min-height: 120px;
+  font-weight: 600;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(137, 180, 250, 0.1) inset;
+}
+
+/* ================================
+   BUTTON HOVER & ACTIVE STATES
+   ================================ */
+button:focus,
+button:active {
+  background-color: rgba(69, 71, 90, 0.95);
+  border-color: @blue;
+  outline-style: none;
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(137, 180, 250, 0.2) inset,
+    0 0 20px rgba(137, 180, 250, 0.15);
+}
+
+button:hover {
+  background-color: rgba(69, 71, 90, 0.95);
+  border-color: @blue;
+  outline-style: none;
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(137, 180, 250, 0.2) inset,
+    0 0 20px rgba(137, 180, 250, 0.15);
+}
+
+#suspend {
+  border-color: rgba(238, 212, 159, 0.4);
+}
+#suspend:hover,
+#suspend:focus {
+  border-color: @accent_suspend;
+  box-shadow: 0 0 20px rgba(238, 212, 159, 0.25);
+}
+
+#shutdown {
+  border-color: rgba(238, 153, 160, 0.4);
+}
+#shutdown:hover,
+#shutdown:focus {
+  border-color: @accent_shutdown;
+  box-shadow: 0 0 20px rgba(238, 153, 160, 0.25);
+}
+
+#reboot {
+  border-color: rgba(138, 173, 244, 0.4);
+}
+#reboot:hover,
+#reboot:focus {
+  border-color: @accent_reboot;
+  box-shadow: 0 0 20px rgba(138, 173, 244, 0.25);
+}
+
+#logout {
+  border-color: rgba(198, 160, 246, 0.4);
+}
+#logout:hover,
+#logout:focus {
+  border-color: @accent_logout;
+  box-shadow: 0 0 20px rgba(198, 160, 246, 0.25);
+}
+
+#lock {
+  border-color: rgba(245, 169, 127, 0.4);
+}
+#lock:hover,
+#lock:focus {
+  border-color: @accent_lock;
+  box-shadow: 0 0 20px rgba(245, 169, 127, 0.25);
+}
+
+#hibernate {
+  border-color: rgba(166, 218, 149, 0.4);
+}
+#hibernate:hover,
+#hibernate:focus {
+  border-color: @accent_hibernate;
+  box-shadow: 0 0 20px rgba(166, 218, 149, 0.25);
+}
+
+/* ================================
+   BUTTON ICONS
+   ================================ */
+#lock {
+  background-image: url("/home/ushtro/.config/wlogout/icons/lock.svg");
+}
+
+#logout {
+  background-image: url("/home/ushtro/.config/wlogout/icons/logout.svg");
+}
+
+#suspend {
+  background-image: url("/home/ushtro/.config/wlogout/icons/suspend.svg");
+}
+
+#hibernate {
+  background-image: url("/home/ushtro/.config/wlogout/icons/hibernate.svg");
+}
+
+#shutdown {
+  background-image: url("/home/ushtro/.config/wlogout/icons/shutdown.svg");
+}
+
+#reboot {
+  background-image: url("/home/ushtro/.config/wlogout/icons/reboot.svg");
+}

@@ -1,0 +1,26 @@
+#!/bin/bash
+# Rewired to read /sys (no acpi dep). Falls back gracefully on desktops w/o a battery.
+BAT="/sys/class/power_supply/BAT0"
+[ -d "$BAT" ] || BAT="/sys/class/power_supply/BAT1"
+if [ -d "$BAT" ]; then
+	CAP="$(cat "$BAT/capacity" 2>/dev/null)"
+	ST="$(cat "$BAT/status" 2>/dev/null)"
+else
+	CAP=100; ST="Full"
+fi
+
+icon() {
+	if [[ "$ST" == "Charging" && "$CAP" -lt 100 ]]; then
+		echo "images/icons/battery/charge.png"
+	elif [[ "$ST" == "Full" || "$CAP" -ge 100 ]]; then
+		echo "images/icons/battery/full.png"
+	elif [[ "$CAP" -ge 65 ]]; then echo "images/icons/battery/battery-3.png"
+	elif [[ "$CAP" -ge 35 ]]; then echo "images/icons/battery/battery-2.png"
+	elif [[ "$CAP" -ge 10 ]]; then echo "images/icons/battery/battery-1.png"
+	else echo "images/icons/battery/low.png"
+	fi
+}
+case "$1" in
+	--icon) icon ;;
+	--perc) echo "${CAP}%" ;;
+esac

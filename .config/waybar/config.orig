@@ -1,0 +1,160 @@
+{
+  "layer": "top",
+  "position": "top",
+  "height": 51,
+  "margin-top": 4,
+  "margin-left": 7,
+  "margin-bottom": 0,
+  "margin-right": 12,
+  "spacing": 10,
+  "modules-left": [
+    "custom/launcher",
+    "clock",
+    "custom/media"
+  ],
+  "modules-center": [
+    "hyprland/workspaces"
+  ],
+  "modules-right": [
+    "backlight",
+    "pulseaudio",
+    "battery",
+    "bluetooth",
+    "network",
+    "idle_inhibitor",
+    "custom/theme-switcher",
+    "custom/power-menu"
+  ],
+  "hyprland/workspaces": {
+    "on-click": "activate",
+    "active-only": false,
+    "all-outputs": true,
+    "format": "{icon}",
+    "format-icons": {
+      "urgent": "",
+      "active": "",
+      "default": ""
+    },
+    "persistent-workspaces": {
+      "*": 4
+    }
+  },
+  "clock": {
+    "format": "<b>{:%H:%M:%S}</b>",
+    "format-alt": "<b>{:%A, %d %B %Y}</b>",
+    "tooltip-format": "<big>{:%B %Y}</big>\n<tt><small>{calendar}</small></tt>",
+    "interval": 1
+  },
+  "backlight": {
+    "device": "nvidia",
+    "format": "{icon} <b>{percent}%</b>",
+    "format-icons": [
+      "󰃞",
+      "󰃟",
+      "󰃠"
+    ],
+    "tooltip": false,
+    "on-scroll-up": "brightnessctl set 5%+",
+    "on-scroll-down": "brightnessctl set 5%-"
+  },
+  "pulseaudio": {
+    "format": "<b>{icon} {volume}%</b>",
+    "format-bluetooth": "<b>󰂯 {volume}%</b>",
+    "format-bluetooth-muted": "<b>󰂲</b>",
+    "format-muted": "<b>󰖁</b>",
+    "format-icons": {
+      "headphone": "󰋋",
+      "hands-free": "󰋎",
+      "headset": "󰋎",
+      "default": [
+        "󰕿",
+        "󰖀",
+        "󰕾"
+      ]
+    },
+    "tooltip": true,
+    "tooltip-format": "{desc}: {volume}%",
+    "on-click": "pwvucontrol",
+    "on-scroll-up": "pamixer -i 5",
+    "on-scroll-down": "pamixer -d 5"
+  },
+  "network": {
+    "format-wifi": "<b>󰤨 {essid}</b>",
+    "format-ethernet": "<b>󰈀 Connected</b>",
+    "format-disconnected": "<b>󰤭</b>",
+    "tooltip": true,
+    "tooltip-format-wifi": "{essid} ({signalStrength}%)\n󰓅 {ipaddr}/{cidr}",
+    "on-click": "bash ~/.config/waybar/scripts/wofi-wifi-menu.sh",
+    "interval": 5
+  },
+  "bluetooth": {
+    "format": "<b>󰂯</b>",
+    "format-connected": "<b>󰂱 {num_connections}</b>",
+    "format-disabled": "<b>󰂲</b>",
+    "on-click": "bash ~/.config/waybar/scripts/wofi-bluetooth",
+    "interval": 30
+  },
+  "battery": {
+    "bat": "BAT0",
+    "interval": 10,
+    "states": {
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "<b>{icon} {capacity}%</b>",
+    "format-charging": "<b>󰂄 {capacity}%</b>",
+    "format-plugged": "<b>󰚥 {capacity}%</b>",
+    "format-full": "<b>󰁹 Full</b>",
+    "format-icons": [
+      "󰁺",
+      "󰁻",
+      "󰁼",
+      "󰁽",
+      "󰁾",
+      "󰁿",
+      "󰂀",
+      "󰂁",
+      "󰂂",
+      "󰁹"
+    ],
+    "tooltip": true
+  },
+  "custom/launcher": {
+    "format": "󰣇",
+    "tooltip": false,
+    "on-click": "wofi --show drun"
+  },
+  "custom/theme-switcher": {
+    "exec": "~/.config/theming/waybar-status.sh",
+    "return-type": "json",
+    "on-click": "~/.config/theming/toggle-theme.sh",
+    "tooltip": true
+  },
+  "custom/power-menu": {
+    "format": "⏻",
+    "tooltip": false,
+    "on-click": "wlogout"
+  },
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": {
+      "activated": "󰅶",
+      "deactivated": "󰾪"
+    },
+    "start-activated": true,
+    "tooltip": true,
+    "tooltip-format-activated": "Idle inhibitor active",
+    "tooltip-format-deactivated": "Idle inhibitor inactive"
+  },
+  "custom/media": {
+    "format": "{}",
+    "exec": "~/.config/waybar/scripts/mediaplayer.sh",
+    "return-type": "json",
+    "interval": 3,
+    "on-click": "playerctl play-pause",
+    "on-scroll-up": "playerctl next",
+    "on-scroll-down": "playerctl previous",
+    "tooltip": true,
+    "escape": true
+  }
+}

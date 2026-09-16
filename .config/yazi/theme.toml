@@ -1,0 +1,52 @@
+# ================================
+# YAZI THEME WITH CATPPUCCIN FLAVOR
+# ================================
+
+[flavor]
+use = "catppuccin-mocha"
+
+# ================================
+# CUSTOM OVERRIDES
+# ================================
+
+# Manager overrides for more vibrant selection
+[mgr]
+hovered       = { reversed = true }
+preview_hovered = { fg = "#89b4fa", underline = true }
+
+# Status bar customization - matching Waybar modules
+[status]
+separator_open  = ""
+separator_close = ""
+
+# More vibrant mode indicators
+mode_normal = { fg = "#1e1e2e", bg = "#89b4fa", bold = true }
+mode_select = { fg = "#1e1e2e", bg = "#a6e3a1", bold = true }
+mode_unset  = { fg = "#1e1e2e", bg = "#f38ba8", bold = true }
+
+# Progress bar with signature blue
+progress_normal = { fg = "#89b4fa", bg = "#313244" }
+progress_error  = { fg = "#f38ba8", bg = "#313244" }
+
+# Input styling - matching Wofi
+[input]
+border = { fg = "#89dceb" }
+
+# Select styling
+[select]
+border = { fg = "#a6e3a1" }
+active = { fg = "#1e1e2e", bg = "#a6e3a1", bold = true }
+
+# Tasks styling
+[tasks]
+border  = { fg = "#89b4fa" }
+hovered = { fg = "#1e1e2e", bg = "#fab387" }
+
+# Which menu styling
+[which]
+cand = { fg = "#89dceb" }
+
+# Completion styling
+[completion]
+border = { fg = "#89b4fa" }
+active = { reversed = true }
