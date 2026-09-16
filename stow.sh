@@ -51,12 +51,12 @@ reconcile() {
     return 0
   fi
 
-  [ -e "$target" ] || return 0
+  [ -e "$target" ] || [ -L "$target" ] || return 0
 
-  if [ -d "$source" ] && [ -d "$target" ]; then
+  if [ -d "$source" ] && [ ! -L "$source" ] && [ -d "$target" ]; then
     local child
     for child in "$source"/*; do
-      [ -e "$child" ] || continue
+      [ -e "$child" ] || [ -L "$child" ] || continue
       reconcile "$rel/$(basename "$child")"
     done
     rmdir "$target" 2>/dev/null || true
@@ -67,7 +67,7 @@ reconcile() {
 }
 
 for entry in "$DOTFILES_DIR"/.config/*; do
-  [ -e "$entry" ] || continue
+  [ -e "$entry" ] || [ -L "$entry" ] || continue
   reconcile ".config/$(basename "$entry")"
 done
 for entry in "$DOTFILES_DIR"/.*; do
@@ -75,7 +75,7 @@ for entry in "$DOTFILES_DIR"/.*; do
   case "$base" in
     .|..|.git|.gitignore|.config|.stow-local-ignore) continue ;;
   esac
-  [ -e "$entry" ] || continue
+  [ -e "$entry" ] || [ -L "$entry" ] || continue
   reconcile "$base"
 done
 
