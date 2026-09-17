@@ -98,7 +98,7 @@ VOLUME_EDGE_DIR="$HOME/.config/eww/volume-edge"
 if [ -d "$VOLUME_EDGE_DIR" ]; then
     (setsid eww --config "$VOLUME_EDGE_DIR" daemon >/dev/null 2>&1 &) || true
     sleep 0.3
-    eww --config "$VOLUME_EDGE_DIR" open volume-edge >/dev/null 2>&1 || true
+    eww --config "$VOLUME_EDGE_DIR" open volume-hotzone >/dev/null 2>&1 || true
 fi
 
 # Hyprland: re-source config (picks up hyprland-colors.conf + decorations.conf

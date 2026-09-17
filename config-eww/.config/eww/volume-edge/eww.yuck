@@ -1,44 +1,51 @@
 ;; Hover-triggered volume slider that lives pinned to the right screen edge.
-;; A thin strip is always there to catch the pointer; hovering it reveals a
-;; vertical slider, and leaving the strip/slider (moving left, off the
-;; widget) slides it back away. Purely hover-driven, no auto-hide timer.
 ;;
-;; The window itself is a fixed-size surface sized for the *expanded* state
-;; (eww's :geometry width/height pin the actual layer-shell surface size --
-;; it does not auto-grow with the revealer). The hotzone strip and the
-;; slider panel each get their own small eventbox instead of one eventbox
-;; around the whole window, so hovering the empty transparent margin next
-;; to them (still inside the fixed-size surface) does nothing -- only the
-;; two real hit areas do.
+;; Two separate layer-shell windows, not one window with an internal
+;; revealer -- a revealer inside a `halign`/`valign`-positioned box collapses
+;; that box (and everything inside it, including its hover hitbox) to its
+;; content's natural size, which is zero when the revealer is closed. That
+;; silently ate all hover input. Splitting into a tiny always-on hotzone
+;; window (whose root widget is the hover-catching eventbox, so it can't
+;; collapse) and a separate panel window that's opened/closed on demand
+;; sidesteps that entirely, and matches how the eww/arin dock in this same
+;; config already does its sidebar (open/close, not a revealer).
+;;
+;; The two windows sit edge-to-edge with no gap or overlap (panel's `x`
+;; margin equals the hotzone's width) so a real, continuous mouse movement
+;; crosses cleanly from one hitbox into the other.
+;;
+;; `eww open`/`eww close` need an explicit `--config` or they can't find
+;; this daemon's socket (its path is derived from the config dir) and fail
+;; silently -- ${EWW_CONFIG_DIR} is eww's own built-in variable for this.
 ;;
 ;; Standalone daemon/config so it survives independently of whichever bar
 ;; (waybar vs. the eww/arin dock) the active theme picks -- see
 ;; ~/.config/theming/apply-theme.sh, which relaunches it after every theme
 ;; switch since that script's blanket `pkill -x eww` kills it too.
 
-(defvar reveal false)
-
 (deflisten vol_state :initial "{\"volume\": 0, \"muted\": false}"
   "scripts/volume-listen.sh")
 
-(defwindow volume-edge
+(defwindow volume-hotzone
   :monitor 0
   :stacking "overlay"
   :exclusive false
   :focusable false
-  :geometry (geometry :anchor "right center" :width "110px" :height "260px")
-  (volume-edge-widget))
+  :geometry (geometry :anchor "right center" :x "0px" :width "10px" :height "260px")
+  (eventbox :onhover "eww --config ${EWW_CONFIG_DIR} open volume-panel"
+            :onscroll "scripts/scroll-volume.sh {}"
+    (box :class "hotzone")))
 
-(defwidget volume-edge-widget []
-  (box :orientation "h" :space-evenly false :halign "end" :valign "center"
-    (revealer :transition "slideleft" :duration "180ms" :reveal reveal
-      (eventbox :onhoverlost "eww update reveal=false"
-        (volume-panel :volume {jq(vol_state, ".volume")} :muted {jq(vol_state, ".muted")})))
-    (eventbox :onhover "eww update reveal=true"
-              :onscroll "scripts/scroll-volume.sh {}"
-      (box :class "hotzone" :vexpand true))))
+(defwindow volume-panel
+  :monitor 0
+  :stacking "overlay"
+  :exclusive false
+  :focusable false
+  :geometry (geometry :anchor "right center" :x "10px" :width "90px" :height "260px")
+  (eventbox :onhoverlost "eww --config ${EWW_CONFIG_DIR} close volume-panel"
+    (volume-panel-content :volume {jq(vol_state, ".volume")} :muted {jq(vol_state, ".muted")})))
 
-(defwidget volume-panel [volume muted]
+(defwidget volume-panel-content [volume muted]
   (box :class "volume-panel" :orientation "v" :space-evenly false :valign "center" :halign "center"
     (eventbox :cursor "pointer" :onclick "scripts/toggle-mute.sh"
       (label :class "vol-icon"

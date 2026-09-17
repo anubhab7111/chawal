@@ -9,7 +9,8 @@
 }
 
 .hotzone {
-    min-width: 14px;
+    min-width: 10px;
+    min-height: 260px;
 }
 
 .volume-panel {
@@ -17,7 +18,7 @@
     border: 2px solid @mauve;
     border-radius: 18px;
     padding: 16px 10px;
-    margin: 0px 8px 0px 0px;
+    margin: 0px 6px 0px 4px;
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
 }
 
