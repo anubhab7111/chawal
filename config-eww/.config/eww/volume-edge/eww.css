@@ -3,8 +3,13 @@
    switches themes, no separate palette to keep in sync. */
 @import url("/home/ushtro/.config/theming/current/waybar-colors.css");
 
+/* The system GTK theme draws its own focus/hover outline on interactive
+   widgets (eventbox included) independently of `all: unset` on background
+   and border -- that showed up as a second, lighter ring just outside our
+   own panel border. Kill it explicitly everywhere. */
 * {
     all: unset;
+    outline: none;
     font-family: "JetBrainsMono Nerd Font";
 }
 
@@ -13,13 +18,16 @@
     min-height: 260px;
 }
 
+/* Same pill treatment as Waybar's own modules (see #custom-launcher in
+   waybar-style.css): solid @crust + a drop shadow plus a 1px inset
+   highlight, no colored border stroke. */
 .volume-panel {
-    background-color: @base;
-    border: 2px solid @mauve;
+    background: @crust;
     border-radius: 18px;
     padding: 16px 10px;
-    margin: 0px 6px 0px 4px;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
 }
 
 .vol-icon {

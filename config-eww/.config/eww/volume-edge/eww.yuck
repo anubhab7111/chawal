@@ -31,8 +31,10 @@
   :stacking "overlay"
   :exclusive false
   :focusable false
+  :namespace "volume-hotzone"
   :geometry (geometry :anchor "right center" :x "0px" :width "10px" :height "260px")
   (eventbox :onhover "eww --config ${EWW_CONFIG_DIR} open volume-panel"
+            :onhoverlost "scripts/maybe-close-panel.sh ${EWW_CONFIG_DIR}"
             :onscroll "scripts/scroll-volume.sh {}"
     (box :class "hotzone")))
 
@@ -41,8 +43,9 @@
   :stacking "overlay"
   :exclusive false
   :focusable false
+  :namespace "volume-panel"
   :geometry (geometry :anchor "right center" :x "10px" :width "90px" :height "260px")
-  (eventbox :onhoverlost "eww --config ${EWW_CONFIG_DIR} close volume-panel"
+  (eventbox :onhoverlost "scripts/maybe-close-panel.sh ${EWW_CONFIG_DIR}"
     (volume-panel-content :volume {jq(vol_state, ".volume")} :muted {jq(vol_state, ".muted")})))
 
 (defwidget volume-panel-content [volume muted]
