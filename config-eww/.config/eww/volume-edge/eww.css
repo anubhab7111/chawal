@@ -18,15 +18,13 @@
     min-height: 260px;
 }
 
-/* Same treatment as Waybar's #pulseaudio module itself, not just a generic
-   pill: teal -> sky gradient, 14px radius (waybar-style.css uses 14px for
-   every module chip, 15px is only the global window-wide default), and the
-   same shadow formula as the rest of the bar (drop shadow + 1px inset
-   highlight, no colored border stroke). */
+/* Neutral dark box -- no gradient, no accent hue. Cyan (@sky) appears
+   nowhere else in this widget except as the fill level below, so it reads
+   unambiguously as "this much volume" rather than decoration. */
 .volume-panel {
-    background: linear-gradient(135deg, @teal 0%, @sky 100%);
+    background: @base;
     border-radius: 14px;
-    padding: 16px 10px;
+    padding: 0px;
     box-shadow:
         0 4px 12px rgba(0, 0, 0, 0.3),
         0 0 0 1px rgba(255, 255, 255, 0.05) inset;
@@ -40,71 +38,68 @@
         0 0 0 1px rgba(255, 255, 255, 0.08) inset;
 }
 
-/* Waybar's gradient module chips (cpu/battery/pulseaudio/...) all use dark
-   @base text on their bright gradient backgrounds -- same here. */
-.vol-icon {
-    color: @base;
-    font-size: 20px;
-    font-weight: 800;
-    margin-bottom: 10px;
-    transition: color 100ms ease;
-}
-
-/* Same hover-accent convention as #custom-launcher:hover (mauve -> peach). */
-.vol-icon:hover {
-    color: @peach;
-}
-
-.vol-pct {
-    color: @base;
-    font-size: 12px;
-    font-weight: 800;
-    margin-top: 10px;
-}
-
-.vol-scale {
-    min-width: 24px;
-    min-height: 150px;
+/* The scale IS the box: trough stretched to fill it completely (instead of
+   a thin centered bar) and its own corners rounded to match the panel, so
+   the fill reads as one continuous gauge, not an inset track. */
+.vol-scale,
+.vol-scale trough,
+.vol-scale trough highlight {
+    border-radius: 14px;
+    min-width: 90px;
 }
 
 .vol-scale trough {
-    background-color: @crust;
-    border-radius: 10px;
-    min-width: 8px;
+    background-color: @base;
+    min-height: 260px;
 }
 
+/* The only cyan in the whole widget: this rectangle's height, filled from
+   the bottom, IS the volume level. */
 .vol-scale trough highlight {
-    background-color: @mauve;
-    border-radius: 10px;
-    min-width: 8px;
+    background-color: @sky;
     transition: background-color 100ms ease;
 }
 
-/* Hovering the track itself previews the "grabbable" state before you've
-   even picked up the knob. */
 .vol-scale trough:hover highlight {
-    background-color: @pink;
+    box-shadow: inset 0 0 24px rgba(255, 255, 255, 0.35);
 }
 
+/* No traditional knob -- the fill's edge is the only "handle" there is. */
 .vol-scale slider {
-    background-color: @base;
-    border-radius: 50%;
-    min-width: 16px;
-    min-height: 16px;
-    margin: 0px -4px;
-    box-shadow: 0 0 0 2px @lavender;
-    transition: min-width 100ms ease, min-height 100ms ease, box-shadow 100ms ease;
+    background-color: transparent;
+    min-width: 0px;
+    min-height: 0px;
+    box-shadow: none;
+    margin: 0px;
 }
 
-.vol-scale slider:hover {
-    min-width: 20px;
-    min-height: 20px;
-    box-shadow: 0 0 0 3px @lavender, 0 2px 8px rgba(0, 0, 0, 0.35);
+/* Icon/percentage float on top of whatever the fill happens to be doing
+   underneath (dark base at low volume, bright cyan at high volume), so
+   plain @text alone would lose contrast against the cyan half. A dark
+   halo keeps them legible either way without needing volume-dependent
+   color logic. */
+.vol-icon,
+.vol-pct {
+    color: @text;
+    text-shadow:
+        0px 0px 3px @crust,
+        0px 0px 3px @crust,
+        0px 1px 2px @crust;
 }
 
-/* :active is GTK's pressed/dragging state -- give the knob a brighter,
-   more saturated ring while you're actually moving it. */
-.vol-scale slider:active {
-    background-color: @crust;
-    box-shadow: 0 0 0 3px @pink, 0 2px 10px rgba(0, 0, 0, 0.4);
+.vol-icon {
+    font-size: 18px;
+    font-weight: 800;
+    margin-top: 10px;
+    transition: color 100ms ease;
+}
+
+.vol-icon:hover {
+    color: @sky;
+}
+
+.vol-pct {
+    font-size: 11px;
+    font-weight: 800;
+    margin-bottom: 10px;
 }

@@ -49,22 +49,26 @@
     (volume-panel-content :volume {jq(vol_state, ".volume")} :muted {jq(vol_state, ".muted")})))
 
 (defwidget volume-panel-content [volume muted]
-  ;; The outer box is the styled `.volume-panel` and fills the whole window
-  ;; (hexpand/vexpand), so its own CSS padding is the only inset between the
-  ;; window edge and the content -- not also centered-with-leftover-margin
-  ;; inside a smaller box, which read as a second, outer "padding". The
-  ;; inner box just centers the actual controls within that padded area.
-  (box :class "volume-panel" :orientation "v" :hexpand true :vexpand true
-    (box :orientation "v" :space-evenly false :valign "center" :halign "center" :vexpand true
-      (eventbox :cursor "pointer" :onclick "scripts/toggle-mute.sh"
-        (label :class "vol-icon"
-               :text {muted ? "󰖁" : (volume > 66 ? "󰕾" : (volume > 0 ? "󰖀" : "󰕿"))}))
+  ;; No traditional track-and-knob: the GtkScale itself IS the whole box now
+  ;; (trough stretched to fill it entirely, knob hidden via CSS), so the
+  ;; cyan fill level is the only indicator, like a battery gauge. It's still
+  ;; a real GtkScale underneath (not custom-drawn), so drag/click/scroll all
+  ;; keep working natively -- only the paint changed. Icon and percentage
+  ;; float on top via `overlay`, pinned to top/bottom regardless of fill.
+  (box :class "volume-panel" :hexpand true :vexpand true
+    (overlay
       (scale :class "vol-scale"
              :orientation "v"
              :flipped true
+             :hexpand true
+             :vexpand true
              :cursor "pointer"
              :value volume
              :min 0
              :max 100
              :onchange "scripts/set-volume.sh {}")
-      (label :class "vol-pct" :text "${volume}%"))))
+      (eventbox :class "vol-icon-hit" :cursor "pointer" :onclick "scripts/toggle-mute.sh"
+                :halign "center" :valign "start"
+        (label :class "vol-icon"
+               :text {muted ? "󰖁" : (volume > 66 ? "󰕾" : (volume > 0 ? "󰖀" : "󰕿"))}))
+      (label :class "vol-pct" :halign "center" :valign "end" :text "${volume}%"))))
