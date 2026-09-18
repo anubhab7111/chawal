@@ -18,27 +18,45 @@
     min-height: 260px;
 }
 
-/* Same pill treatment as Waybar's own modules (see #custom-launcher in
-   waybar-style.css): solid @crust + a drop shadow plus a 1px inset
-   highlight, no colored border stroke. */
+/* Same treatment as Waybar's #pulseaudio module itself, not just a generic
+   pill: teal -> sky gradient, 14px radius (waybar-style.css uses 14px for
+   every module chip, 15px is only the global window-wide default), and the
+   same shadow formula as the rest of the bar (drop shadow + 1px inset
+   highlight, no colored border stroke). */
 .volume-panel {
-    background: @crust;
-    border-radius: 18px;
+    background: linear-gradient(135deg, @teal 0%, @sky 100%);
+    border-radius: 14px;
     padding: 16px 10px;
     box-shadow:
         0 4px 12px rgba(0, 0, 0, 0.3),
         0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    transition: box-shadow 150ms ease;
 }
 
+/* Same lift-on-hover cue as #idle_inhibitor:hover in waybar-style.css. */
+.volume-panel:hover {
+    box-shadow:
+        0 6px 16px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+}
+
+/* Waybar's gradient module chips (cpu/battery/pulseaudio/...) all use dark
+   @base text on their bright gradient backgrounds -- same here. */
 .vol-icon {
-    color: @mauve;
+    color: @base;
     font-size: 20px;
     font-weight: 800;
     margin-bottom: 10px;
+    transition: color 100ms ease;
+}
+
+/* Same hover-accent convention as #custom-launcher:hover (mauve -> peach). */
+.vol-icon:hover {
+    color: @peach;
 }
 
 .vol-pct {
-    color: @subtext1;
+    color: @base;
     font-size: 12px;
     font-weight: 800;
     margin-top: 10px;
@@ -50,7 +68,7 @@
 }
 
 .vol-scale trough {
-    background-color: @surface0;
+    background-color: @crust;
     border-radius: 10px;
     min-width: 8px;
 }
@@ -59,12 +77,34 @@
     background-color: @mauve;
     border-radius: 10px;
     min-width: 8px;
+    transition: background-color 100ms ease;
+}
+
+/* Hovering the track itself previews the "grabbable" state before you've
+   even picked up the knob. */
+.vol-scale trough:hover highlight {
+    background-color: @pink;
 }
 
 .vol-scale slider {
-    background-color: @lavender;
+    background-color: @base;
     border-radius: 50%;
     min-width: 16px;
     min-height: 16px;
     margin: 0px -4px;
+    box-shadow: 0 0 0 2px @lavender;
+    transition: min-width 100ms ease, min-height 100ms ease, box-shadow 100ms ease;
+}
+
+.vol-scale slider:hover {
+    min-width: 20px;
+    min-height: 20px;
+    box-shadow: 0 0 0 3px @lavender, 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+/* :active is GTK's pressed/dragging state -- give the knob a brighter,
+   more saturated ring while you're actually moving it. */
+.vol-scale slider:active {
+    background-color: @crust;
+    box-shadow: 0 0 0 3px @pink, 0 2px 10px rgba(0, 0, 0, 0.4);
 }

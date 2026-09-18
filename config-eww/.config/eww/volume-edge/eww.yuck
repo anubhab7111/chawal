@@ -49,14 +49,22 @@
     (volume-panel-content :volume {jq(vol_state, ".volume")} :muted {jq(vol_state, ".muted")})))
 
 (defwidget volume-panel-content [volume muted]
-  (box :class "volume-panel" :orientation "v" :space-evenly false :valign "center" :halign "center"
-    (eventbox :cursor "pointer" :onclick "scripts/toggle-mute.sh"
-      (label :class "vol-icon"
-             :text {muted ? "󰖁" : (volume > 66 ? "󰕾" : (volume > 0 ? "󰖀" : "󰕿"))}))
-    (scale :class "vol-scale"
-           :orientation "v"
-           :value volume
-           :min 0
-           :max 100
-           :onchange "scripts/set-volume.sh {}")
-    (label :class "vol-pct" :text "${volume}%")))
+  ;; The outer box is the styled `.volume-panel` and fills the whole window
+  ;; (hexpand/vexpand), so its own CSS padding is the only inset between the
+  ;; window edge and the content -- not also centered-with-leftover-margin
+  ;; inside a smaller box, which read as a second, outer "padding". The
+  ;; inner box just centers the actual controls within that padded area.
+  (box :class "volume-panel" :orientation "v" :hexpand true :vexpand true
+    (box :orientation "v" :space-evenly false :valign "center" :halign "center" :vexpand true
+      (eventbox :cursor "pointer" :onclick "scripts/toggle-mute.sh"
+        (label :class "vol-icon"
+               :text {muted ? "󰖁" : (volume > 66 ? "󰕾" : (volume > 0 ? "󰖀" : "󰕿"))}))
+      (scale :class "vol-scale"
+             :orientation "v"
+             :flipped true
+             :cursor "pointer"
+             :value volume
+             :min 0
+             :max 100
+             :onchange "scripts/set-volume.sh {}")
+      (label :class "vol-pct" :text "${volume}%"))))
