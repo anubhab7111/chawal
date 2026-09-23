@@ -135,7 +135,6 @@ window#waybar {
 #network,
 #bluetooth,
 #idle_inhibitor,
-#custom-theme-switcher,
 #custom-pacman-update {
     padding: 2px 12px;
     margin: 4px 0px 4px 8px;
@@ -279,15 +278,6 @@ window#waybar {
     padding: 3px 12px;
     margin: 6px 0px 6px 8px;
     border-radius: 14px;
-}
-
-/* ================================
-   THEME SWITCHER
-   ================================ */
-#custom-theme-switcher {
-    color: @base;
-    background: linear-gradient(135deg, @mauve 0%, @lavender 100%);
-    font-size: 16px;
 }
 
 /* ================================

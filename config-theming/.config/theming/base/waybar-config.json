@@ -22,7 +22,6 @@
     "bluetooth",
     "network",
     "idle_inhibitor",
-    "custom/theme-switcher",
     "custom/power-menu"
   ],
   "hyprland/workspaces": {
@@ -123,12 +122,6 @@
     "format": "󰣇",
     "tooltip": false,
     "on-click": "wofi --show drun"
-  },
-  "custom/theme-switcher": {
-    "exec": "~/.config/theming/waybar-status.sh",
-    "return-type": "json",
-    "on-click": "~/.config/theming/toggle-theme.sh",
-    "tooltip": true
   },
   "custom/power-menu": {
     "format": "⏻",
