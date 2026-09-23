@@ -41,9 +41,9 @@ for pair in "waybar-config.json:config" "waybar-style.css:style.css"; do
     src_name="${pair%%:*}"
     target="$HOME/.config/waybar/${pair#*:}"
     if [ -f "$THEME_DIR/$src_name" ]; then
-        ln -sfn "../theming/themes/$THEME_NAME/$src_name" "$target"
+        ln -sfn "$THEME_DIR/$src_name" "$target"
     else
-        ln -sfn "../theming/base/$src_name" "$target"
+        ln -sfn "$THEMING_DIR/base/$src_name" "$target"
     fi
 done
 
@@ -61,9 +61,9 @@ fi
 # eww/arin dock SCSS: this theme's reskin if it has one, else the original look.
 EWW_ARIN_DIR="$HOME/.config/eww/arin"
 if [ -f "$THEME_DIR/eww-arin.scss" ]; then
-    ln -sfn "../../theming/themes/$THEME_NAME/eww-arin.scss" "$EWW_ARIN_DIR/eww.scss"
+    ln -sfn "$THEME_DIR/eww-arin.scss" "$EWW_ARIN_DIR/eww.scss"
 else
-    ln -sfn "../../theming/base/eww-arin.scss" "$EWW_ARIN_DIR/eww.scss"
+    ln -sfn "$THEMING_DIR/base/eww-arin.scss" "$EWW_ARIN_DIR/eww.scss"
 fi
 
 # Bar vs. floating dock: themes with a `use-eww-dock` marker replace waybar
@@ -157,6 +157,14 @@ fi
 
 # kitty: reloads its config (and re-included theme file) on SIGUSR1
 pkill -SIGUSR1 -x kitty >/dev/null 2>&1 || true
+
+# neovim: repaint every running instance from the new palette (lua/rice in
+# ~/.config/nvim). Instances that aren't running just pick it up on next start.
+# timeout: a nvim stuck at a prompt must never hang the theme switch.
+for sock in "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"/nvim.*.0; do
+    [ -S "$sock" ] || continue
+    timeout 2 nvim --server "$sock" --remote-expr 'luaeval("require(\"rice\").reload_async()")' >/dev/null 2>&1 || true
+done
 
 # mako: config symlink target changed, reload it
 makoctl reload >/dev/null 2>&1 || true
