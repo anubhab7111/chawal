@@ -155,6 +155,26 @@ if [ -f "$ROFI_THEME_FILE" ]; then
     ln -sfn "$ROFI_THEME_FILE" "$HOME/.config/rofi/current.rasi"
 fi
 
+# Obsidian: copy this theme's palette snippet into every vault the "Hyprland
+# Rice" theme uses. COPY (not symlink) so Obsidian's snippet file-watcher sees
+# an in-place change and restyles live. Vaults come from obsidian.json; a
+# missing palette or vault is skipped, never fatal.
+OBSIDIAN_PALETTE="$THEME_DIR/obsidian-colors.css"
+OBSIDIAN_JSON="$HOME/.config/obsidian/obsidian.json"
+if [ -f "$OBSIDIAN_PALETTE" ] && [ -f "$OBSIDIAN_JSON" ]; then
+    python3 - "$OBSIDIAN_JSON" <<'PYEOF' | while IFS= read -r vault; do
+import json, sys
+with open(sys.argv[1]) as f:
+    for v in json.load(f).get("vaults", {}).values():
+        print(v.get("path", ""))
+PYEOF
+        snippets="$vault/.obsidian/snippets"
+        [ -d "$vault/.obsidian" ] || continue
+        mkdir -p "$snippets"
+        cp "$OBSIDIAN_PALETTE" "$snippets/rice-palette.css" || true
+    done
+fi
+
 # kitty: reloads its config (and re-included theme file) on SIGUSR1
 pkill -SIGUSR1 -x kitty >/dev/null 2>&1 || true
 
