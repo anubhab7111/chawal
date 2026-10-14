@@ -1,7 +1,8 @@
 ;; Hover-triggered brightness slider pinned to the left screen edge -- the
 ;; mirror image of ../volume-edge (see that file for why it's split into a
-;; tiny always-on hotzone window plus an on-demand panel window, and why
-;; `eww open`/`close` need an explicit --config).
+;; tiny always-on hotzone window plus an on-demand panel window, how the
+;; revealer slide works, and why `eww open`/`close`/`update` need an
+;; explicit --config).
 ;;
 ;; Standalone daemon/config so it survives independently of whichever bar
 ;; the active theme picks -- ~/.config/theming/apply-theme.sh relaunches it
@@ -10,6 +11,8 @@
 (deflisten bright_state :initial "{\"brightness\": 100}"
   "scripts/brightness-listen.sh")
 
+(defvar panel_open false)
+
 (defwindow brightness-hotzone
   :monitor 0
   :stacking "overlay"
@@ -17,7 +20,7 @@
   :focusable false
   :namespace "brightness-hotzone"
   :geometry (geometry :anchor "left center" :x "0px" :width "10px" :height "260px")
-  (eventbox :onhover "eww --config ${EWW_CONFIG_DIR} open brightness-panel"
+  (eventbox :onhover "scripts/show-panel.sh ${EWW_CONFIG_DIR}"
             :onhoverlost "scripts/maybe-close-panel.sh ${EWW_CONFIG_DIR}"
             :onscroll "scripts/scroll-brightness.sh {}"
     (box :class "hotzone")))
@@ -31,14 +34,19 @@
   :geometry (geometry :anchor "left center" :x "10px" :width "90px" :height "260px")
   (eventbox :onhoverlost "scripts/maybe-close-panel.sh ${EWW_CONFIG_DIR}"
             :onscroll "scripts/scroll-brightness.sh {}"
-    (brightness-panel-content :brightness {jq(bright_state, ".brightness")})))
+    (revealer :reveal panel_open
+              :transition "slideright"
+              :duration "220ms"
+              :halign "start"
+      (brightness-panel-content :brightness {jq(bright_state, ".brightness")}))))
 
 (defwidget brightness-panel-content [brightness]
   ;; Same gauge-style GtkScale as the volume panel: the fill level is the
   ;; only indicator, icon and percentage float on top via `overlay`.
+  ;; `full` rounds the fill's top corners at 100% (see eww.css).
   (box :class "brightness-panel" :hexpand true :vexpand true
     (overlay
-      (scale :class "bri-scale"
+      (scale :class "bri-scale${brightness >= 99 ? ' full' : ''}"
              :orientation "v"
              :flipped true
              :hexpand true

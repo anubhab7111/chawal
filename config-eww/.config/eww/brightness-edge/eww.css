@@ -1,5 +1,6 @@
-/* Mirror of ../volume-edge/eww.css, with @yellow as the fill so brightness
-   reads differently from volume's @sky. Colors come from the live theme. */
+/* Mirror of ../volume-edge/eww.css (read the comments there for the
+   reasoning), with @yellow as the fill so brightness reads differently from
+   volume's @sky. Colors come from the live theme. */
 @import url("/home/ushtro/.config/theming/current/waybar-colors.css");
 
 * {
@@ -13,26 +14,22 @@
     min-height: 260px;
 }
 
+/* Inset ring only -- an outer drop shadow would be clipped to the window's
+   rectangle and show as a hard edge around the rounded corners. */
 .brightness-panel {
     background: @base;
     border-radius: 14px;
     padding: 0px;
-    box-shadow:
-        0 4px 12px rgba(0, 0, 0, 0.3),
-        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-    transition: box-shadow 150ms ease;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+    transition: box-shadow 180ms ease;
 }
 
 .brightness-panel:hover {
-    box-shadow:
-        0 6px 16px rgba(0, 0, 0, 0.4),
-        0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
 }
 
-/* The scale IS the box: trough fills it, knob hidden, fill height = level. */
 .bri-scale,
-.bri-scale trough,
-.bri-scale trough highlight {
+.bri-scale trough {
     border-radius: 14px;
     min-width: 90px;
 }
@@ -42,13 +39,22 @@
     min-height: 260px;
 }
 
+/* Fill rises from the bottom: only its bottom corners are rounded while the
+   level is partial (straight level line on top); `.full` rounds all four. */
 .bri-scale trough highlight {
     background-color: @yellow;
-    transition: background-color 100ms ease;
+    border-radius: 0px 0px 14px 14px;
+    transition:
+        background-color 160ms ease,
+        box-shadow 180ms ease;
+}
+
+.bri-scale.full trough highlight {
+    border-radius: 14px;
 }
 
 .bri-scale trough:hover highlight {
-    box-shadow: inset 0 0 24px rgba(255, 255, 255, 0.35);
+    box-shadow: inset 0 0 24px rgba(255, 255, 255, 0.3);
 }
 
 .bri-scale slider {

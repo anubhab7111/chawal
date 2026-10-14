@@ -1,22 +1,25 @@
 ;; Hover-triggered volume slider that lives pinned to the right screen edge.
 ;;
 ;; Two separate layer-shell windows, not one window with an internal
-;; revealer -- a revealer inside a `halign`/`valign`-positioned box collapses
-;; that box (and everything inside it, including its hover hitbox) to its
-;; content's natural size, which is zero when the revealer is closed. That
-;; silently ate all hover input. Splitting into a tiny always-on hotzone
-;; window (whose root widget is the hover-catching eventbox, so it can't
-;; collapse) and a separate panel window that's opened/closed on demand
-;; sidesteps that entirely, and matches how the eww/arin dock in this same
-;; config already does its sidebar (open/close, not a revealer).
+;; revealer around the hover hitbox -- a revealer inside a `halign`/`valign`
+;; positioned box collapses that box (and its hover hitbox) to its content's
+;; natural size, which is zero when the revealer is closed. Splitting into a
+;; tiny always-on hotzone window (whose root widget is the hover-catching
+;; eventbox, so it can't collapse) and a separate panel window that's
+;; opened/closed on demand sidesteps that.
+;;
+;; The panel window has a FIXED geometry, so a revealer inside it is safe:
+;; the window's eventbox keeps its full hitbox while the revealer inside
+;; slides the gauge in from / out to the screen edge (`panel_open`, flipped
+;; by scripts/show-panel.sh and scripts/maybe-close-panel.sh).
 ;;
 ;; The two windows sit edge-to-edge with no gap or overlap (panel's `x`
 ;; margin equals the hotzone's width) so a real, continuous mouse movement
 ;; crosses cleanly from one hitbox into the other.
 ;;
-;; `eww open`/`eww close` need an explicit `--config` or they can't find
-;; this daemon's socket (its path is derived from the config dir) and fail
-;; silently -- ${EWW_CONFIG_DIR} is eww's own built-in variable for this.
+;; `eww open`/`eww close`/`eww update` need an explicit `--config` or they
+;; can't find this daemon's socket -- ${EWW_CONFIG_DIR} is eww's own
+;; built-in variable for this.
 ;;
 ;; Standalone daemon/config so it survives independently of whichever bar
 ;; (waybar vs. the eww/arin dock) the active theme picks -- see
@@ -26,6 +29,8 @@
 (deflisten vol_state :initial "{\"volume\": 0, \"muted\": false}"
   "scripts/volume-listen.sh")
 
+(defvar panel_open false)
+
 (defwindow volume-hotzone
   :monitor 0
   :stacking "overlay"
@@ -33,7 +38,7 @@
   :focusable false
   :namespace "volume-hotzone"
   :geometry (geometry :anchor "right center" :x "0px" :width "10px" :height "260px")
-  (eventbox :onhover "eww --config ${EWW_CONFIG_DIR} open volume-panel"
+  (eventbox :onhover "scripts/show-panel.sh ${EWW_CONFIG_DIR}"
             :onhoverlost "scripts/maybe-close-panel.sh ${EWW_CONFIG_DIR}"
             :onscroll "scripts/scroll-volume.sh {}"
     (box :class "hotzone")))
@@ -46,18 +51,25 @@
   :namespace "volume-panel"
   :geometry (geometry :anchor "right center" :x "10px" :width "90px" :height "260px")
   (eventbox :onhoverlost "scripts/maybe-close-panel.sh ${EWW_CONFIG_DIR}"
-    (volume-panel-content :volume {jq(vol_state, ".volume")} :muted {jq(vol_state, ".muted")})))
+            :onscroll "scripts/scroll-volume.sh {}"
+    (revealer :reveal panel_open
+              :transition "slideleft"
+              :duration "220ms"
+              :halign "end"
+      (volume-panel-content :volume {jq(vol_state, ".volume")} :muted {jq(vol_state, ".muted")}))))
 
 (defwidget volume-panel-content [volume muted]
-  ;; No traditional track-and-knob: the GtkScale itself IS the whole box now
-  ;; (trough stretched to fill it entirely, knob hidden via CSS), so the
-  ;; cyan fill level is the only indicator, like a battery gauge. It's still
-  ;; a real GtkScale underneath (not custom-drawn), so drag/click/scroll all
-  ;; keep working natively -- only the paint changed. Icon and percentage
-  ;; float on top via `overlay`, pinned to top/bottom regardless of fill.
+  ;; No traditional track-and-knob: the GtkScale itself IS the whole box
+  ;; (trough stretched to fill it, knob hidden via CSS), so the fill level is
+  ;; the only indicator, like a battery gauge. It's still a real GtkScale
+  ;; underneath, so drag/click/scroll all keep working natively. Icon and
+  ;; percentage float on top via `overlay`.
+  ;;
+  ;; `full` squares/rounds the fill's top corners (see eww.css); `muted`
+  ;; dims the fill.
   (box :class "volume-panel" :hexpand true :vexpand true
     (overlay
-      (scale :class "vol-scale"
+      (scale :class "vol-scale${volume >= 99 ? ' full' : ''}${muted ? ' muted' : ''}"
              :orientation "v"
              :flipped true
              :hexpand true
