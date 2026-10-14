@@ -1,4 +1,4 @@
-;; Hover-triggered brightness slider pinned to the left screen edge -- the
+;; Hover-triggered brightness slider pinned to the right screen edge, stacked above the volume bar -- the
 ;; mirror image of ../volume-edge (see that file for why it's split into a
 ;; tiny always-on hotzone window plus an on-demand panel window, how the
 ;; revealer slide works, and why `eww open`/`close`/`update` need an
@@ -19,7 +19,7 @@
   :exclusive false
   :focusable false
   :namespace "brightness-hotzone"
-  :geometry (geometry :anchor "left center" :x "0px" :width "10px" :height "260px")
+  :geometry (geometry :anchor "right top" :x "0px" :y "100px" :width "10px" :height "260px")
   (eventbox :onhover "scripts/show-panel.sh ${EWW_CONFIG_DIR}"
             :onhoverlost "scripts/maybe-close-panel.sh ${EWW_CONFIG_DIR}"
             :onscroll "scripts/scroll-brightness.sh {}"
@@ -31,13 +31,13 @@
   :exclusive false
   :focusable false
   :namespace "brightness-panel"
-  :geometry (geometry :anchor "left center" :x "10px" :width "90px" :height "260px")
+  :geometry (geometry :anchor "right top" :x "10px" :y "100px" :width "90px" :height "260px")
   (eventbox :onhoverlost "scripts/maybe-close-panel.sh ${EWW_CONFIG_DIR}"
             :onscroll "scripts/scroll-brightness.sh {}"
     (revealer :reveal panel_open
-              :transition "slideright"
+              :transition "slideleft"
               :duration "220ms"
-              :halign "start"
+              :halign "end"
       (brightness-panel-content :brightness {jq(bright_state, ".brightness")}))))
 
 (defwidget brightness-panel-content [brightness]
