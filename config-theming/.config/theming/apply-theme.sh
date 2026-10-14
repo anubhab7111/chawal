@@ -58,42 +58,14 @@ if [ -f "$ICON_THEME_FILE" ]; then
     gsettings set org.gnome.desktop.interface icon-theme "$ICON_THEME" >/dev/null 2>&1 || true
 fi
 
-# eww/arin dock SCSS: this theme's reskin if it has one, else the original look.
-EWW_ARIN_DIR="$HOME/.config/eww/arin"
-if [ -f "$THEME_DIR/eww-arin.scss" ]; then
-    ln -sfn "$THEME_DIR/eww-arin.scss" "$EWW_ARIN_DIR/eww.scss"
-else
-    ln -sfn "$THEMING_DIR/base/eww-arin.scss" "$EWW_ARIN_DIR/eww.scss"
-fi
+# eww: stop every running daemon so the edge widgets below come back up
+# with this theme's colors. eww's own IPC-based `kill` can silently no-op,
+# so force it by process name.
+pkill -x eww >/dev/null 2>&1 || true
+sleep 0.3
 
-# Bar vs. floating dock: themes with a `use-eww-dock` marker replace waybar
-# with the eww/arin floating dock (search/apps/weather/music/system pods).
-# Every other theme uses waybar. Tear down whichever isn't wanted first.
-USE_DOCK=0
-if [ -f "$THEME_DIR/use-eww-dock" ]; then
-    USE_DOCK=1
-fi
-
-if [ "$USE_DOCK" = "1" ]; then
-    pkill -x waybar >/dev/null 2>&1 || true
-    # eww's own IPC-based `kill` can silently no-op (observed: a daemon
-    # survived it, leaving a duplicate "bar" layer-shell surface + doubled
-    # exclusive-zone reservation once a second one opened). Force it.
-    eww --config "$EWW_ARIN_DIR" kill >/dev/null 2>&1 || true
-    pkill -x eww >/dev/null 2>&1 || true
-    sleep 0.3
-    (setsid eww --config "$EWW_ARIN_DIR" daemon >/dev/null 2>&1 &) || true
-    sleep 0.5
-    eww --config "$EWW_ARIN_DIR" open bar >/dev/null 2>&1 || true
-else
-    eww --config "$EWW_ARIN_DIR" kill >/dev/null 2>&1 || true
-    pkill -x eww >/dev/null 2>&1 || true
-fi
-
-# Edge-hover widgets (volume on the right, brightness on the left): each is
-# its own eww daemon, independent of the waybar-vs-eww-dock choice above --
-# but the `pkill -x eww` calls in both branches kill them too (they match
-# by process name, not config dir), so always relaunch them here.
+# Edge-hover widgets (volume and brightness, right edge): each is its own
+# eww daemon, killed by the `pkill -x eww` above, so always relaunch them.
 for entry in "volume-edge:volume-hotzone" "brightness-edge:brightness-hotzone"; do
     EDGE_DIR="$HOME/.config/eww/${entry%%:*}"
     if [ -d "$EDGE_DIR" ]; then
@@ -116,12 +88,10 @@ else
     hyprctl keyword decoration:screen_shader "[[EMPTY]]" >/dev/null 2>&1 || true
 fi
 
-# Waybar: only (re)started when this theme doesn't use the eww dock. Config/style
-# targets may have changed, needs a full restart to pick it up.
-if [ "$USE_DOCK" = "0" ]; then
-    pkill -x waybar >/dev/null 2>&1 || true
-    (setsid waybar >/dev/null 2>&1 &) || true
-fi
+# Waybar: config/style targets may have changed, needs a full restart to
+# pick them up.
+pkill -x waybar >/dev/null 2>&1 || true
+(setsid waybar >/dev/null 2>&1 &) || true
 
 # cava: patch the 8 gradient_color_N keys in the live config from this theme's
 # palette, else the shared default gradient.
@@ -176,9 +146,6 @@ PYEOF
     done
 fi
 
-# kitty: reloads its config (and re-included theme file) on SIGUSR1
-pkill -SIGUSR1 -x kitty >/dev/null 2>&1 || true
-
 # neovim: repaint every running instance from the new palette (lua/rice in
 # ~/.config/nvim). Instances that aren't running just pick it up on next start.
 # timeout: a nvim stuck at a prompt must never hang the theme switch.
@@ -199,7 +166,7 @@ fi
 
 # wofi/wlogout (read config fresh on each launch) pick up the new theme
 # automatically, no action needed. fastfetch has no hardcoded colors of its
-# own — it inherits whatever terminal (kitty/alacritty) runs it, which is
+# own — it inherits the terminal (alacritty) that runs it, which is
 # already themed above.
 
 # VS Code: merge (or remove) a workbench.colorCustomizations block on top of

@@ -22,7 +22,7 @@
 ;; built-in variable for this.
 ;;
 ;; Standalone daemon/config so it survives independently of whichever bar
-;; (waybar vs. the eww/arin dock) the active theme picks -- see
+;; the active theme uses -- see
 ;; ~/.config/theming/apply-theme.sh, which relaunches it after every theme
 ;; switch since that script's blanket `pkill -x eww` kills it too.
 
