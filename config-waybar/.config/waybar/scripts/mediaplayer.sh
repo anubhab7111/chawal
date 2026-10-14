@@ -1,48 +1,42 @@
-#!/bin/bash
-
-# Waybar custom media module script
-# Uses playerctl to get currently playing media info
+#!/usr/bin/env bash
+# Waybar custom/media module: one long-running playerctl follower instead
+# of polling. `playerctl --follow` re-prints the format line whenever the
+# player's status or metadata changes (and an empty line once no player is
+# left); each line is turned into Waybar JSON by jq, which takes care of
+# escaping quotes, backslashes and control characters in titles.
+#
+# Fields are split on the ASCII unit separator rather than tabs: tabs are
+# IFS whitespace, so an empty artist field would collapse into its neighbour.
 
 MAX_LENGTH=40
+SEP=$'\x1f'
 
-get_media_info() {
-    player_status=$(playerctl status 2>/dev/null)
-
-    if [[ "$player_status" == "Playing" || "$player_status" == "Paused" ]]; then
-        artist=$(playerctl metadata artist 2>/dev/null)
-        title=$(playerctl metadata title 2>/dev/null)
-
-        if [[ -n "$title" ]]; then
-            if [[ -n "$artist" ]]; then
-                media_text="$artist - $title"
-            else
-                media_text="$title"
-            fi
-
-            # Truncate if too long
-            if [[ ${#media_text} -gt $MAX_LENGTH ]]; then
-                media_text="${media_text:0:$MAX_LENGTH}..."
-            fi
-
-            if [[ "$player_status" == "Playing" ]]; then
-                icon="󰏤"
-                status_text="Playing"
-            else
-                icon="󰐊"
-                status_text="Paused"
-            fi
-
-            # JSON output for waybar
-            printf '{"text": "%s %s", "tooltip": "%s\\n%s", "class": "%s"}\n' \
-                "$icon" "$media_text" "$status_text: $artist - $title" \
-                "$(playerctl metadata --format '{{playerName}}')" \
-                "$player_status"
-        else
-            echo '{"text": "", "tooltip": "", "class": "stopped"}'
-        fi
-    else
-        echo '{"text": "", "tooltip": "", "class": "stopped"}'
-    fi
+coproc FOLLOW {
+    exec playerctl --follow metadata \
+        --format "{{status}}${SEP}{{playerName}}${SEP}{{artist}}${SEP}{{title}}" 2>/dev/null
 }
+follower=$FOLLOW_PID
+# Keep our own copy of the read end: bash closes the coproc's fds as soon as
+# it exits, which would drop any lines still buffered in the pipe.
+exec {in}<&"${FOLLOW[0]}"
 
-get_media_info
+# Waybar only signals this script, so take the follower down with it.
+trap 'kill "$follower" 2>/dev/null' EXIT
+trap 'exit 0' TERM INT HUP
+
+while IFS="$SEP" read -r status player artist title <&"$in"; do
+    # A failed write means Waybar has gone away: stop instead of lingering.
+    jq -cn --arg status "$status" --arg player "$player" \
+        --arg artist "$artist" --arg title "$title" --argjson max "$MAX_LENGTH" '
+        if ($status == "Playing" or $status == "Paused") and $title != "" then
+            (if $artist != "" then "\($artist) - \($title)" else $title end) as $media
+            | {
+                text: "\(if $status == "Playing" then "󰏤" else "󰐊" end) \(
+                    if ($media | length) > $max then $media[:$max] + "..." else $media end)",
+                tooltip: "\($status): \($media)\n\($player)",
+                class: $status
+              }
+        else
+            {text: "", tooltip: "", class: "stopped"}
+        end' || exit 0
+done
