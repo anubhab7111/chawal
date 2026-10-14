@@ -90,17 +90,18 @@ else
     pkill -x eww >/dev/null 2>&1 || true
 fi
 
-# Volume edge-hover widget: disabled for now (was relaunched here after
-# every theme switch, since the `pkill -x eww` calls in both branches above
-# kill it too, matching by process name rather than config dir). The eww
-# config itself is untouched at ~/.config/eww/volume-edge -- to re-enable,
-# uncomment this block.
-# VOLUME_EDGE_DIR="$HOME/.config/eww/volume-edge"
-# if [ -d "$VOLUME_EDGE_DIR" ]; then
-#     (setsid eww --config "$VOLUME_EDGE_DIR" daemon >/dev/null 2>&1 &) || true
-#     sleep 0.3
-#     eww --config "$VOLUME_EDGE_DIR" open volume-hotzone >/dev/null 2>&1 || true
-# fi
+# Edge-hover widgets (volume on the right, brightness on the left): each is
+# its own eww daemon, independent of the waybar-vs-eww-dock choice above --
+# but the `pkill -x eww` calls in both branches kill them too (they match
+# by process name, not config dir), so always relaunch them here.
+for entry in "volume-edge:volume-hotzone" "brightness-edge:brightness-hotzone"; do
+    EDGE_DIR="$HOME/.config/eww/${entry%%:*}"
+    if [ -d "$EDGE_DIR" ]; then
+        (setsid eww --config "$EDGE_DIR" daemon >/dev/null 2>&1 &) || true
+        sleep 0.3
+        eww --config "$EDGE_DIR" open "${entry##*:}" >/dev/null 2>&1 || true
+    fi
+done
 
 # Hyprland: re-source config (picks up hyprland-colors.conf + decorations.conf
 # + hypr-overrides.conf via the current symlink)
