@@ -1,3 +1,10 @@
 *.cache
 icon-theme.cache
 .claude/
+
+# Runtime litter written through the stow links
+btop.log
+*.orig
+*.bak
+*.bak.*
+*.backup.*
