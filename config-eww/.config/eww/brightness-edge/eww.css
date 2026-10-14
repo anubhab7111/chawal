@@ -9,6 +9,18 @@
     font-family: "JetBrainsMono Nerd Font";
 }
 
+/* See ../volume-edge/eww.css: window classes equal their defwindow names,
+   so the card must not be called `.brightness-panel`, and the windows are
+   forced transparent past the GTK theme's `window.background` rule. */
+window,
+window.background,
+.background {
+    background: transparent;
+    background-color: transparent;
+    box-shadow: none;
+    border: none;
+}
+
 .hotzone {
     min-width: 10px;
     min-height: 260px;
@@ -16,7 +28,7 @@
 
 /* Inset ring only -- an outer drop shadow would be clipped to the window's
    rectangle and show as a hard edge around the rounded corners. */
-.brightness-panel {
+.bri-card {
     background: @base;
     border-radius: 14px;
     padding: 0px;
@@ -24,7 +36,7 @@
     transition: box-shadow 180ms ease;
 }
 
-.brightness-panel:hover {
+.bri-card:hover {
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
 }
 
