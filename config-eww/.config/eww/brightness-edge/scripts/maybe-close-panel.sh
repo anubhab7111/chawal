@@ -9,7 +9,7 @@ sleep 0.08
 
 outside() {
     read -r x y < <(hyprctl cursorpos | tr -d ',')
-    (( x < 0 || x > 100 || y < 438 || y > 698 ))
+    (( x < 1820 || x > 1920 || y < 155 || y > 415 ))
 }
 
 if outside; then
