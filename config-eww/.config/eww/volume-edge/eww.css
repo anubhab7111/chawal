@@ -13,6 +13,22 @@
     font-family: "JetBrainsMono Nerd Font";
 }
 
+/* eww gives every layer-shell window a CSS class equal to its defwindow
+   name ("volume-panel", "volume-hotzone"). Never reuse those names as
+   widget classes: an earlier `.volume-panel` card rule also painted the
+   WINDOW itself, leaving a permanent dark rounded box behind when the card
+   slid away. The card is `.vol-card` for that reason. The GTK theme's own
+   `window.background` rule is also more specific than `*`, so force the
+   windows transparent explicitly. */
+window,
+window.background,
+.background {
+    background: transparent;
+    background-color: transparent;
+    box-shadow: none;
+    border: none;
+}
+
 .hotzone {
     min-width: 10px;
     min-height: 260px;
@@ -26,7 +42,7 @@
    panel's rectangle, so anything painted outside the rounded border is
    clipped to a hard rectangular edge -- that was the "glitchy corner".
    The inset ring is drawn inside the rounded shape, so it clips cleanly. */
-.volume-panel {
+.vol-card {
     background: @base;
     border-radius: 14px;
     padding: 0px;
@@ -34,7 +50,7 @@
     transition: box-shadow 180ms ease;
 }
 
-.volume-panel:hover {
+.vol-card:hover {
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
 }
 

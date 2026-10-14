@@ -44,7 +44,7 @@
   ;; Same gauge-style GtkScale as the volume panel: the fill level is the
   ;; only indicator, icon and percentage float on top via `overlay`.
   ;; `full` rounds the fill's top corners at 100% (see eww.css).
-  (box :class "brightness-panel" :hexpand true :vexpand true
+  (box :class "bri-card" :hexpand true :vexpand true
     (overlay
       (scale :class "bri-scale${brightness >= 99 ? ' full' : ''}"
              :orientation "v"

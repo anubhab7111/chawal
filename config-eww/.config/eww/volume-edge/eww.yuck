@@ -67,7 +67,7 @@
   ;;
   ;; `full` squares/rounds the fill's top corners (see eww.css); `muted`
   ;; dims the fill.
-  (box :class "volume-panel" :hexpand true :vexpand true
+  (box :class "vol-card" :hexpand true :vexpand true
     (overlay
       (scale :class "vol-scale${volume >= 99 ? ' full' : ''}${muted ? ' muted' : ''}"
              :orientation "v"
