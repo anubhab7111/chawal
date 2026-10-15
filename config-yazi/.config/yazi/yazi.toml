@@ -156,8 +156,8 @@ rename_title = "Rename:"
 rename_origin = "hovered"
 rename_offset = [0, 1, 50, 3]
 
-# Trash and delete prompts are yazi's [confirm] dialogs, which list the
-# affected files; they use the defaults.
+# Trash and delete prompts are yazi's [confirm] dialogs (below), which list
+# the affected files.
 
 # find
 find_title = ["Find next:", "Find previous:"]
@@ -178,6 +178,15 @@ search_offset = [0, 2, 50, 3]
 shell_title = ["Shell:", "Shell (block):"]
 shell_origin = "top-center"
 shell_offset = [0, 2, 50, 3]
+
+# ================================
+# CONFIRM SETTINGS
+# ================================
+# Compact trash/delete dialogs: 10 rows fit about six file paths (it
+# scrolls for more) instead of the default 20.
+[confirm]
+trash_offset  = [0, 0, 70, 10]
+delete_offset = [0, 0, 70, 10]
 
 # ================================
 # PICK SETTINGS ("Open with" menu)
