@@ -1,0 +1,54 @@
+# imv with Vim-style keys: h/l previous/next image, j/k zoom out/in,
+# Shift+h/j/k/l pan. yazi opens imv on the whole folder (imv -n FILE DIR),
+# so h/l walk through every image next to the one you opened.
+
+[options]
+# Every bind is listed below, so imv's defaults (h/j/k/l = pan) don't mix in.
+suppress_default_binds = true
+
+[binds]
+q = quit
+x = close
+
+# Previous / next image
+h = prev
+l = next
+<Left> = prev
+<Right> = next
+<bracketleft> = prev
+<bracketright> = next
+gg = goto 1
+<Shift+G> = goto -1
+
+# Zoom: j out, k in
+j = zoom -1
+k = zoom 1
+<Down> = zoom -1
+<Up> = zoom 1
+<minus> = zoom -1
+<Shift+plus> = zoom 1
+o = zoom -1
+i = zoom 1
+a = zoom actual
+r = reset
+
+# Pan with Shift+h/j/k/l
+<Shift+H> = pan 50 0
+<Shift+J> = pan 0 -50
+<Shift+K> = pan 0 50
+<Shift+L> = pan -50 0
+c = center
+
+# View
+f = fullscreen
+d = overlay
+s = scaling next
+<Shift+S> = upscaling next
+<Ctrl+r> = rotate by 90
+p = exec echo $imv_current_file
+
+# Animated images and slideshow
+<period> = next_frame
+<space> = toggle_playing
+t = slideshow +1
+<Shift+T> = slideshow -1

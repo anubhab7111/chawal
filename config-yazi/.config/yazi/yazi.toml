@@ -46,9 +46,10 @@ edit = [
 	{ run = 'code %s', orphan = true, for = "windows" },
 ]
 
-# Images
+# Images. imv-dir opens one image together with its whole folder, so h/l in
+# imv walk the neighbours; with several selected it shows just those.
 open_image = [
-	{ run = 'imv %s', orphan = true, for = "unix" },
+	{ run = 'imv-dir %s', orphan = true, for = "unix" },
 	{ run = 'feh %s', orphan = true, for = "unix" },
 ]
 
