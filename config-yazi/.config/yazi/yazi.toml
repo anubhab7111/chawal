@@ -6,7 +6,8 @@
 # ================================
 # MANAGER SETTINGS
 # ================================
-[manager]
+# yazi 26.9 sets the window title to "Yazi: <dir>" itself (old title_format).
+[mgr]
 # Layout configuration
 ratio = [1, 4, 3]
 sort_by = "natural"
@@ -19,7 +20,6 @@ show_hidden = false
 show_symlink = true
 scrolloff = 5
 mouse_events = ["click", "scroll"]
-title_format = "Yazi: {cwd}"
 
 # ================================
 # PREVIEW SETTINGS
@@ -31,7 +31,6 @@ max_height = 900
 cache_dir = ""
 image_filter = "lanczos3"
 image_quality = 90
-sixel_fraction = 15
 ueberzug_scale = 1
 ueberzug_offset = [0, 0, 0, 0]
 
@@ -118,53 +117,23 @@ rules = [
 	{ mime = "application/*rar", use = "extract" },
 
 	# Directories
-	{ mime = "inode/directory", use = "open_dir" },
+	{ mime = "folder/*", use = "open_dir" },
 
 	# Fallback
 	{ mime = "*", use = "edit" },
-
-  { name = "*.{png,jpg,jpeg}", use = [ "image_roll", "reveal" ] },
-  { name = "*.heic", use = [ "feh_opener", "reveal" ] },
 ]
 
 # ================================
 # TASKS SETTINGS
 # ================================
 [tasks]
-micro_workers = 10
-macro_workers = 25
 bizarre_retry = 5
 image_alloc = 536870912  # 512MB
 image_bound = [0, 0]
 suppress_preload = false
 
-# ================================
-# PLUGIN SETTINGS
-# ================================
-[plugin]
-
-# Preloaders
-preloaders = [
-	{ mime = "image/{avif,hei?,jxl,svg+xml}", run = "magick" },
-	{ mime = "image/*", run = "image" },
-	{ mime = "video/*", run = "video" },
-	{ mime = "application/pdf", run = "pdf" },
-	{ mime = "application/json", run = "json" },
-]
-
-# Previewers
-previewers = [
-	{ mime = "text/*", run = "code" },
-	{ mime = "*/xml", run = "code" },
-	{ mime = "*/javascript", run = "code" },
-	{ mime = "*/x-wine-extension-ini", run = "code" },
-	{ mime = "application/{json,x-ndjson}", run = "json" },
-	{ mime = "image/{avif,hei?,jxl,svg+xml}", run = "magick" },
-	{ mime = "image/*", run = "image" },
-	{ mime = "video/*", run = "video" },
-	{ mime = "application/pdf", run = "pdf" },
-	{ mime = "inode/directory", run = "folder" },
-]
+# Previews use yazi's built-in preloaders and previewers (folders, text,
+# json, images, video, pdf, archives, fonts, svg, ...).
 
 # ================================
 # INPUT SETTINGS
@@ -185,15 +154,8 @@ rename_title = "Rename:"
 rename_origin = "hovered"
 rename_offset = [0, 1, 50, 3]
 
-# trash
-trash_title = "Move {n} selected file{s} to trash? (y/N)"
-trash_origin = "top-center"
-trash_offset = [0, 2, 50, 3]
-
-# delete
-delete_title = "Delete {n} selected file{s} permanently? (y/N)"
-delete_origin = "top-center"
-delete_offset = [0, 2, 50, 3]
+# Trash and delete prompts are yazi's [confirm] dialogs, which list the
+# affected files; they use the defaults.
 
 # find
 find_title = ["Find next:", "Find previous:"]
@@ -216,16 +178,10 @@ shell_origin = "top-center"
 shell_offset = [0, 2, 50, 3]
 
 # ================================
-# SELECT SETTINGS
+# PICK SETTINGS ("Open with" menu)
 # ================================
-[select]
+[pick]
 open_title = "Open with:"
 open_origin = "hovered"
 open_offset = [0, 1, 50, 7]
-
-# ================================
-# LOG SETTINGS
-# ================================
-[log]
-enabled = false
 
