@@ -35,3 +35,13 @@ fkill() {
     ((${#pids[@]})) || return 0
     kill -s "$sig" "${pids[@]}"
 }
+
+# fastfetch's config draws the logo as sixel (alacritty, tmux). kitty has no
+# sixel, so there the logo goes through `kitten icat`, which also animates it.
+fastfetch() {
+    if [[ $TERM == xterm-kitty ]]; then
+        command fastfetch --logo-type kitty-icat "$@"
+    else
+        command fastfetch "$@"
+    fi
+}
