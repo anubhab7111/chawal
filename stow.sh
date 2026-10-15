@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Symlink this repo's rice configs into $HOME via GNU Stow.
-# Each top-level directory here (config-*, home-*) is its own stow package;
-# any real file/directory already at a target path is moved into a
-# timestamped backup dir first, so nothing is ever deleted.
+# Each config-* and home-* directory here is its own stow package; other
+# top-level directories (system/, ...) are never linked into $HOME. Any real
+# file/directory already at a target path is moved into a timestamped
+# backup dir first, so nothing is ever deleted.
 set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -80,7 +81,7 @@ package_rel() {
 }
 
 packages=()
-for entry in "$DOTFILES_DIR"/*/; do
+for entry in "$DOTFILES_DIR"/config-*/ "$DOTFILES_DIR"/home-*/; do
   [ -d "$entry" ] || continue
   packages+=("$(basename "$entry")")
 done
