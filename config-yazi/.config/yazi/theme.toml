@@ -2,38 +2,40 @@
 # YAZI THEME WITH CATPPUCCIN FLAVOR
 # ================================
 
+# yazi picks the dark or light flavor from the terminal background.
 [flavor]
-use = "catppuccin-mocha"
+dark = "catppuccin-mocha"
 
 # ================================
 # CUSTOM OVERRIDES
 # ================================
 
-# Manager overrides for more vibrant selection
-[mgr]
-hovered       = { reversed = true }
-preview_hovered = { fg = "#89b4fa", underline = true }
+# Hovered entry and preview highlight
+[indicator]
+current = { reversed = true }
+preview = { fg = "#89b4fa", underline = true }
 
-# Status bar customization - matching Waybar modules
+# Status bar customization - matching Waybar modules (flat, no round caps)
 [status]
-separator_open  = ""
-separator_close = ""
-
-# More vibrant mode indicators
-mode_normal = { fg = "#1e1e2e", bg = "#89b4fa", bold = true }
-mode_select = { fg = "#1e1e2e", bg = "#a6e3a1", bold = true }
-mode_unset  = { fg = "#1e1e2e", bg = "#f38ba8", bold = true }
+sep_left  = { open = "", close = "" }
+sep_right = { open = "", close = "" }
 
 # Progress bar with signature blue
 progress_normal = { fg = "#89b4fa", bg = "#313244" }
 progress_error  = { fg = "#f38ba8", bg = "#313244" }
 
-# Input styling - matching Wofi
+# More vibrant mode indicators
+[mode]
+normal_main = { fg = "#1e1e2e", bg = "#89b4fa", bold = true }
+select_main = { fg = "#1e1e2e", bg = "#a6e3a1", bold = true }
+unset_main  = { fg = "#1e1e2e", bg = "#f38ba8", bold = true }
+
+# Input styling
 [input]
 border = { fg = "#89dceb" }
 
-# Select styling
-[select]
+# "Open with" menu styling
+[pick]
 border = { fg = "#a6e3a1" }
 active = { fg = "#1e1e2e", bg = "#a6e3a1", bold = true }
 
@@ -47,6 +49,6 @@ hovered = { fg = "#1e1e2e", bg = "#fab387" }
 cand = { fg = "#89dceb" }
 
 # Completion styling
-[completion]
+[cmp]
 border = { fg = "#89b4fa" }
 active = { reversed = true }
