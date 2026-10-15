@@ -39,7 +39,10 @@
 //  ]
 
 "display": {
-        "separator": " "
+        "separator": " ",
+        // Cut long lines instead of wrapping them into the logo area; tmux
+        // drops a sixel logo as soon as text lands on any of its cells.
+        "disableLinewrap": true
     },
     "modules": [
         {
