@@ -37,19 +37,29 @@ fkill() {
 }
 
 # fastfetch with the spinning 3D Arch logo (~/.config/fastfetch/logo).
-# kitty animates it natively through `kitten icat`. alacritty can't animate,
-# so the logo spins once through chafa (sixel) and settles facing front;
-# Ctrl+C skips. With arguments, inside tmux, or in a short window it uses
-# the static front-facing logo from config.jsonc.
+# kitty animates it natively through `kitten icat`. alacritty (also inside
+# tmux) can't animate, so the logo spins once through chafa (sixel) and
+# settles facing front; Ctrl+C skips. With arguments or in a short window it
+# uses the static front-facing logo from config.jsonc.
 fastfetch() {
     local logo=~/.config/fastfetch/logo/arch-spin.webp
     if [[ $TERM == xterm-kitty && -f $logo ]]; then
         command fastfetch --logo "$logo" --logo-type kitty-icat "$@"
-    elif [[ $TERM == alacritty && -z $TMUX && $# -eq 0 && -t 1 && -f $logo ]] &&
-        command -v chafa >/dev/null && (($(tput lines) >= 24)); then
+    elif [[ $# -eq 0 && -t 1 && -f $logo ]] && command -v chafa >/dev/null &&
+        (($(tput lines) >= 24)) && _rice_can_spin; then
         _rice_fetch_spin "$logo"
     else
         command fastfetch "$@"
+    fi
+}
+
+# Sixel animation works in alacritty, and in tmux when the attached client
+# (alacritty) supports sixel; tmux's features come from terminal-features.
+_rice_can_spin() {
+    if [[ -n $TMUX ]]; then
+        [[ $(tmux display -p '#{client_termfeatures}' 2>/dev/null) == *sixel* ]]
+    else
+        [[ $TERM == alacritty ]]
     fi
 }
 
