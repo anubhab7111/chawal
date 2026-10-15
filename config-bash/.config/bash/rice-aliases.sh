@@ -66,9 +66,11 @@ _rice_fetch_spin() (
 
     # chafa saves/restores the cursor itself, so jump to the rows explicitly.
     trap 'printf "\e[?25h\e[%d;1H" "$end"; exit 130' INT
+    # --probe off: format and size are given, and late probe replies would
+    # otherwise be echoed onto the prompt line.
     printf '\e[?25l\e[%d;1H' "$row"
-    chafa -f sixels --animate on --duration 4 --bg "$bg" -s "${w}x$h" "$logo"
+    chafa --probe off -f sixels --animate on --duration 4 --bg "$bg" -s "${w}x$h" "$logo"
     printf '\e[%d;1H' "$row"
-    chafa -f sixels --animate off --bg "$bg" -s "${w}x$h" "$logo"
+    chafa --probe off -f sixels --animate off --bg "$bg" -s "${w}x$h" "$logo"
     printf '\e[?25h\e[%d;1H' "$end"
 )
