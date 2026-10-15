@@ -15,20 +15,32 @@ dark = "catppuccin-mocha"
 current = { reversed = true }
 preview = { fg = "#89b4fa", underline = true }
 
-# Status bar customization - matching Waybar modules (flat, no round caps)
+# Status bar pills, matching the tmux bar: rounded caps, an accent segment
+# and a surface0 text segment.
 [status]
-sep_left  = { open = "", close = "" }
-sep_right = { open = "", close = "" }
+sep_left  = { open = "", close = "" }
+sep_right = { open = "", close = "" }
 
 # Progress bar with signature blue
 progress_normal = { fg = "#89b4fa", bg = "#313244" }
 progress_error  = { fg = "#f38ba8", bg = "#313244" }
 
-# More vibrant mode indicators
+# Mode pill: blue normal, green select, red unset (crust text, like tmux)
 [mode]
-normal_main = { fg = "#1e1e2e", bg = "#89b4fa", bold = true }
-select_main = { fg = "#1e1e2e", bg = "#a6e3a1", bold = true }
-unset_main  = { fg = "#1e1e2e", bg = "#f38ba8", bold = true }
+normal_main = { fg = "#11111b", bg = "#89b4fa", bold = true }
+normal_alt  = { fg = "#cdd6f4", bg = "#313244" }
+select_main = { fg = "#11111b", bg = "#a6e3a1", bold = true }
+select_alt  = { fg = "#cdd6f4", bg = "#313244" }
+unset_main  = { fg = "#11111b", bg = "#f38ba8", bold = true }
+unset_alt   = { fg = "#cdd6f4", bg = "#313244" }
+
+# Confirm dialogs (trash, delete, overwrite, quit): red Yes, grey No
+[confirm]
+border     = { fg = "#89b4fa" }
+title      = { fg = "#f38ba8", bold = true }
+btn_yes    = { fg = "#11111b", bg = "#f38ba8", bold = true }
+btn_no     = { fg = "#cdd6f4", bg = "#313244" }
+btn_labels = ["    Yes  ", "    No  "]
 
 # Input styling
 [input]
