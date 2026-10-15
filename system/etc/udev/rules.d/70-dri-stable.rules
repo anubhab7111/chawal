@@ -1,0 +1,8 @@
+# Stable names for the two GPUs of this laptop (HP OMEN 16).
+# The card numbers (/dev/dri/cardN) swap between boots, and Hyprland's
+# AQ_DRM_DEVICES splits on ':', so the /dev/dri/by-path names can't be used.
+#   /dev/dri/intel-igpu   Intel Iris Xe, PCI 0000:00:02.0 (renders)
+#   /dev/dri/nvidia-dgpu  NVIDIA RTX 3050, PCI 0000:01:00.0 (drives HDMI)
+# Only the card nodes match: connectors (card1-HDMI-A-1, ...) are drm_connector.
+SUBSYSTEM=="drm", KERNEL=="card[0-9]*", ENV{DEVTYPE}=="drm_minor", KERNELS=="0000:00:02.0", SYMLINK+="dri/intel-igpu"
+SUBSYSTEM=="drm", KERNEL=="card[0-9]*", ENV{DEVTYPE}=="drm_minor", KERNELS=="0000:01:00.0", SYMLINK+="dri/nvidia-dgpu"
