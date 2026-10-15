@@ -37,35 +37,37 @@ ueberzug_offset = [0, 0, 0, 0]
 # ================================
 # OPENER SETTINGS
 # ================================
+# yazi 26.9 passes the files through %s (all selected, already quoted);
+# "$@" is no longer filled, so apps started with no file.
 [opener]
 # Text files
 edit = [
-	{ run = 'nvim "$@"', block = true, for = "unix" },
-	{ run = 'code "%*"', orphan = true, for = "windows" },
+	{ run = 'nvim %s', block = true, for = "unix" },
+	{ run = 'code %s', orphan = true, for = "windows" },
 ]
 
 # Images
 open_image = [
-	{ run = 'imv "$@"', orphan = true, for = "unix" },
-	{ run = 'feh "$@"', orphan = true, for = "unix" },
+	{ run = 'imv %s', orphan = true, for = "unix" },
+	{ run = 'feh %s', orphan = true, for = "unix" },
 ]
 
 # Videos
 play = [
-	{ run = 'mpv "$@"', orphan = true, for = "unix" },
-	{ run = 'vlc "%*"', orphan = true, for = "windows" },
+	{ run = 'mpv %s', orphan = true, for = "unix" },
+	{ run = 'vlc %s', orphan = true, for = "windows" },
 ]
 
 # PDFs
 open_pdf = [
-	{ run = 'okular "$@"', orphan = true, for = "unix" },
-	{ run = 'evince "$@"', orphan = true, for = "unix" },
+	{ run = 'okular %s', orphan = true, for = "unix" },
+	{ run = 'evince %s', orphan = true, for = "unix" },
 ]
 
 # Archives
 extract = [
-	{ run = 'unar "$@"', desc = "Extract here" },
-	{ run = '7z x "$@"', desc = "Extract with 7z" },
+	{ run = 'unar %s', desc = "Extract here" },
+	{ run = '7z x %s', desc = "Extract with 7z" },
 ]
 
 # Directories
@@ -75,10 +77,10 @@ open_dir = [
 
 # Presentations
 # open_ppt = [
-#     { run = 'libreoffice --impress "$@"', orphan = true, for = "unix" },
+#     { run = 'libreoffice --impress %s', orphan = true, for = "unix" },
 # ]
 open_ppt = [
-    { run = 'libreoffice --impress "$@"', orphan = true, for = "unix" },
+    { run = 'libreoffice --impress %s', orphan = true, for = "unix" },
 ]
 
 
