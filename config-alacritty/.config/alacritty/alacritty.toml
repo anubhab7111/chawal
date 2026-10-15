@@ -58,9 +58,10 @@ bindings = [
     # { key = "Home", mods = "Control|Shift", action = "ScrollToTop" },
     # { key = "End", mods = "Control|Shift", action = "ScrollToBottom" },
 
-    # Copy/Paste
+    # Copy/Paste (clipboard; the primary selection stays on middle-click)
     { key = "C", mods = "Control|Shift", action = "Copy" },
     { key = "V", mods = "Control|Shift", action = "Paste" },
+    { key = "Insert", mods = "Control", action = "Copy" },
     { key = "Insert", mods = "Shift", action = "Paste" },
 
     # # Selection
@@ -115,19 +116,16 @@ bindings = [
     { key = "3", mods = "Control|Alt", chars = "git status\r" },
     { key = "4", mods = "Control|Alt", chars = "htop\r" },
 
-    # Arch Linux Package Management
-    { key = "S", mods = "Control|Alt", chars = "sudo pacman -S " },
-    { key = "U", mods = "Control|Alt", chars = "sudo pacman -Syu\r" },
-    { key = "R", mods = "Control|Alt", chars = "sudo pacman -R " },
+    # Arch Linux Package Management (read-only queries)
+    # Anything that needs sudo lives in ~/.config/bash/rice-aliases.sh
+    # (up, orphans, fkill), so a stray key chord can't start it.
     { key = "Q", mods = "Control|Alt", chars = "pacman -Q " },
     { key = "F", mods = "Control|Alt", chars = "pacman -Ss " },
     { key = "I", mods = "Control|Alt", chars = "pacman -Si " },
     { key = "O", mods = "Control|Alt", chars = "pacman -Qo " },
-    { key = "D", mods = "Control|Alt", chars = "pacman -Qdtq | sudo pacman -Rs -\r" },
 
     # AUR Helper shortcuts (using yay - adjust if using different AUR helper)
     { key = "Y", mods = "Control|Alt", chars = "yay -S " },
-    { key = "Y", mods = "Control|Alt|Shift", chars = "yay -Syu\r" },
 
     # System Monitoring and Management
     # { key = "M", mods = "Control|Alt", chars = "free -h\r" },
@@ -140,12 +138,10 @@ bindings = [
     # File System and Disk Management
     { key = "Space", mods = "Control|Alt", chars = "df -h\r" },
     { key = "L", mods = "Control|Alt", chars = "lsblk\r" },
-    { key = "B", mods = "Control|Alt", chars = "sudo fdisk -l\r" },
 
     # Network and Process Management
     { key = "N", mods = "Control|Alt", chars = "ip addr show\r" },
     { key = "P", mods = "Control|Alt", chars = "ps aux | grep " },
-    { key = "K", mods = "Control|Alt", chars = "sudo kill -9 " },
     #
     # Development shortcuts
     # { key = "G", mods = "Control|Shift", chars = "git " },
@@ -170,44 +166,26 @@ bindings = [
     # { key = "2", mods = "Command", action = "SelectTab2" },
     # { key = "3", mods = "Command", action = "SelectTab3" },
     # { key = "9", mods = "Command", action = "SelectLastTab" },
-
-    # Linux/BSD specific bindings (uncomment if using Linux/BSD)
-    { key = "Insert", mods = "Control", action = "CopySelection" },
-    { key = "Insert", mods = "Shift", action = "PasteSelection" },
 ]
 
-# Useful Arch Linux Keybinding Reference:
+# Keybinding reference (active binds only):
 #
-# Package Management:
-# Ctrl+Alt+S  = sudo pacman -S (install package)
-# Ctrl+Alt+U  = sudo pacman -Syu (system update)
-# Ctrl+Alt+R  = sudo pacman -R (remove package)
+# Terminal:
+# Ctrl+Shift+C / Ctrl+Insert = copy      Ctrl+Shift+V / Shift+Insert = paste
+# Ctrl+Shift+F / Ctrl+Shift+B = search forward / backward
+# Ctrl+Shift+A = vi mode                 Ctrl+Alt+K = clear scrollback
+# Ctrl+Shift+T = new window              Ctrl+Plus / Ctrl+Minus / Ctrl+0 = font size
+#
+# Typed commands (Enter is pressed for you only where noted):
+# Ctrl+Alt+1..4 = cd ~ / ls -la / git status / htop (run)
 # Ctrl+Alt+Q  = pacman -Q (query installed packages)
 # Ctrl+Alt+F  = pacman -Ss (search packages)
 # Ctrl+Alt+I  = pacman -Si (package info)
 # Ctrl+Alt+O  = pacman -Qo (which package owns file)
-# Ctrl+Alt+D  = remove orphaned packages
 # Ctrl+Alt+Y  = yay -S (AUR install)
-# Ctrl+Alt+Shift+Y = yay -Syu (AUR update)
+# Ctrl+Alt+Space = df -h (run)          Ctrl+Alt+L = lsblk (run)
+# Ctrl+Alt+N  = ip addr show (run)      Ctrl+Alt+P = ps aux | grep
+# Ctrl+Alt+.  = cd .. (run)             Ctrl+Alt+/ = find . -name
 #
-# System Management:
-# Ctrl+Alt+M  = free -h (memory usage)
-# Ctrl+Alt+J  = sudo journalctl -f (live system logs)
-# Ctrl+Alt+T  = systemctl status (service status)
-# Ctrl+Alt+E  = sudo systemctl enable (enable service)
-# Ctrl+Alt+X  = sudo systemctl start (start service)
-# Ctrl+Alt+Z  = sudo systemctl stop (stop service)
-#
-# System Info:
-# Ctrl+Alt+Space = df -h (disk usage)
-# Ctrl+Alt+L  = lsblk (list block devices)
-# Ctrl+Alt+B  = sudo fdisk -l (disk partitions)
-# Ctrl+Alt+N  = ip addr show (network interfaces)
-# Ctrl+Alt+P  = ps aux | grep (search processes)
-# Ctrl+Alt+K  = sudo kill -9 (force kill process)
-#
-# Quick Navigation:
-# Ctrl+Alt+Shift+C = cd /etc
-# Ctrl+Alt+Shift+V = cd /var/log
-# Ctrl+Alt+Shift+H = cd /home
-# Ctrl+Alt+Shift+S = cd /usr/share
+# Shell helpers (~/.config/bash/rice-aliases.sh):
+# up = yay -Syu    orphans = remove orphaned packages    fkill [-9] = pick and kill processes
