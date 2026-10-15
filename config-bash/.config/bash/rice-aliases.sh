@@ -36,12 +36,39 @@ fkill() {
     kill -s "$sig" "${pids[@]}"
 }
 
-# fastfetch's config draws the logo as sixel (alacritty, tmux). kitty has no
-# sixel, so there the logo goes through `kitten icat`, which also animates it.
+# fastfetch with the spinning 3D Arch logo (~/.config/fastfetch/logo).
+# kitty animates it natively through `kitten icat`. alacritty can't animate,
+# so the logo spins once through chafa (sixel) and settles facing front;
+# Ctrl+C skips. With arguments, inside tmux, or in a short window it uses
+# the static front-facing logo from config.jsonc.
 fastfetch() {
-    if [[ $TERM == xterm-kitty ]]; then
-        command fastfetch --logo-type kitty-icat "$@"
+    local logo=~/.config/fastfetch/logo/arch-spin.webp
+    if [[ $TERM == xterm-kitty && -f $logo ]]; then
+        command fastfetch --logo "$logo" --logo-type kitty-icat "$@"
+    elif [[ $TERM == alacritty && -z $TMUX && $# -eq 0 && -t 1 && -f $logo ]] &&
+        command -v chafa >/dev/null && (($(tput lines) >= 24)); then
+        _rice_fetch_spin "$logo"
     else
         command fastfetch "$@"
     fi
 }
+
+_rice_fetch_spin() (
+    local logo=$1 w=20 h=13 room=20 row end blank
+    local bg='#1e1e2e' # terminal background (Mocha base)
+    # Make room first, so nothing scrolls while the logo is drawn in place.
+    printf '\n%.0s' $(seq "$room")
+    printf '\e[%dA' "$room"
+    IFS='[;' read -rs -d R -p $'\e[6n' _ row _ </dev/tty
+    blank=$(for _ in $(seq "$h"); do printf '%*s\n' "$w" ''; done)
+    command fastfetch --logo-type data-raw --logo "$blank"
+    IFS='[;' read -rs -d R -p $'\e[6n' _ end _ </dev/tty
+
+    # chafa saves/restores the cursor itself, so jump to the rows explicitly.
+    trap 'printf "\e[?25h\e[%d;1H" "$end"; exit 130' INT
+    printf '\e[?25l\e[%d;1H' "$row"
+    chafa -f sixels --animate on --duration 4 --bg "$bg" -s "${w}x$h" "$logo"
+    printf '\e[%d;1H' "$row"
+    chafa -f sixels --animate off --bg "$bg" -s "${w}x$h" "$logo"
+    printf '\e[?25h\e[%d;1H' "$end"
+)
