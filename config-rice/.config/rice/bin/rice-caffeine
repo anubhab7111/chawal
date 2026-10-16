@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# rice-caffeine: keep the session awake (Waybar's caffeine button).
+#
+#   rice-caffeine toggle|on|off
+#   rice-caffeine status      JSON for Waybar's custom/caffeine module
+#
+# "On" is a `systemd-inhibit --what=idle` holder, which hypridle honours, so
+# no dim, lock, screen-off or suspend fires. Autostart runs `off` at login.
+
+set -euo pipefail
+
+RUN="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice"
+PIDFILE="$RUN/caffeine.pid"
+
+running() {
+    local pid
+    [ -f "$PIDFILE" ] || return 1
+    pid=$(cat "$PIDFILE")
+    # only trust the pid if it is still our inhibitor
+    [ -n "$pid" ] && grep -q "systemd-inhibit" "/proc/$pid/cmdline" 2>/dev/null
+}
+
+on() {
+    running && return 0
+    mkdir -p "$RUN"
+    # $$ is the child shell's pid, which exec hands to systemd-inhibit
+    # shellcheck disable=SC2016
+    setsid -f sh -c 'echo $$ > "$1"; exec systemd-inhibit --what=idle --who=rice-caffeine \
+        --why="Caffeine is on" --mode=block sleep infinity' sh "$PIDFILE" </dev/null >/dev/null 2>&1
+    for _ in 1 2 3 4 5 6 7 8 9 10; do running && return 0; sleep 0.1; done
+    echo "rice-caffeine: inhibitor did not start" >&2
+    return 1
+}
+
+off() {
+    if running; then kill "$(cat "$PIDFILE")" 2>/dev/null || true; fi
+    rm -f "$PIDFILE"
+}
+
+notify_bar() { "$HOME/.config/rice/bin/rice-sync" caffeine; }
+
+case ${1:-} in
+on) on; notify_bar ;;
+off) off; notify_bar ;;
+toggle)
+    if running; then off; else on; fi
+    notify_bar
+    ;;
+status)
+    if running; then
+        printf '{"text":"\U000F0176","class":"on","alt":"on","tooltip":"Caffeine on: no dim, lock or suspend"}\n'
+    else
+        printf '{"text":"\U000F0FAA","class":"off","alt":"off","tooltip":"Caffeine off"}\n'
+    fi
+    ;;
+*)
+    sed -n '3,6s/^# \{0,1\}//p' "$0" >&2
+    exit 2
+    ;;
+esac

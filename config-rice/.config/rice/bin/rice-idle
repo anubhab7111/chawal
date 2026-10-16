@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# rice-idle: helpers for hypridle (hypridle.conf).
+#
+#   rice-idle dim     dim to min(current, 30% of max); never brightens, never stacks
+#   rice-idle undim   restore the brightness saved by dim
+#   rice-idle quiet   exit 0 when no audio is playing (the listeners'
+#                     condition_cmd: playing audio defers idle)
+
+set -euo pipefail
+
+RUN="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice"
+SAVED="$RUN/dimmed-from"
+
+case ${1:-} in
+dim)
+    [ -f "$SAVED" ] && exit 0 # already dimmed: don't stack
+    cur=$(brightnessctl g)
+    target=$(($(brightnessctl m) * 30 / 100))
+    ((cur > target)) || exit 0 # already at or below the dim level
+    mkdir -p "$RUN"
+    printf '%s\n' "$cur" > "$SAVED"
+    brightnessctl -q set "$target"
+    ;;
+undim)
+    [ -f "$SAVED" ] || exit 0
+    brightnessctl -q set "$(cat "$SAVED")"
+    rm -f "$SAVED"
+    ;;
+quiet)
+    ! pactl list sinks short 2>/dev/null | grep -q RUNNING
+    ;;
+*)
+    sed -n '3,8s/^# \{0,1\}//p' "$0" >&2
+    exit 2
+    ;;
+esac
