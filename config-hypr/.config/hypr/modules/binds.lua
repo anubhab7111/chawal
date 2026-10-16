@@ -112,6 +112,7 @@ bind("SHIFT + PRINT", exec("hyprshot -m region"))
 
 -- Utilities
 bind("SUPER + SHIFT + V", exec("~/.config/rice/bin/rice-clip"))                -- Clipboard history
+bind("SUPER + W", exec("~/.config/rice/bin/rice-wall"))                         -- Wallpaper picker
 
 -- Zoom
 local function zoom_by(factor)
