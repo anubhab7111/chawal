@@ -13,8 +13,9 @@ local bind = hl.bind
 local exec = hl.dsp.exec_cmd
 
 -- System
--- Exit Hyprland after a Yes/No confirm (rofi's power menu replaces this in P11)
-local confirm_exit = [=[[ "$(printf 'No\nYes' | rofi -dmenu -i -no-custom -p 'Exit Hyprland?')" = Yes ]]=]
+-- Exit Hyprland after a Yes/No confirm (rofi's power menu replaces this in P11).
+-- Uses `test`, not `[ ]`: exec reads a leading "[...]" as exec rules.
+local confirm_exit = [[test "$(printf 'No\nYes' | rofi -dmenu -i -no-custom -p 'Exit Hyprland?')" = Yes]]
     .. [[ && hyprctl dispatch 'hl.dsp.exit()']]
 bind(mainMod .. " + M", exec(confirm_exit))
 -- Lock through logind so hypridle's lock_cmd (single hyprlock instance) runs
