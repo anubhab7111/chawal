@@ -34,9 +34,11 @@ function rice.lid.closed()
     return state:find("closed") ~= nil
 end
 
+-- FALLBACK is Hyprland's placeholder when no real output is left, not a
+-- screen anyone can see: it must never keep the panel off.
 local function other_screen_on()
     for _, m in ipairs(hl.get_monitors()) do
-        if m.name ~= rice.lid.internal then return true end
+        if m.name ~= rice.lid.internal and m.name ~= "FALLBACK" then return true end
     end
     return false
 end
