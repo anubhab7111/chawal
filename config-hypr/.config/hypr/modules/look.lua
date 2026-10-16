@@ -1,4 +1,4 @@
--- Look and feel, ported from configs/decorations.conf unchanged.
+-- Look and feel: layout, decorations, blur and animations.
 local p = rice.palette
 
 hl.config({

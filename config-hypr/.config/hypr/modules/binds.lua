@@ -1,4 +1,4 @@
--- Keybinds. Ported from configs/bindings.conf in P5; P6 fixed the quirks
+-- Keybinds. Ported from the hyprlang config in P5; P6 fixed the quirks
 -- (duplicate brightness binds, SUPER+SHIFT+0 doing two things, instant exit).
 
 local terminal    = "alacritty"

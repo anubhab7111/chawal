@@ -1,5 +1,4 @@
--- Input, cursor and gestures, ported from configs/decorations.conf and
--- configs/bindings.conf unchanged.
+-- Input, cursor and gestures.
 
 hl.config({
     input = {
