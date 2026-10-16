@@ -29,15 +29,18 @@ thumbs() {
     mkdir -p "$CACHE"
     exec 9>"$CACHE/.lock"
     flock -n 9 || exit 0 # another run is already at it
-    local f t
+    local f t tmp
     while IFS= read -r f; do
         t=$(thumb_of "$f")
         [ -s "$t" ] && continue
-        # [0]: first frame only (gifs); write aside, then move into place
-        if magick "${f}[0]" -thumbnail 384x216^ -gravity center -extent 384x216 "$t.tmp.png" 2>/dev/null; then
-            mv "$t.tmp.png" "$t"
+        # magick reads % in output names as format escapes (%d, %h, ...), so
+        # write to a %-free temp name and move it into place. [0]: first
+        # frame only (gifs). One bad image must not stop the rest.
+        tmp=$(mktemp -p "$CACHE" .thumb-XXXXXX.png)
+        if magick "${f}[0]" -thumbnail 384x216^ -gravity center -extent 384x216 "$tmp" 2>/dev/null; then
+            mv -f "$tmp" "$t" || rm -f "$tmp"
         else
-            rm -f "$t.tmp.png"
+            rm -f "$tmp"
         fi
     done < <(images)
 }
