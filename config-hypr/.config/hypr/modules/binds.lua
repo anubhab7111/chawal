@@ -3,7 +3,7 @@
 
 local terminal    = "alacritty"
 local fileManager = "thunar"
-local menu        = "wofi --show drun"
+local menu        = "rofi -show drun"
 local code        = "vscodium"
 local browser     = "firefox"
 
@@ -13,15 +13,13 @@ local bind = hl.bind
 local exec = hl.dsp.exec_cmd
 
 -- System
--- Exit Hyprland after a Yes/No confirm (rofi's power menu replaces this in P11).
--- Uses `test`, not `[ ]`: exec reads a leading "[...]" as exec rules.
-local confirm_exit = [[test "$(printf 'No\nYes' | rofi -dmenu -i -no-custom -p 'Exit Hyprland?')" = Yes]]
-    .. [[ && hyprctl dispatch 'hl.dsp.exit()']]
-bind(mainMod .. " + M", exec(confirm_exit))
+-- Power menu (lock, suspend, log out, reboot, shut down; the last three confirm)
+local power_menu = "~/.config/rice/bin/rice-power"
+bind(mainMod .. " + M", exec(power_menu))
 -- Lock through logind so hypridle's lock_cmd (single hyprlock instance) runs
 bind(mainMod .. " + L", exec("loginctl lock-session"))
 bind(mainMod .. " + F1", exec("~/.config/hypr/scripts/gamemode.sh"))
-bind(mainMod .. " + escape", exec("wlogout"))
+bind(mainMod .. " + escape", exec(power_menu))
 
 -- Applications
 bind(mainMod .. " + Q", exec(terminal))

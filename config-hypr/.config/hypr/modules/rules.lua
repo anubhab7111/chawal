@@ -104,6 +104,8 @@ end
 layer("wofi", { animation = "popin 80%" })
 layer("wofi", { dim_around = true })
 
+layer("rofi", { blur = true, ignore_alpha = 0.5, animation = "popin 80%", dim_around = true })
+
 layer("mako", { blur = true })
 layer("mako", { animation = "slide right" })
 

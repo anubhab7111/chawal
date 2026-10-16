@@ -1,0 +1,19 @@
+/* rofi: app launcher (SUPER+Space) and the dmenu-style menus in
+   ~/.config/rice/bin. Colours come from the active theme through the
+   themes/colors.rasi slot that rice-theme creates. */
+configuration {
+    modi: "drun,run";
+    show-icons: true;
+    icon-theme: "candy-icons";
+    drun-display-format: "{name}";
+    display-drun: "";
+    display-run: "";
+    display-dmenu: "";
+    font: "JetBrainsMono Nerd Font 12";
+    matching: "fuzzy";
+    sort: true;
+    sorting-method: "fzf";
+    kb-cancel: "Escape,Control+g";
+}
+
+@theme "~/.config/rofi/themes/rice.rasi"
