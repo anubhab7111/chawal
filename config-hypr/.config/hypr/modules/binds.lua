@@ -18,7 +18,7 @@ local power_menu = "~/.config/rice/bin/rice-power"
 bind(mainMod .. " + M", exec(power_menu))
 -- Lock through logind so hypridle's lock_cmd (single hyprlock instance) runs
 bind(mainMod .. " + L", exec("loginctl lock-session"))
-bind(mainMod .. " + F1", exec("~/.config/hypr/scripts/gamemode.sh"))
+bind(mainMod .. " + F1", function() rice.gamemode.toggle() end)          -- Game mode (modes.lua)
 bind(mainMod .. " + escape", exec(power_menu))
 
 -- Applications

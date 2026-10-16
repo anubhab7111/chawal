@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# rice-gamemode: shell side of game mode (the logic is rice.gamemode in
+# ~/.config/hypr/modules/modes.lua; SUPER+F1 toggles it there).
+#
+#   rice-gamemode toggle   same as SUPER+F1
+#   rice-gamemode status   JSON for Waybar's custom/gamemode (hidden when off)
+
+set -euo pipefail
+
+FLAG="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice/gamemode"
+
+case ${1:-} in
+toggle) hyprctl eval 'rice.gamemode.toggle()' >/dev/null ;;
+status)
+    if [ -f "$FLAG" ]; then
+        printf '{"text":"\U000F0297","class":"on","tooltip":"Game mode on (SUPER+F1 to leave)"}\n'
+    else
+        printf '{"text":"","class":"off"}\n'
+    fi
+    ;;
+*)
+    sed -n '4,6s/^# \{0,1\}//p' "$0" >&2
+    exit 2
+    ;;
+esac

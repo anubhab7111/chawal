@@ -4,10 +4,12 @@
 #
 #   caffeine   -> Waybar custom/caffeine (SIGRTMIN+8)
 #   nightlight -> Waybar custom/nightlight (SIGRTMIN+11)
+#   gamemode   -> Waybar custom/gamemode (SIGRTMIN+10)
 
 case ${1:-} in
 caffeine) pkill -RTMIN+8 -x waybar 2>/dev/null ;;
 nightlight) pkill -RTMIN+11 -x waybar 2>/dev/null ;;
+gamemode) pkill -RTMIN+10 -x waybar 2>/dev/null ;;
 *)
     echo "rice-sync: unknown key: ${1:-}" >&2
     exit 2
