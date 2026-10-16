@@ -1,5 +1,5 @@
-# This file is written by nwg-look. Do not edit.
+# Default XCursor theme (tracked in dotfiles home-icons; nwg-look can overwrite it).
 [Icon Theme]
 Name=Default
 Comment=Default Cursor Theme
-Inherits=Layan-border-cursors
+Inherits=Bibata-Modern-Classic

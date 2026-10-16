@@ -11,9 +11,14 @@ hl.env("QT_QPA_PLATFORM", "wayland;xcb")
 hl.env("QT_WAYLAND_DISABLE_WINDOWDECORATION", "1")
 -- QT_QPA_PLATFORMTHEME is left unset until qt6ct is installed (P35).
 
--- Cursor
+-- Cursor: Bibata Modern Classic at 30 everywhere. Hyprland draws the
+-- hyprcursor build (home-icons); XWayland, Qt and anything else that reads
+-- XCURSOR_* use the XCursor build from bibata-cursor-theme-bin. GTK reads
+-- settings.ini / ~/.gtkrc-2.0 / gsettings, all set to the same theme and size.
 hl.env("HYPRCURSOR_THEME", "HyprBibataModernClassicSVG")
-hl.env("HYPRCURSOR_SIZE", "34")
+hl.env("HYPRCURSOR_SIZE", "30")
+hl.env("XCURSOR_THEME", "Bibata-Modern-Classic")
+hl.env("XCURSOR_SIZE", "30")
 
 -- GPUs. Stable names from system/etc/udev/rules.d/70-dri-stable.rules
 -- (install with sudo ~/dotfiles/system/install.sh): Intel iGPU (PCI 00:02.0)

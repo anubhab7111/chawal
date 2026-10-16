@@ -32,6 +32,8 @@ bind(mainMod .. " + B", exec(browser))
 bind(mainMod .. " + SHIFT + B", exec("chromium"))
 bind(mainMod .. " + Z", exec("zapzap"))
 bind(mainMod .. " + A", exec("pwvucontrol"))                                   -- Audio control
+bind(mainMod .. " + SHIFT + A", exec("claude-desktop"))
+bind(mainMod .. " + O", exec("obsidian"))
 
 -- Window management
 bind(mainMod .. " + C", hl.dsp.window.close())

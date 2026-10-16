@@ -20,8 +20,8 @@ local commands = {
     "awww-daemon",
     [[bash -c 'sleep 1; ~/.config/theming/apply-theme.sh "$(cat ~/.config/theming/state 2>/dev/null || echo catppuccin)"']],
 
-    -- Cursor theme
-    "hyprctl setcursor HyprBibataModernClassicSVG 30",
+    -- Cursor for GTK apps that read gsettings (env.lua sets the rest)
+    "gsettings set org.gnome.desktop.interface cursor-theme Bibata-Modern-Classic; gsettings set org.gnome.desktop.interface cursor-size 30",
 
     -- UI components (waybar is started by the theme replay above)
     "hypridle",
