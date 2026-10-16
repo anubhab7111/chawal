@@ -126,12 +126,12 @@
   "custom/launcher": {
     "format": "󰣇",
     "tooltip": false,
-    "on-click": "wofi --show drun"
+    "on-click": "rofi -show drun"
   },
   "custom/power-menu": {
     "format": "⏻",
     "tooltip": false,
-    "on-click": "wlogout"
+    "on-click": "~/.config/rice/bin/rice-power"
   },
   "idle_inhibitor": {
     "format": "{icon}",

@@ -1,0 +1,87 @@
+/* Rice look for every rofi window: centred card, one accent, flat rows.
+   colors.rasi is a slot (rice-theme) -> the active theme's rofi-colors.rasi,
+   which defines bg, bg-alt, surface, fg, fg-dim and accent. */
+@import "~/.config/rofi/themes/colors.rasi"
+
+* {
+    background-color: transparent;
+    text-color: @fg;
+    spacing: 0;
+}
+
+window {
+    width: 640px;
+    location: center;
+    anchor: center;
+    border: 2px;
+    border-color: @accent;
+    border-radius: 15px;
+    background-color: @bg;
+    padding: 16px;
+}
+
+mainbox {
+    children: [ inputbar, message, listview ];
+    spacing: 12px;
+}
+
+inputbar {
+    children: [ prompt, entry ];
+    spacing: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background-color: @bg-alt;
+}
+
+prompt {
+    text-color: @accent;
+}
+
+entry {
+    placeholder: "Search";
+    placeholder-color: @fg-dim;
+    cursor: text;
+}
+
+message {
+    padding: 8px 14px;
+    border-radius: 10px;
+    background-color: @bg-alt;
+}
+
+textbox {
+    text-color: @fg-dim;
+}
+
+listview {
+    lines: 8;
+    columns: 1;
+    fixed-height: false;
+    scrollbar: false;
+    spacing: 4px;
+}
+
+element {
+    padding: 8px 12px;
+    spacing: 12px;
+    border-radius: 10px;
+}
+
+element normal.normal,
+element alternate.normal {
+    background-color: transparent;
+}
+
+element selected.normal {
+    background-color: @surface;
+    text-color: @accent;
+}
+
+element-icon {
+    size: 24px;
+}
+
+element-text {
+    text-color: inherit;
+    vertical-align: 0.5;
+}

@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# rice-power: rofi power menu (SUPER+M, SUPER+Escape, Waybar power button).
+# Log out, reboot and shut down ask Yes/No first, with No preselected.
+
+set -euo pipefail
+
+menu() { # prompt, then one item per line on stdin; prints the pick
+    rofi -dmenu -i -no-custom -p "$1" -theme-str 'window { width: 360px; } listview { lines: 5; }'
+}
+
+confirm() {
+    [ "$(printf 'No\nYes\n' | menu "$1?")" = Yes ]
+}
+
+lock='  Lock'
+suspend='  Suspend'
+logout='󰍃  Log out'
+reboot='  Reboot'
+poweroff='  Shut down'
+
+pick=$(printf '%s\n' "$lock" "$suspend" "$logout" "$reboot" "$poweroff" | menu Power) || exit 0
+
+case $pick in
+"$lock") loginctl lock-session ;;
+"$suspend") systemctl suspend ;; # hypridle locks first (before_sleep_cmd)
+"$logout") confirm "Log out" && hyprctl dispatch 'hl.dsp.exit()' ;;
+"$reboot") confirm "Reboot" && systemctl reboot ;;
+"$poweroff") confirm "Shut down" && systemctl poweroff ;;
+esac
+exit 0

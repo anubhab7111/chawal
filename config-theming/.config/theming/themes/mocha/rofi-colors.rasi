@@ -1,0 +1,10 @@
+/* Catppuccin Mocha colours for rofi (themes/rice.rasi imports them through
+   the ~/.config/rofi/themes/colors.rasi slot). */
+* {
+    bg:      #1e1e2ef0;
+    bg-alt:  #181825;
+    surface: #313244;
+    fg:      #cdd6f4;
+    fg-dim:  #6c7086;
+    accent:  #cba6f7;
+}

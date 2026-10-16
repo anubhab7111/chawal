@@ -53,6 +53,7 @@ bootstrap() {
     slot "$CURRENT/waybar-colors.css" "$HOME/.config/waybar/colors.css"
     slot "$CURRENT/cava.theme" "$HOME/.config/cava/themes/rice"
     slot "$CURRENT/btop.theme" "$HOME/.config/btop/themes/rice.theme"
+    slot "$CURRENT/rofi-colors.rasi" "$HOME/.config/rofi/themes/colors.rasi"
 
     # alacritty watches the inode of the file it imports, so a retargeted
     # symlink goes unnoticed: copy the colours over the same file instead.

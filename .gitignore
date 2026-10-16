@@ -14,6 +14,7 @@ btop.log
 config-theming/.config/theming/current
 config-waybar/.config/waybar/colors.css
 config-btop/.config/btop/themes/rice.theme
+config-rofi/.config/rofi/themes/colors.rasi
 # cava writes its default themes and shaders here on every start; the
 # themes/rice slot lives here too.
 config-cava/.config/cava/themes/
