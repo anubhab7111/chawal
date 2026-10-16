@@ -1,5 +1,5 @@
 /* Catppuccin Mocha palette for the "Hyprland Rice" Obsidian theme.
-   apply-theme.sh copies this into each vault as .obsidian/snippets/rice-palette.css
+   rice-theme copies this into each vault as .obsidian/snippets/rice-palette.css
    (enabled via appearance.json). Values mirror waybar-colors.css. */
 body {
   --ctp-rosewater: #f5e0dc;

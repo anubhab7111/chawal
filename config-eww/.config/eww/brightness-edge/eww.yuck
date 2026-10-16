@@ -5,8 +5,8 @@
 ;; explicit --config).
 ;;
 ;; Standalone daemon/config so it survives independently of whichever bar
-;; the active theme picks -- ~/.config/theming/apply-theme.sh relaunches it
-;; after every theme switch.
+;; the active theme picks. Autostart opens it; rice-theme runs `eww reload`
+;; on it after every theme switch.
 
 (deflisten bright_state :initial "{\"brightness\": 100}"
   "scripts/brightness-listen.sh")

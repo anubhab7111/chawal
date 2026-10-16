@@ -1,6 +1,6 @@
 /* Colors come from the live theme, same file Waybar imports -- this widget
-   re-themes itself automatically whenever ~/.config/theming/apply-theme.sh
-   switches themes, no separate palette to keep in sync. */
+   re-themes itself whenever rice-theme switches themes (it runs `eww reload`),
+   no separate palette to keep in sync. */
 @import url("/home/ushtro/.config/theming/current/waybar-colors.css");
 
 /* The system GTK theme draws its own focus/hover outline on interactive

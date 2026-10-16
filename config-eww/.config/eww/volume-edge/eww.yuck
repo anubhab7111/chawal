@@ -22,9 +22,8 @@
 ;; built-in variable for this.
 ;;
 ;; Standalone daemon/config so it survives independently of whichever bar
-;; the active theme uses -- see
-;; ~/.config/theming/apply-theme.sh, which relaunches it after every theme
-;; switch since that script's blanket `pkill -x eww` kills it too.
+;; the active theme uses. Autostart opens it; rice-theme runs `eww reload`
+;; on it after every theme switch.
 
 (deflisten vol_state :initial "{\"volume\": 0, \"muted\": false}"
   "scripts/volume-listen.sh")

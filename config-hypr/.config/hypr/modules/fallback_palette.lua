@@ -1,6 +1,6 @@
 -- Fallback palette (Catppuccin Mocha), used when the active theme has no
 -- theming/current/hyprland.lua or it fails to load. Keep in sync with
--- config-theming/.config/theming/themes/catppuccin/hyprland.lua.
+-- config-theming/.config/theming/themes/mocha/hyprland.lua.
 return {
     rosewater = "f5e0dc",
     flamingo  = "f2cdcd",

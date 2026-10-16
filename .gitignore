@@ -8,3 +8,13 @@ btop.log
 *.bak
 *.bak.*
 *.backup.*
+
+# Theme state lives in ~/.local/state/rice; these are the slot links
+# rice-theme bootstrap creates inside stowed packages (see rice-theme).
+config-theming/.config/theming/current
+config-waybar/.config/waybar/colors.css
+config-btop/.config/btop/themes/rice.theme
+# cava writes its default themes and shaders here on every start; the
+# themes/rice slot lives here too.
+config-cava/.config/cava/themes/
+config-cava/.config/cava/shaders/
