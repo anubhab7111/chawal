@@ -47,7 +47,10 @@ local function set_panel(off)
     if off then
         hl.monitor({ output = rice.lid.internal, disabled = true })
     else
-        hl.monitor({ output = rice.lid.internal, mode = "preferred", position = "auto", scale = "auto" })
+        -- disabled = false must be explicit: the rule merges with the
+        -- earlier disabled one, and without it the panel stays off
+        hl.monitor({ output = rice.lid.internal, disabled = false,
+            mode = "preferred", position = "auto", scale = "auto" })
     end
 end
 
