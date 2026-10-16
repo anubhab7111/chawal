@@ -6,10 +6,12 @@
 #   rice-record stop
 #   rice-record status          JSON for Waybar's custom/recording (hidden when idle)
 #
-# Encodes H.264 on the Intel iGPU (VA-API, its render node by PCI path, since
-# the numbers swap between boots), falling back to software if that fails to
-# start. No audio. Files go to ~/Videos/Recordings; stopping sends SIGINT so
-# the file is finalized, then a notification says where it went.
+# Encodes H.264 in software (libx264, veryfast). VA-API on the Intel iGPU
+# would be lighter, but wf-recorder 0.6.0 builds a scale_vaapi filter with
+# out_range=full that ffmpeg 9 rejects (Invalid argument), so it cannot
+# start; revisit when wf-recorder is updated. No audio. Files go to
+# ~/Videos/Recordings; stopping sends SIGINT so the file is finalized, then
+# a notification says where it went.
 
 set -euo pipefail
 
@@ -17,7 +19,6 @@ RUN="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice"
 PIDFILE="$RUN/record.pid"
 FILEREC="$RUN/record.file"
 OUT_DIR="${RICE_RECORD_DIR:-$HOME/Videos/Recordings}"
-RENDER=/dev/dri/by-path/pci-0000:00:02.0-render
 
 recording() {
     [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null
@@ -36,25 +37,22 @@ stop() {
     notify-send -a rice -i media-record "Recording saved" "${file/#$HOME/\~}" || true
 }
 
-# start GEOMETRY_ARGS...: try VA-API, then software
+# start GEOMETRY_ARGS...
 start() {
     mkdir -p "$RUN" "$OUT_DIR"
     local file pid
     file="$OUT_DIR/rec-$(date +%Y%m%d-%H%M%S).mp4"
-    for codec in vaapi software; do
-        local -a enc=()
-        [ "$codec" = vaapi ] && enc=(-c h264_vaapi -d "$RENDER")
-        setsid wf-recorder "${enc[@]}" "$@" -f "$file" </dev/null >"$RUN/record.log" 2>&1 &
-        pid=$!
-        sleep 1
-        if kill -0 "$pid" 2>/dev/null; then
-            echo "$pid" > "$PIDFILE"
-            echo "$file" > "$FILEREC"
-            notify_bar
-            return 0
-        fi
-        rm -f "$file"
-    done
+    setsid wf-recorder -c libx264 -p preset=veryfast -p crf=23 "$@" -f "$file" \
+        </dev/null >"$RUN/record.log" 2>&1 &
+    pid=$!
+    sleep 0.5 # a bad output or geometry makes it exit right away
+    if kill -0 "$pid" 2>/dev/null; then
+        echo "$pid" > "$PIDFILE"
+        echo "$file" > "$FILEREC"
+        notify_bar
+        return 0
+    fi
+    rm -f "$file"
     notify-send -a rice -u critical "Recording failed" "See $RUN/record.log" || true
     return 1
 }
