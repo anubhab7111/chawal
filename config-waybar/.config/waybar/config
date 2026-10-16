@@ -21,7 +21,7 @@
     "battery",
     "bluetooth",
     "network",
-    "idle_inhibitor",
+    "custom/caffeine",
     "tray",
     "custom/power-menu"
   ],
@@ -133,16 +133,13 @@
     "tooltip": false,
     "on-click": "~/.config/rice/bin/rice-power"
   },
-  "idle_inhibitor": {
-    "format": "{icon}",
-    "format-icons": {
-      "activated": "󰅶",
-      "deactivated": "󰾪"
-    },
-    "start-activated": false,
-    "tooltip": true,
-    "tooltip-format-activated": "Idle inhibitor active",
-    "tooltip-format-deactivated": "Idle inhibitor inactive"
+  "custom/caffeine": {
+    "exec": "~/.config/rice/bin/rice-caffeine status",
+    "return-type": "json",
+    "interval": "once",
+    "signal": 8,
+    "on-click": "~/.config/rice/bin/rice-caffeine toggle",
+    "tooltip": true
   },
   "custom/media": {
     "format": "{}",

@@ -134,7 +134,7 @@ window#waybar {
 #pulseaudio,
 #network,
 #bluetooth,
-#idle_inhibitor,
+#custom-caffeine,
 #custom-pacman-update {
     padding: 2px 12px;
     margin: 4px 0px 4px 8px;
@@ -219,15 +219,15 @@ window#waybar {
 }
 
 /* ================================
-   IDLE INHIBITOR
+   CAFFEINE (rice-caffeine; was idle_inhibitor)
    ================================ */
-#idle_inhibitor {
+#custom-caffeine {
     color: @base;
     background: linear-gradient(135deg, @yellow 0%, @peach 100%);
     font-size: 16px;
 }
 
-#idle_inhibitor.activated {
+#custom-caffeine.on {
     color: @base;
     background: linear-gradient(135deg, @green 0%, @teal 100%);
     box-shadow:
@@ -235,7 +235,7 @@ window#waybar {
         0 0 0 1px rgba(255, 255, 255, 0.1) inset;
 }
 
-#idle_inhibitor:hover {
+#custom-caffeine:hover {
     box-shadow:
         0 6px 16px rgba(0, 0, 0, 0.4),
         0 0 0 1px rgba(255, 255, 255, 0.08) inset;

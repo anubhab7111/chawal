@@ -24,6 +24,9 @@ local commands = {
     -- Cursor for GTK apps that read gsettings (env.lua sets the rest)
     "gsettings set org.gnome.desktop.interface cursor-theme Bibata-Modern-Classic; gsettings set org.gnome.desktop.interface cursor-size 30",
 
+    -- Caffeine starts off every login (its inhibitor can outlive a logout)
+    "~/.config/rice/bin/rice-caffeine off",
+
     -- UI components (waybar and the eww edge widgets start with the theme above)
     "hypridle",
     "mako",
