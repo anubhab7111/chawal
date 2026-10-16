@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# rice-record: screen recording with wf-recorder.
+#
+#   rice-record toggle region   Ctrl+Print: pick a region, or stop
+#   rice-record toggle screen   Ctrl+Shift+Print: the focused output, or stop
+#   rice-record stop
+#   rice-record status          JSON for Waybar's custom/recording (hidden when idle)
+#
+# Encodes H.264 on the Intel iGPU (VA-API, its render node by PCI path, since
+# the numbers swap between boots), falling back to software if that fails to
+# start. No audio. Files go to ~/Videos/Recordings; stopping sends SIGINT so
+# the file is finalized, then a notification says where it went.
+
+set -euo pipefail
+
+RUN="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice"
+PIDFILE="$RUN/record.pid"
+FILEREC="$RUN/record.file"
+OUT_DIR="${RICE_RECORD_DIR:-$HOME/Videos/Recordings}"
+RENDER=/dev/dri/by-path/pci-0000:00:02.0-render
+
+recording() {
+    [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null
+}
+
+notify_bar() { "$HOME/.config/rice/bin/rice-sync" recording; }
+
+stop() {
+    recording || { rm -f "$PIDFILE"; return 0; }
+    local pid file
+    pid=$(cat "$PIDFILE"); file=$(cat "$FILEREC" 2>/dev/null || true)
+    kill -INT "$pid"
+    for _ in $(seq 50); do kill -0 "$pid" 2>/dev/null || break; sleep 0.1; done
+    rm -f "$PIDFILE" "$FILEREC"
+    notify_bar
+    notify-send -a rice -i media-record "Recording saved" "${file/#$HOME/\~}" || true
+}
+
+# start GEOMETRY_ARGS...: try VA-API, then software
+start() {
+    mkdir -p "$RUN" "$OUT_DIR"
+    local file pid
+    file="$OUT_DIR/rec-$(date +%Y%m%d-%H%M%S).mp4"
+    for codec in vaapi software; do
+        local -a enc=()
+        [ "$codec" = vaapi ] && enc=(-c h264_vaapi -d "$RENDER")
+        setsid wf-recorder "${enc[@]}" "$@" -f "$file" </dev/null >"$RUN/record.log" 2>&1 &
+        pid=$!
+        sleep 1
+        if kill -0 "$pid" 2>/dev/null; then
+            echo "$pid" > "$PIDFILE"
+            echo "$file" > "$FILEREC"
+            notify_bar
+            return 0
+        fi
+        rm -f "$file"
+    done
+    notify-send -a rice -u critical "Recording failed" "See $RUN/record.log" || true
+    return 1
+}
+
+case ${1:-} in
+toggle)
+    if recording; then stop; exit 0; fi
+    case ${2:-} in
+    region)
+        geom=$(slurp 2>/dev/null) || exit 0 # Esc cancels
+        start -g "$geom"
+        ;;
+    screen)
+        output=$(hyprctl -j monitors | jq -r '.[] | select(.focused) | .name')
+        start -o "$output"
+        ;;
+    *) echo "usage: rice-record toggle region|screen" >&2; exit 2 ;;
+    esac
+    ;;
+stop) stop ;;
+status)
+    if recording; then
+        printf '{"text":"\U000F044A REC","class":"on","tooltip":"Recording; click to stop"}\n'
+    else
+        printf '{"text":"","class":"off"}\n'
+    fi
+    ;;
+*)
+    sed -n '3,8s/^# \{0,1\}//p' "$0" >&2
+    exit 2
+    ;;
+esac

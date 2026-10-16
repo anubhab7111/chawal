@@ -21,6 +21,7 @@
     "battery",
     "bluetooth",
     "network",
+    "custom/recording",
     "custom/gamemode",
     "custom/nightlight",
     "custom/caffeine",
@@ -134,6 +135,14 @@
     "format": "⏻",
     "tooltip": false,
     "on-click": "~/.config/rice/bin/rice-power"
+  },
+  "custom/recording": {
+    "exec": "~/.config/rice/bin/rice-record status",
+    "return-type": "json",
+    "interval": "once",
+    "signal": 9,
+    "on-click": "~/.config/rice/bin/rice-record stop",
+    "tooltip": true
   },
   "custom/gamemode": {
     "exec": "~/.config/rice/bin/rice-gamemode status",
