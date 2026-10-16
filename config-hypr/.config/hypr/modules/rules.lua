@@ -1,0 +1,179 @@
+-- Window, layer and workspace rules, ported from configs/windowrules.conf
+-- unchanged and in the same order. All rules are anonymous on purpose:
+-- named rules are evaluated before anonymous ones, which would reorder them.
+local p = rice.palette
+
+local function rule(match, effects)
+    effects.match = match
+    hl.window_rule(effects)
+end
+
+local function class(re) return { class = re } end
+local function title(re) return { title = re } end
+
+-- General
+rule(class([[.*]]), { suppress_event = "maximize" })
+rule(class([[^(libreoffice.*)$]]), { suppress_event = "fullscreen" })
+
+-- Floating windows
+rule(class([[^(com.saivert.pwvucontrol)$]]), { float = true })
+rule(class([[^(blueman-manager)$]]), { float = true })
+rule(class([[^(nm-connection-editor)$]]), { float = true })
+rule(class([[^(qalculate-gtk)$]]), { float = true })
+rule(class([[^(pavucontrol)$]]), { float = true })
+
+rule(class([[^(xdg-desktop-portal-gtk)$]]), { float = true })
+rule(title([[^(Open File)$]]), { float = true })
+rule(title([[^(Save File)$]]), { float = true })
+rule(title([[^(Open Folder)$]]), { float = true })
+rule(title([[^(Save As)$]]), { float = true })
+
+rule(class([[^(zenity)$]]), { float = true })
+rule(title([[^(Picture-in-Picture)$]]), { float = true })
+-- Disabled in the port: never matched under hyprlang, which read the second
+-- match: as part of the class regex. P6 decides whether to enable them.
+-- rule({ class = [[^(mpv)$]], title = [[^(.*mpv.*)$]] }, { float = true })
+rule(class([[^(imv)$]]), { float = true })
+
+rule(class([[^(polkit-gnome-authentication-agent-1)$]]), { float = true })
+rule(class([[^(org.kde.polkit-kde-authentication-agent-1)$]]), { float = true })
+
+-- Centered floating windows
+rule(class([[^(pavucontrol)$]]), { center = true })
+rule(class([[^(blueman-manager)$]]), { center = true })
+rule(class([[^(qalculate-gtk)$]]), { center = true })
+rule(class([[^(nm-connection-editor)$]]), { center = true })
+rule(title([[^(Open File)$]]), { center = true })
+rule(title([[^(Save File)$]]), { center = true })
+
+-- Window sizes
+rule(class([[^(pavucontrol)$]]), { size = { 900, 600 } })
+rule(class([[^(blueman-manager)$]]), { size = { 800, 500 } })
+rule(class([[^(qalculate-gtk)$]]), { size = { 600, 700 } })
+rule(class([[^(nm-connection-editor)$]]), { size = { 700, 500 } })
+
+-- Opacity
+rule(class([[^(pavucontrol)$]]), { opacity = "0.90 0.85 override" })
+rule(class([[^(blueman-manager)$]]), { opacity = "0.90 0.85 override" })
+rule(class([[^(thunar)$]]), { opacity = "0.92 0.88 override" })
+rule(class([[^(org.gnome.Nautilus)$]]), { opacity = "0.92 0.88 override" })
+rule(class([[^(nemo)$]]), { opacity = "0.92 0.88 override" })
+
+rule(class([[^(Alacritty)$]]), { opacity = "0.95 0.90 override" })
+rule(class([[^(footclient)$]]), { opacity = "0.95 0.90 override" })
+
+rule(class([[^(code-oss)$]]), { opacity = "0.98 0.95 override" })
+rule(class([[^(code)$]]), { opacity = "0.90 0.90 override" })
+rule(class([[^(dev.zed.Zed)$]]), { opacity = "0.90 0.90 override" })
+rule(class([[^(codium)$]]), { opacity = "0.98 0.95 override" })
+rule(class([[^(Cursor)$]]), { opacity = "0.98 0.95 override" })
+rule(class([[^(Cursor)$]]), { opacity = "0.7 0.95 override" })
+
+rule(class([[^(discord)$]]), { opacity = "0.96 0.92 override" })
+rule(class([[^(vesktop)$]]), { opacity = "0.96 0.92 override" })
+rule(class([[^(com.rtosta.zapzap)$]]), { opacity = "0.96 0.92 override" })
+rule(class([[^(Signal)$]]), { opacity = "0.96 0.92 override" })
+
+rule(class([[^(firefox)$]]), { opacity = "1.00 1.00 override" })
+rule(class([[^(steam_app_default)$]]), { opacity = "1.00 1.00 override" })
+rule(class([[^(µVision)$]]), { opacity = "1.00 1.00 override" })
+
+-- Blur
+rule(class([[^(firefox)$]]), { no_blur = true })
+rule(class([[^(chromium)$]]), { no_blur = true })
+rule(class([[^(brave-browser)$]]), { no_blur = true })
+rule(class([[^(librewolf)$]]), { no_blur = true })
+rule(class([[^(steam)$]]), { no_blur = true })
+rule(class([[^(Steam)$]]), { no_blur = true })
+rule(title([[^(.*Steam[A-Za-z0-9\s]*)$]]), { no_blur = true })
+
+rule(class([[^(mpv)$]]), { no_blur = true })
+rule(class([[^(vlc)$]]), { no_blur = true })
+rule(class([[^(spotify)$]]), { no_blur = true })
+rule(class([[^(Spotify)$]]), { no_blur = true })
+
+rule(class([[^(gamescope)$]]), { no_blur = true })
+
+-- Idle inhibit
+rule(class([[^(mpv)$]]), { idle_inhibit = "focus" })
+rule(class([[^(vlc)$]]), { idle_inhibit = "focus" })
+rule(class([[^(firefox)$]]), { idle_inhibit = "fullscreen" })
+rule(class([[^(chromium)$]]), { idle_inhibit = "fullscreen" })
+rule(class([[^(steam_app_.*)$]]), { idle_inhibit = "always" })
+
+-- Layer rules
+local function layer(namespace, effects)
+    effects.match = { namespace = namespace }
+    hl.layer_rule(effects)
+end
+
+layer("wofi", { animation = "popin 90%" })
+layer("wofi", { animation = "slide down" })
+layer("wofi", { animation = "popin 80%" })
+layer("wofi", { dim_around = true })
+
+layer("mako", { blur = true })
+layer("mako", { animation = "slide right" })
+
+layer("swaync-notification-window", { blur = true })
+layer("swaync-notification-window", { animation = "slide right" })
+layer("swaync-control-center", { blur = true })
+layer("swaync-control-center", { animation = "slide right" })
+
+-- Volume edge-hover slider: no blur (its own namespace, so it doesn't inherit
+-- the blanket gtk-layer-shell blur rule below; with ignore_opacity and
+-- popups_ignorealpha on, that blur rendered through the widget's transparent
+-- margins as a visible blurred box). It slides in from the right instead.
+layer("volume-panel", { animation = "slide right" })
+
+layer("gtk-layer-shell", { blur = true })
+layer("hyprpaper", { no_anim = true })
+layer("selection", { no_anim = true })
+layer("logout_dialog", { blur = true })
+
+-- Special animations
+rule(class([[^(thunar)$]]), { animation = "slide" })
+rule(class([[^(org.gnome.Nautilus)$]]), { animation = "slide" })
+
+rule(class([[^(pavucontrol)$]]), { animation = "popin 80%" })
+rule(class([[^(blueman-manager)$]]), { animation = "popin 80%" })
+rule(class([[^(qalculate-gtk)$]]), { animation = "popin 80%" })
+
+rule(title([[^(Picture-in-Picture)$]]), { animation = "fade" })
+
+-- Tiling exceptions
+rule(class([[^(Spotify)$]]), { tile = true })
+rule(class([[^(discord)$]]), { tile = true })
+
+-- Window borders
+-- Disabled in the port: never matched under hyprlang (see the mpv float rule).
+-- rule({ class = [[^(firefox)]], fullscreen = true }, { border_size = 0 })
+-- rule({ class = [[^(chromium)]], fullscreen = true }, { border_size = 0 })
+-- rule({ class = [[^(mpv)]], fullscreen = true }, { border_size = 0 })
+rule(class([[^(steam_app_.*)$]]), { border_size = 0 })
+
+rule(class([[^(firefox)$]]), { border_color = "rgb(" .. p.red .. ")" })
+rule(class([[^(code-oss)$]]), { border_color = "rgb(" .. p.blue .. ")" })
+rule(class([[^(thunar)$]]), { border_color = "rgb(" .. p.green .. ")" })
+rule(class([[^(discord)$]]), { border_color = "rgb(" .. p.peach .. ")" })
+
+-- Pinning and special behaviours
+rule(title([[^(Picture-in-Picture)$]]), { pin = true })
+-- Disabled in the port: never matched under hyprlang (see the mpv float rule).
+-- rule({ class = [[^(mpv)]], title = [[^(.*mpv.*)$]] }, { pin = true })
+
+rule(class([[^(steam)$]]), { no_initial_focus = true })
+rule(class([[^(spotify)$]]), { no_initial_focus = true })
+
+rule(class([[^(steam_app_.*)$]]), { immediate = true })
+rule(class([[^(cs2)$]]), { immediate = true })
+
+-- XWayland apps
+rule({ xwayland = true }, { rounding = 12 })
+rule({ xwayland = true }, { opacity = "0.95 0.90 override" })
+
+-- Workspace rules
+hl.workspace_rule({ workspace = "1", persistent = true })
+hl.workspace_rule({ workspace = "2", persistent = true })
+hl.workspace_rule({ workspace = "special:music", on_created_empty = "spotify" })
+hl.workspace_rule({ workspace = "special:term", on_created_empty = "alacritty" })

@@ -75,17 +75,17 @@ for entry in "volume-edge:volume-hotzone" "brightness-edge:brightness-hotzone"; 
     fi
 done
 
-# Hyprland: re-source config (picks up hyprland-colors.conf + decorations.conf
-# + hypr-overrides.conf via the current symlink)
+# Hyprland: re-run the Lua config (picks up the theme's hyprland.lua palette
+# via the current symlink)
 hyprctl reload >/dev/null 2>&1 || true
 
 # Hyprland screen shader: this theme's post-process, or clear it. MUST run
-# AFTER `hyprctl reload` above — reload re-parses the static config (which
+# AFTER `hyprctl reload` above — reload re-runs the static config (which
 # never sets screen_shader), so setting this before reload gets clobbered.
 if [ -f "$THEME_DIR/screen.frag" ]; then
-    hyprctl keyword decoration:screen_shader "$THEME_DIR/screen.frag" >/dev/null 2>&1 || true
+    hyprctl eval "hl.config({ decoration = { screen_shader = \"$THEME_DIR/screen.frag\" } })" >/dev/null 2>&1 || true
 else
-    hyprctl keyword decoration:screen_shader "[[EMPTY]]" >/dev/null 2>&1 || true
+    hyprctl eval 'hl.config({ decoration = { screen_shader = "" } })' >/dev/null 2>&1 || true
 fi
 
 # Waybar: config/style targets may have changed, needs a full restart to
