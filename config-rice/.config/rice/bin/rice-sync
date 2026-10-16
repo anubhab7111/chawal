@@ -2,10 +2,12 @@
 # rice-sync KEY: tell the bar a rice toggle changed, so it refreshes now
 # instead of on its next poll. Every rice-* toggle ends with this.
 #
-#   caffeine -> Waybar custom/caffeine (SIGRTMIN+8)
+#   caffeine   -> Waybar custom/caffeine (SIGRTMIN+8)
+#   nightlight -> Waybar custom/nightlight (SIGRTMIN+11)
 
 case ${1:-} in
 caffeine) pkill -RTMIN+8 -x waybar 2>/dev/null ;;
+nightlight) pkill -RTMIN+11 -x waybar 2>/dev/null ;;
 *)
     echo "rice-sync: unknown key: ${1:-}" >&2
     exit 2

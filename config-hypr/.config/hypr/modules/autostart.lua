@@ -24,6 +24,9 @@ local commands = {
     -- Cursor for GTK apps that read gsettings (env.lua sets the rest)
     "gsettings set org.gnome.desktop.interface cursor-theme Bibata-Modern-Classic; gsettings set org.gnome.desktop.interface cursor-size 30",
 
+    -- Night light daemon, neutral until rice-nightlight turns it warm
+    "hyprsunset --identity",
+
     -- Caffeine starts off every login (its inhibitor can outlive a logout)
     "~/.config/rice/bin/rice-caffeine off",
 
