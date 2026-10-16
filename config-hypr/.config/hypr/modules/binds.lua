@@ -1,6 +1,5 @@
--- Keybinds, ported from configs/bindings.conf with no behaviour change.
--- Known quirks are kept on purpose and fixed in P6 (see the plan):
--- the duplicate brightness binds and SUPER+SHIFT+0 doing two things.
+-- Keybinds. Ported from configs/bindings.conf in P5; P6 fixed the quirks
+-- (duplicate brightness binds, SUPER+SHIFT+0 doing two things, instant exit).
 
 local terminal    = "alacritty"
 local fileManager = "thunar"
@@ -14,8 +13,12 @@ local bind = hl.bind
 local exec = hl.dsp.exec_cmd
 
 -- System
-bind(mainMod .. " + M", hl.dsp.exit())                                         -- Exit Hyprland
-bind(mainMod .. " + L", exec("hyprlock"))                                      -- Lock screen
+-- Exit Hyprland after a Yes/No confirm (rofi's power menu replaces this in P11)
+local confirm_exit = [=[[ "$(printf 'No\nYes' | rofi -dmenu -i -no-custom -p 'Exit Hyprland?')" = Yes ]]=]
+    .. [[ && hyprctl dispatch 'hl.dsp.exit()']]
+bind(mainMod .. " + M", exec(confirm_exit))
+-- Lock through logind so hypridle's lock_cmd (single hyprlock instance) runs
+bind(mainMod .. " + L", exec("loginctl lock-session"))
 bind(mainMod .. " + F1", exec("~/.config/hypr/scripts/gamemode.sh"))
 bind(mainMod .. " + escape", exec("wlogout"))
 
@@ -75,31 +78,39 @@ hl.define_submap("resize", function()
     bind("R", hl.dsp.submap("reset"))
 end)
 
--- Media
-bind("XF86AudioRaiseVolume", exec("pamixer --allow-boost -i 5"))
-bind("XF86AudioLowerVolume", exec("pamixer --allow-boost -d 5"))
-bind("XF86AudioMute", exec("pamixer -t"))
-bind("XF86AudioPlay", exec("playerctl play-pause"))
-bind("XF86AudioPause", exec("playerctl play-pause"))
-bind("XF86AudioNext", exec("playerctl next"))
-bind("XF86AudioPrev", exec("playerctl previous"))
+-- Volume: 5% steps capped at 100%, repeat while held, work on the lock
+-- screen. Either volume key unmutes first.
+local held = { repeating = true, locked = true }
+local sink = "@DEFAULT_AUDIO_SINK@"
+local function volume(step)
+    return exec("wpctl set-mute " .. sink .. " 0; wpctl set-volume -l 1.0 " .. sink .. " " .. step)
+end
+bind("XF86AudioRaiseVolume", volume("5%+"), held)
+bind("XF86AudioLowerVolume", volume("5%-"), held)
+bind("XF86AudioMute", exec("wpctl set-mute " .. sink .. " toggle"), { locked = true })
+bind("XF86AudioMicMute", exec("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true })
 
--- Brightness (duplicated plain + locked binds, as before; fixed in P6)
-bind("XF86MonBrightnessUp", exec("brightnessctl s +5%"))
-bind("XF86MonBrightnessDown", exec("brightnessctl s 5%-"))
-bind("XF86MonBrightnessUp", exec("brightnessctl set +5%"), { locked = true })
-bind("XF86MonBrightnessDown", exec("brightnessctl set 5%-"), { locked = true })
+-- Media
+bind("XF86AudioPlay", exec("playerctl play-pause"), { locked = true })
+bind("XF86AudioPause", exec("playerctl play-pause"), { locked = true })
+bind("XF86AudioNext", exec("playerctl next"), { locked = true })
+bind("XF86AudioPrev", exec("playerctl previous"), { locked = true })
+
+-- Brightness: exponential 5% steps (fine near dark), never below 1% of max.
+-- brightnessctl 0.5 reads -n as a raw value only, so 1% is computed.
+local function brightness(step)
+    return exec("brightnessctl -e4 -n$(( $(brightnessctl m) / 100 )) set " .. step)
+end
+bind("XF86MonBrightnessUp", brightness("5%+"), held)
+bind("XF86MonBrightnessDown", brightness("5%-"), held)
 
 -- Screenshots
 bind(mainMod .. " + PRINT", exec("hyprshot -m window"))
 bind("PRINT", exec("hyprshot -m output"))
--- Was "$shiftMod, PRINT": $shiftMod was never defined, but hyprlang still
--- read the literal "$shiftMod" as SHIFT, so the live bind is SHIFT+PRINT.
 bind("SHIFT + PRINT", exec("hyprshot -m region"))
 
 -- Utilities
 bind("SUPER + SHIFT + V", exec("cliphist list | wofi --dmenu | cliphist decode | wl-copy"))
-bind("SUPER + SHIFT + N", exec("~/.config/theming/toggle-theme.sh"))
 
 -- Zoom
 local function zoom_by(factor)
@@ -120,4 +131,4 @@ bind(mainMod .. " + SHIFT + mouse_up", zoom_reset)
 bind(mainMod .. " + SHIFT + mouse_down", zoom_reset)
 bind(mainMod .. " + SHIFT + minus", zoom_reset)
 bind(mainMod .. " + SHIFT + KP_SUBTRACT", zoom_reset)
-bind(mainMod .. " + SHIFT + 0", zoom_reset)
+-- SUPER+SHIFT+0 stays "move window to workspace 10" (see the workspace loop)

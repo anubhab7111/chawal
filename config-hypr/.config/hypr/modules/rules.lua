@@ -1,5 +1,5 @@
 -- Window, layer and workspace rules, ported from configs/windowrules.conf
--- unchanged and in the same order. All rules are anonymous on purpose:
+-- in P5 in the same order; P6 removed dead and duplicate rules. All rules are anonymous on purpose:
 -- named rules are evaluated before anonymous ones, which would reorder them.
 local p = rice.palette
 
@@ -20,7 +20,6 @@ rule(class([[^(com.saivert.pwvucontrol)$]]), { float = true })
 rule(class([[^(blueman-manager)$]]), { float = true })
 rule(class([[^(nm-connection-editor)$]]), { float = true })
 rule(class([[^(qalculate-gtk)$]]), { float = true })
-rule(class([[^(pavucontrol)$]]), { float = true })
 
 rule(class([[^(xdg-desktop-portal-gtk)$]]), { float = true })
 rule(title([[^(Open File)$]]), { float = true })
@@ -30,16 +29,13 @@ rule(title([[^(Save As)$]]), { float = true })
 
 rule(class([[^(zenity)$]]), { float = true })
 rule(title([[^(Picture-in-Picture)$]]), { float = true })
--- Disabled in the port: never matched under hyprlang, which read the second
--- match: as part of the class regex. P6 decides whether to enable them.
--- rule({ class = [[^(mpv)$]], title = [[^(.*mpv.*)$]] }, { float = true })
 rule(class([[^(imv)$]]), { float = true })
 
 rule(class([[^(polkit-gnome-authentication-agent-1)$]]), { float = true })
 rule(class([[^(org.kde.polkit-kde-authentication-agent-1)$]]), { float = true })
 
 -- Centered floating windows
-rule(class([[^(pavucontrol)$]]), { center = true })
+rule(class([[^(com.saivert.pwvucontrol)$]]), { center = true })
 rule(class([[^(blueman-manager)$]]), { center = true })
 rule(class([[^(qalculate-gtk)$]]), { center = true })
 rule(class([[^(nm-connection-editor)$]]), { center = true })
@@ -47,13 +43,13 @@ rule(title([[^(Open File)$]]), { center = true })
 rule(title([[^(Save File)$]]), { center = true })
 
 -- Window sizes
-rule(class([[^(pavucontrol)$]]), { size = { 900, 600 } })
+rule(class([[^(com.saivert.pwvucontrol)$]]), { size = { 900, 600 } })
 rule(class([[^(blueman-manager)$]]), { size = { 800, 500 } })
 rule(class([[^(qalculate-gtk)$]]), { size = { 600, 700 } })
 rule(class([[^(nm-connection-editor)$]]), { size = { 700, 500 } })
 
 -- Opacity
-rule(class([[^(pavucontrol)$]]), { opacity = "0.90 0.85 override" })
+rule(class([[^(com.saivert.pwvucontrol)$]]), { opacity = "0.90 0.85 override" })
 rule(class([[^(blueman-manager)$]]), { opacity = "0.90 0.85 override" })
 rule(class([[^(thunar)$]]), { opacity = "0.92 0.88 override" })
 rule(class([[^(org.gnome.Nautilus)$]]), { opacity = "0.92 0.88 override" })
@@ -66,7 +62,6 @@ rule(class([[^(code-oss)$]]), { opacity = "0.98 0.95 override" })
 rule(class([[^(code)$]]), { opacity = "0.90 0.90 override" })
 rule(class([[^(dev.zed.Zed)$]]), { opacity = "0.90 0.90 override" })
 rule(class([[^(codium)$]]), { opacity = "0.98 0.95 override" })
-rule(class([[^(Cursor)$]]), { opacity = "0.98 0.95 override" })
 rule(class([[^(Cursor)$]]), { opacity = "0.7 0.95 override" })
 
 rule(class([[^(discord)$]]), { opacity = "0.96 0.92 override" })
@@ -107,8 +102,6 @@ local function layer(namespace, effects)
     hl.layer_rule(effects)
 end
 
-layer("wofi", { animation = "popin 90%" })
-layer("wofi", { animation = "slide down" })
 layer("wofi", { animation = "popin 80%" })
 layer("wofi", { dim_around = true })
 
@@ -127,7 +120,6 @@ layer("swaync-control-center", { animation = "slide right" })
 layer("volume-panel", { animation = "slide right" })
 
 layer("gtk-layer-shell", { blur = true })
-layer("hyprpaper", { no_anim = true })
 layer("selection", { no_anim = true })
 layer("logout_dialog", { blur = true })
 
@@ -135,7 +127,7 @@ layer("logout_dialog", { blur = true })
 rule(class([[^(thunar)$]]), { animation = "slide" })
 rule(class([[^(org.gnome.Nautilus)$]]), { animation = "slide" })
 
-rule(class([[^(pavucontrol)$]]), { animation = "popin 80%" })
+rule(class([[^(com.saivert.pwvucontrol)$]]), { animation = "popin 80%" })
 rule(class([[^(blueman-manager)$]]), { animation = "popin 80%" })
 rule(class([[^(qalculate-gtk)$]]), { animation = "popin 80%" })
 
@@ -146,10 +138,10 @@ rule(class([[^(Spotify)$]]), { tile = true })
 rule(class([[^(discord)$]]), { tile = true })
 
 -- Window borders
--- Disabled in the port: never matched under hyprlang (see the mpv float rule).
--- rule({ class = [[^(firefox)]], fullscreen = true }, { border_size = 0 })
--- rule({ class = [[^(chromium)]], fullscreen = true }, { border_size = 0 })
--- rule({ class = [[^(mpv)]], fullscreen = true }, { border_size = 0 })
+-- No border in fullscreen or maximized (SUPER+F / SUPER+SHIFT+F)
+rule({ class = [[^(firefox)$]], fullscreen = true }, { border_size = 0 })
+rule({ class = [[^(chromium)$]], fullscreen = true }, { border_size = 0 })
+rule({ class = [[^(mpv)$]], fullscreen = true }, { border_size = 0 })
 rule(class([[^(steam_app_.*)$]]), { border_size = 0 })
 
 rule(class([[^(firefox)$]]), { border_color = "rgb(" .. p.red .. ")" })
@@ -159,8 +151,6 @@ rule(class([[^(discord)$]]), { border_color = "rgb(" .. p.peach .. ")" })
 
 -- Pinning and special behaviours
 rule(title([[^(Picture-in-Picture)$]]), { pin = true })
--- Disabled in the port: never matched under hyprlang (see the mpv float rule).
--- rule({ class = [[^(mpv)]], title = [[^(.*mpv.*)$]] }, { pin = true })
 
 rule(class([[^(steam)$]]), { no_initial_focus = true })
 rule(class([[^(spotify)$]]), { no_initial_focus = true })
@@ -170,7 +160,6 @@ rule(class([[^(cs2)$]]), { immediate = true })
 
 -- XWayland apps
 rule({ xwayland = true }, { rounding = 12 })
-rule({ xwayland = true }, { opacity = "0.95 0.90 override" })
 
 -- Workspace rules
 hl.workspace_rule({ workspace = "1", persistent = true })
