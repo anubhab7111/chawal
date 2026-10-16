@@ -87,7 +87,7 @@ hl.config({
 
         -- Window swallowing
         enable_swallow = true,
-        swallow_regex = [[^(alacritty|kitty|footclient)$]],
+        swallow_regex = [[^(Alacritty)$]],
         swallow_exception_regex = [[^(wev)$]],
 
         animate_manual_resizes = true,

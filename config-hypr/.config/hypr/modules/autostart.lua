@@ -1,4 +1,4 @@
--- Autostart, ported from configs/autostart.conf. Runs once per session on
+-- Autostart. Runs once per session on
 -- the first rendered frame; config reloads don't run it again.
 --
 -- RICE_NESTED is set by the test harness for nested Hyprland instances:
@@ -8,12 +8,11 @@
 
 local commands = {
     -- System services and environment
-    "systemctl --user start pipewire",
-    "systemctl --user start plasma-polkit-agent",
+    -- (pipewire is socket-activated; --all already exports WAYLAND_DISPLAY,
+    -- DISPLAY and XDG_CURRENT_DESKTOP to both dbus and systemd.)
     "dbus-update-activation-environment --systemd --all",
-    "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP",
-    "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP",
-    "dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY",
+    -- A quick re-login can leave the agent at systemd's start limit.
+    "systemctl --user reset-failed plasma-polkit-agent; systemctl --user start plasma-polkit-agent",
 
     -- Wallpaper and theming. Wallpaper, waybar, the screen shader and
     -- cava/btop/rofi/GTK-icon theming are runtime state that only
@@ -30,7 +29,6 @@ local commands = {
 
     -- Tray applets
     "nm-applet --indicator & blueman-applet",
-    "udiskie",
 
     -- Clipboard history
     "wl-paste --type text --watch cliphist store",
