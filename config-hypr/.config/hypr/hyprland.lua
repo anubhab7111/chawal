@@ -16,4 +16,5 @@ require("modules.rules")
 require("modules.binds")
 require("modules.modes") -- after look: captures its values as the baseline
 require("modules.lid")
+require("modules.pointer") -- after modes: reads rice.modes.game
 require("modules.autostart")
