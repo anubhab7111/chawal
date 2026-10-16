@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# rice-dnd: do-not-disturb for notifications (mako's do-not-disturb mode).
+#
+#   rice-dnd on|off|toggle|status
+#   rice-dnd hold KEY      turn DND on for KEY (e.g. gamemode), remembering
+#                          whether it was already on
+#   rice-dnd release KEY   undo a hold: turn DND off only if the hold turned it on
+
+set -euo pipefail
+
+RUN="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice"
+MODE=do-not-disturb
+
+is_on() { makoctl mode 2>/dev/null | grep -qx "$MODE"; }
+on() { is_on || makoctl mode -a "$MODE" >/dev/null; }
+off() { ! is_on || makoctl mode -r "$MODE" >/dev/null; }
+
+case ${1:-} in
+on) on ;;
+off) off ;;
+toggle) if is_on; then off; else on; fi ;;
+status) if is_on; then echo on; else echo off; fi ;;
+hold)
+    key=${2:?usage: rice-dnd hold KEY}
+    mkdir -p "$RUN"
+    if is_on; then : > "$RUN/dnd-$key-was-on"; else rm -f "$RUN/dnd-$key-was-on"; fi
+    on
+    ;;
+release)
+    key=${2:?usage: rice-dnd release KEY}
+    if [ -f "$RUN/dnd-$key-was-on" ]; then
+        rm -f "$RUN/dnd-$key-was-on" # it was on before the hold: leave it on
+    else
+        off
+    fi
+    ;;
+*)
+    sed -n '3,8s/^# \{0,1\}//p' "$0" >&2
+    exit 2
+    ;;
+esac
