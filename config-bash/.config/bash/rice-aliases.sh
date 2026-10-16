@@ -5,6 +5,9 @@
 # These replace alacritty's old one-key sudo binds: updates, removals and
 # kills now only start from a command you typed and confirmed.
 
+# rice-* tools (rice-theme, ...) by name
+[[ ":$PATH:" == *":$HOME/.config/rice/bin:"* ]] || PATH="$HOME/.config/rice/bin:$PATH"
+
 # Update repo and AUR packages in one go; yay asks for sudo itself.
 alias up='yay -Syu'
 

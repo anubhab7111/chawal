@@ -1,4 +1,7 @@
-# Original catppuccin gradient (captured from the live cava config)
+# cava colours for this theme (bottom to top). Loaded through the
+# ~/.config/cava/themes/rice slot that rice-theme points here.
+[color]
+gradient = 1
 gradient_color_1 = '#94e2d5'
 gradient_color_2 = '#89dceb'
 gradient_color_3 = '#74c7ec'

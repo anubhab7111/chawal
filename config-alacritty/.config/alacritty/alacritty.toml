@@ -1,11 +1,9 @@
 [general]
-# Points at a real (non-symlinked) file that apply-theme.sh overwrites with
-# the active theme's colors. Alacritty's live-reload file-watcher locks onto
-# the inode it starts watching; a symlink retarget (theming/current -> a
-# different theme dir) doesn't fire that watch, so already-open windows
-# would keep the old theme's colors forever. Writing real content to a
-# stable path fixes that.
-import = ["~/.config/alacritty/current-theme.toml"]
+# The active theme's colors, copied (not linked) by rice-theme into its state
+# dir. Alacritty's live-reload watcher locks onto the inode it starts
+# watching, so a retargeted symlink would leave open windows on the old
+# colors; overwriting a real file at a stable path is noticed.
+import = ["~/.local/state/rice/alacritty-colors.toml"]
 
 [font]
 size = 15

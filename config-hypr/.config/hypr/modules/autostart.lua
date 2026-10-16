@@ -14,16 +14,17 @@ local commands = {
     -- A quick re-login can leave the agent at systemd's start limit.
     "systemctl --user reset-failed plasma-polkit-agent; systemctl --user start plasma-polkit-agent",
 
-    -- Wallpaper and theming. Wallpaper, waybar, the screen shader and
-    -- cava/btop/rofi/GTK-icon theming are runtime state that only
-    -- apply-theme.sh sets, so replay the last active theme on every login.
+    -- Theme, bars and wallpaper. rice-theme bootstrap creates the state dir
+    -- and slot links that waybar, eww and alacritty read colours through, so
+    -- it runs first; apply then replays the saved theme (wallpaper, Hyprland
+    -- palette, shader) once awww-daemon is up.
     "awww-daemon",
-    [[bash -c 'sleep 1; ~/.config/theming/apply-theme.sh "$(cat ~/.config/theming/state 2>/dev/null || echo catppuccin)"']],
+    [[bash -c 'rt=~/.config/rice/bin/rice-theme; $rt bootstrap; waybar & eww --config ~/.config/eww/volume-edge open volume-hotzone; eww --config ~/.config/eww/brightness-edge open brightness-hotzone; sleep 1; $rt apply']],
 
     -- Cursor for GTK apps that read gsettings (env.lua sets the rest)
     "gsettings set org.gnome.desktop.interface cursor-theme Bibata-Modern-Classic; gsettings set org.gnome.desktop.interface cursor-size 30",
 
-    -- UI components (waybar is started by the theme replay above)
+    -- UI components (waybar and the eww edge widgets start with the theme above)
     "hypridle",
     "mako",
 

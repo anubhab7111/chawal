@@ -1,0 +1,168 @@
+#!/usr/bin/env bash
+# rice-theme: switch the desktop theme without writing into the dotfiles repo.
+#
+#   rice-theme bootstrap      create the state dir and slot links (idempotent)
+#   rice-theme apply [NAME]   switch to NAME (default: the saved theme), reload apps
+#   rice-theme toggle         switch between mocha and latte
+#   rice-theme get            print the saved theme
+#   rice-theme list           print the available themes
+#
+# The active theme lives in ~/.local/state/rice (theme = its name,
+# current -> its directory). Apps reach it through gitignored "slot" links
+# inside the stowed packages, chiefly ~/.config/theming/current, so nothing
+# tracked in git is ever edited.
+
+set -euo pipefail
+
+THEMES="$HOME/.config/theming/themes"
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/rice"
+CURRENT="$HOME/.config/theming/current"
+DEFAULT=mocha
+
+die() { echo "rice-theme: $*" >&2; exit 1; }
+
+get() {
+    local name=""
+    [ -f "$STATE/theme" ] && name=$(tr -d '[:space:]' < "$STATE/theme")
+    [ "$name" = catppuccin ] && name=mocha # the pre-P10 name
+    if [ -z "$name" ] || [ ! -d "$THEMES/$name" ]; then
+        name=$DEFAULT
+    fi
+    printf '%s\n' "$name"
+}
+
+# slot TARGET LINK: point LINK at TARGET, but never replace a real file.
+slot() {
+    local target=$1 link=$2
+    if [ -e "$link" ] && [ ! -L "$link" ]; then
+        echo "rice-theme: $link is a real file, leaving it alone" >&2
+        return 0
+    fi
+    mkdir -p "$(dirname "$link")"
+    ln -sfn "$target" "$link"
+}
+
+bootstrap() {
+    local name
+    name=$(get)
+    mkdir -p "$STATE"
+    printf '%s\n' "$name" > "$STATE/theme"
+    ln -sfn "$THEMES/$name" "$STATE/current"
+
+    slot "$STATE/current" "$CURRENT"
+    slot "$CURRENT/waybar-colors.css" "$HOME/.config/waybar/colors.css"
+    slot "$CURRENT/cava.theme" "$HOME/.config/cava/themes/rice"
+    slot "$CURRENT/btop.theme" "$HOME/.config/btop/themes/rice.theme"
+
+    # alacritty watches the inode of the file it imports, so a retargeted
+    # symlink goes unnoticed: copy the colours over the same file instead.
+    if ! cmp -s "$CURRENT/alacritty-colors.toml" "$STATE/alacritty-colors.toml"; then
+        cp "$CURRENT/alacritty-colors.toml" "$STATE/alacritty-colors.toml"
+    fi
+}
+
+reload_wallpaper() {
+    local conf="$CURRENT/wallpaper.conf" output path
+    [ -f "$conf" ] || return 0
+    while IFS=: read -r output path; do
+        [ -z "$output" ] && continue
+        case "$output" in \#*) continue ;; esac
+        if [ ! -f "$path" ]; then
+            echo "rice-theme: wallpaper not found, skipping: $path" >&2
+            continue
+        fi
+        if [ "$output" = "*" ]; then
+            awww img "$path" >/dev/null 2>&1 &
+        else
+            awww img "$path" -o "$output" >/dev/null 2>&1 &
+        fi
+    done < "$conf"
+    wait
+}
+
+reload_hyprland() {
+    # reload re-runs the Lua config, which reads the palette through
+    # theming/current. It also clears screen_shader, so set that after.
+    hyprctl reload >/dev/null 2>&1 || true
+    local shader=""
+    [ -f "$CURRENT/screen.frag" ] && shader=$(readlink -f "$CURRENT/screen.frag")
+    hyprctl eval "hl.config({ decoration = { screen_shader = \"$shader\" } })" >/dev/null 2>&1 || true
+}
+
+reload_obsidian() {
+    # Copy (not link) the palette snippet into every vault, so Obsidian's
+    # file watcher restyles open windows. Vaults come from obsidian.json.
+    local palette="$CURRENT/obsidian-colors.css" json="$HOME/.config/obsidian/obsidian.json" vault
+    [ -f "$palette" ] && [ -f "$json" ] || return 0
+    python3 - "$json" <<'PYEOF' | while IFS= read -r vault; do
+import json, sys
+with open(sys.argv[1]) as f:
+    for v in json.load(f).get("vaults", {}).values():
+        print(v.get("path", ""))
+PYEOF
+        [ -d "$vault/.obsidian" ] || continue
+        mkdir -p "$vault/.obsidian/snippets"
+        cp "$palette" "$vault/.obsidian/snippets/rice-palette.css" || true
+    done
+}
+
+reload_apps() {
+    reload_wallpaper
+    reload_hyprland
+
+    if [ -f "$CURRENT/gtk-icon-theme" ]; then
+        gsettings set org.gnome.desktop.interface icon-theme \
+            "$(tr -d '[:space:]' < "$CURRENT/gtk-icon-theme")" >/dev/null 2>&1 || true
+    fi
+
+    pkill -USR2 -x waybar >/dev/null 2>&1 || true # full reload: config + css
+    pkill -USR2 -x cava >/dev/null 2>&1 || true   # colours only
+    makoctl reload >/dev/null 2>&1 || true
+
+    local dir
+    for dir in volume-edge brightness-edge; do
+        if eww --config "$HOME/.config/eww/$dir" ping >/dev/null 2>&1; then
+            eww --config "$HOME/.config/eww/$dir" reload >/dev/null 2>&1 || true
+        fi
+    done
+
+    reload_obsidian
+
+    # neovim: repaint running instances (lua/rice). timeout: an instance
+    # stuck at a prompt must not hang the switch.
+    local sock
+    for sock in "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"/nvim.*.0; do
+        [ -S "$sock" ] || continue
+        timeout 2 nvim --server "$sock" --remote-expr 'luaeval("require(\"rice\").reload_async()")' >/dev/null 2>&1 || true
+    done
+    # btop reads its theme at start; alacritty follows the copied file.
+}
+
+apply() {
+    local name=${1:-$(get)}
+    [ -d "$THEMES/$name" ] || die "no such theme: $name (rice-theme list)"
+    mkdir -p "$STATE"
+    printf '%s\n' "$name" > "$STATE/theme"
+    bootstrap
+    reload_apps
+    echo "theme: $name"
+}
+
+case ${1:-} in
+bootstrap) bootstrap ;;
+apply) apply "${2:-}" ;;
+toggle)
+    case $(get) in
+    mocha) next=latte ;;
+    *) next=mocha ;;
+    esac
+    [ -d "$THEMES/$next" ] || die "no $next theme yet"
+    apply "$next"
+    ;;
+get) get ;;
+list) ls -1 "$THEMES" ;;
+*)
+    sed -n '3,9s/^# \{0,1\}//p' "$0" >&2
+    exit 2
+    ;;
+esac
