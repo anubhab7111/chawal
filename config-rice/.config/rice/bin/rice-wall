@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# rice-wall: wallpaper picker (SUPER+W).
+#
+#   rice-wall            rofi grid of ~/Pictures/wallpapers; the pick goes on
+#                        the focused output and is remembered for the theme
+#   rice-wall set OUTPUT FILE   apply and remember without the picker
+#   rice-wall thumbs     build missing thumbnails (the picker starts this in
+#                        the background)
+#
+# Picks live in ~/.local/state/rice/wallpaper/<theme>/<output>; rice-theme
+# apply prefers them over the theme's wallpaper.conf.
+
+set -euo pipefail
+
+WALLS="${RICE_WALLS:-$HOME/Pictures/wallpapers}"
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/rice/walls"
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/rice"
+RICE_THEME="$HOME/.config/rice/bin/rice-theme"
+
+images() {
+    find -L "$WALLS" -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' \
+        -o -iname '*.webp' -o -iname '*.gif' \) | sort
+}
+
+# one flat cache file per image: the path with / turned into %
+thumb_of() { local p=${1//\//%}; printf '%s/%s.png' "$CACHE" "$p"; }
+
+thumbs() {
+    mkdir -p "$CACHE"
+    exec 9>"$CACHE/.lock"
+    flock -n 9 || exit 0 # another run is already at it
+    local f t
+    while IFS= read -r f; do
+        t=$(thumb_of "$f")
+        [ -s "$t" ] && continue
+        # [0]: first frame only (gifs); write aside, then move into place
+        if magick "${f}[0]" -thumbnail 384x216^ -gravity center -extent 384x216 "$t.tmp.png" 2>/dev/null; then
+            mv "$t.tmp.png" "$t"
+        else
+            rm -f "$t.tmp.png"
+        fi
+    done < <(images)
+}
+
+set_wall() { # output file
+    local output=$1 file=$2 theme
+    [ -f "$file" ] || { echo "rice-wall: no such file: $file" >&2; exit 1; }
+    theme=$("$RICE_THEME" get)
+    mkdir -p "$STATE/wallpaper/$theme"
+    printf '%s\n' "$file" > "$STATE/wallpaper/$theme/$output"
+    awww img "$file" -o "$output" >/dev/null 2>&1
+}
+
+pick() {
+    local output files=() f t idx
+    output=$(hyprctl -j monitors | jq -r '.[] | select(.focused) | .name')
+    [ -n "$output" ] || { echo "rice-wall: no focused output" >&2; exit 1; }
+
+    mapfile -t files < <(images)
+    ((${#files[@]})) || { echo "rice-wall: no images in $WALLS" >&2; exit 1; }
+
+    # thumbnails build in the background; until then rofi scales the original
+    (nice -n 19 "$0" thumbs >/dev/null 2>&1 &)
+
+    idx=$(for f in "${files[@]}"; do
+        t=$(thumb_of "$f")
+        [ -s "$t" ] || t=$f
+        printf '%s\0icon\x1f%s\n' "${f##*/}" "$t"
+    done | rofi -dmenu -i -no-custom -show-icons -format i -p "Wallpaper  $output" \
+        -theme-str 'window { width: 1120px; }
+            listview { columns: 4; lines: 3; spacing: 10px; }
+            element { orientation: vertical; padding: 10px; spacing: 6px; }
+            element-icon { size: 216px; }
+            element-text { horizontal-align: 0.5; }') || exit 0
+
+    set_wall "$output" "${files[$idx]}"
+}
+
+case ${1:-} in
+"") pick ;;
+set) set_wall "${2:?usage: rice-wall set OUTPUT FILE}" "${3:?usage: rice-wall set OUTPUT FILE}" ;;
+thumbs) thumbs ;;
+*)
+    sed -n '3,9s/^# \{0,1\}//p' "$0" >&2
+    exit 2
+    ;;
+esac

@@ -62,22 +62,39 @@ bootstrap() {
     fi
 }
 
+# Wallpaper per output: the theme's wallpaper.conf ("<output>:<path>", or
+# "*:<path>" for all), overridden by picks rice-wall saved for this theme.
 reload_wallpaper() {
-    local conf="$CURRENT/wallpaper.conf" output path
-    [ -f "$conf" ] || return 0
-    while IFS=: read -r output path; do
-        [ -z "$output" ] && continue
-        case "$output" in \#*) continue ;; esac
+    local conf="$CURRENT/wallpaper.conf" picks output path f
+    local -A wall=()
+    picks="$STATE/wallpaper/$(get)"
+    if [ -f "$conf" ]; then
+        while IFS=: read -r output path; do
+            [ -z "$output" ] && continue
+            case "$output" in \#*) continue ;; esac
+            wall[$output]=$path
+        done < "$conf"
+    fi
+    for f in "$picks"/*; do
+        [ -f "$f" ] && wall[${f##*/}]=$(head -n1 "$f")
+    done
+    # "*" first, so per-output entries land on top of it
+    if [ -n "${wall["*"]:-}" ]; then
+        if [ -f "${wall["*"]}" ]; then
+            awww img "${wall["*"]}" >/dev/null 2>&1 || true
+        else
+            echo "rice-theme: wallpaper not found, skipping: ${wall["*"]}" >&2
+        fi
+        unset 'wall[*]'
+    fi
+    for output in "${!wall[@]}"; do
+        path=${wall[$output]}
         if [ ! -f "$path" ]; then
             echo "rice-theme: wallpaper not found, skipping: $path" >&2
             continue
         fi
-        if [ "$output" = "*" ]; then
-            awww img "$path" >/dev/null 2>&1 &
-        else
-            awww img "$path" -o "$output" >/dev/null 2>&1 &
-        fi
-    done < "$conf"
+        awww img "$path" -o "$output" >/dev/null 2>&1 &
+    done
     wait
 }
 
