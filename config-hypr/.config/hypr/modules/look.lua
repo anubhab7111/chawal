@@ -39,8 +39,9 @@ hl.config({
 
         blur = {
             enabled = true,
-            size = 8,
-            passes = 3,
+            -- 2 passes (was 3) saves GPU; size 10 (was 8) keeps it about as soft
+            size = 10,
+            passes = 2,
             ignore_opacity = true,
             new_optimizations = true,
             xray = false,
