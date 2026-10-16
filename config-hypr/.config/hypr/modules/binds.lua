@@ -110,6 +110,10 @@ bind(mainMod .. " + PRINT", exec("hyprshot -m window"))
 bind("PRINT", exec("hyprshot -m output"))
 bind("SHIFT + PRINT", exec("hyprshot -m region"))
 
+-- Screen recording (the same key stops it)
+bind("CTRL + PRINT", exec("~/.config/rice/bin/rice-record toggle region"))
+bind("CTRL + SHIFT + PRINT", exec("~/.config/rice/bin/rice-record toggle screen"))
+
 -- Utilities
 bind("SUPER + SHIFT + V", exec("~/.config/rice/bin/rice-clip"))                -- Clipboard history
 bind("SUPER + W", exec("~/.config/rice/bin/rice-wall"))                         -- Wallpaper picker
