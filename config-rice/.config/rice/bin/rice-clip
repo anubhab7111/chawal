@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# rice-clip: clipboard history in rofi (SUPER+SHIFT+V), over cliphist.
+#
+#   Enter                       copy the entry back to the clipboard
+#   Ctrl+Delete                 delete the entry
+#   Ctrl+Shift+Delete, twice    wipe the whole history
+#
+# Run without arguments to open rofi; rofi then calls this script back as
+# its "clip" mode, with ROFI_RETV saying why (0 open, 1 pick, 10/11 custom
+# keys). Image entries get thumbnails cached in ~/.cache/rice/clip.
+
+set -euo pipefail
+
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/rice/clip"
+HINT="Enter copy    Ctrl+Del delete    Ctrl+Shift+Del wipe all"
+
+if [ -z "${ROFI_RETV:-}" ]; then
+    exec rofi -show clip -modes "clip:$0" \
+        -kb-remove-word-forward "Control+Alt+d" \
+        -kb-custom-1 "Control+Delete" \
+        -kb-custom-2 "Control+Shift+Delete" \
+        -theme-str 'element-icon { size: 48px; } window { width: 720px; }'
+fi
+
+# cliphist reads entries in its list format ("id<TAB>preview")
+entry() { printf '%s\t' "$1"; }
+
+# list [message] [data]: print rofi's mode options, then one row per entry
+list() {
+    printf '\0use-hot-keys\x1ftrue\n\0no-custom\x1ftrue\n'
+    printf '\0message\x1f%s\n' "${1:-$HINT}"
+    printf '\0data\x1f%s\n' "${2:-}"
+
+    mkdir -p "$CACHE"
+    local id preview thumb
+    local -A live=()
+    while IFS=$'\t' read -r id preview; do
+        live[$id]=1
+        if [[ $preview == "[[ binary data "*" ]]" ]]; then
+            thumb="$CACHE/$id.png"
+            if [ ! -s "$thumb" ]; then
+                entry "$id" | cliphist decode 2>/dev/null |
+                    magick - -thumbnail 96x96 "$thumb" 2>/dev/null || rm -f "$thumb"
+            fi
+            if [ -s "$thumb" ]; then
+                printf '%s\0icon\x1f%s\x1finfo\x1f%s\n' "$preview" "$thumb" "$id"
+                continue
+            fi
+        fi
+        printf '%s\0info\x1f%s\n' "$preview" "$id"
+    done < <(cliphist list)
+
+    # drop thumbnails of entries that are gone
+    for thumb in "$CACHE"/*.png; do
+        [ -e "$thumb" ] || continue
+        id=${thumb##*/}; id=${id%.png}
+        [ -n "${live[$id]:-}" ] || rm -f "$thumb"
+    done
+}
+
+id=${ROFI_INFO:-}
+case $ROFI_RETV in
+1) # pick: copy and close (no output). wl-copy forks to serve the
+    # clipboard, so keep its stdout off rofi's pipe or rofi never closes.
+    if [ -n "$id" ]; then
+        entry "$id" | cliphist decode | wl-copy >/dev/null 2>&1
+    fi
+    ;;
+10) # Ctrl+Delete
+    if [ -n "$id" ]; then
+        entry "$id" | cliphist delete
+        rm -f "$CACHE/$id.png"
+    fi
+    list
+    ;;
+11) # Ctrl+Shift+Delete: the first press arms, the second wipes
+    if [ "${ROFI_DATA:-}" = wipe-armed ]; then
+        cliphist wipe
+        rm -rf "$CACHE"
+        list "History wiped"
+    else
+        list "Wipe all $(cliphist list | wc -l) entries? Press Ctrl+Shift+Del again (Esc cancels)" wipe-armed
+    fi
+    ;;
+*) list ;;
+esac
