@@ -111,7 +111,7 @@ bind("PRINT", exec("hyprshot -m output"))
 bind("SHIFT + PRINT", exec("hyprshot -m region"))
 
 -- Utilities
-bind("SUPER + SHIFT + V", exec("cliphist list | wofi --dmenu | cliphist decode | wl-copy"))
+bind("SUPER + SHIFT + V", exec("~/.config/rice/bin/rice-clip"))                -- Clipboard history
 
 -- Zoom
 local function zoom_by(factor)
