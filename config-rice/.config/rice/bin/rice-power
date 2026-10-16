@@ -12,11 +12,12 @@ confirm() {
     [ "$(printf 'No\nYes\n' | menu "$1?")" = Yes ]
 }
 
-lock='  Lock'
-suspend='  Suspend'
-logout='󰍃  Log out'
-reboot='  Reboot'
-poweroff='  Shut down'
+# Material Design nerd-font icons as escapes (Basic-plane glyphs get lost in editors)
+lock=$'\U000F033E  Lock'
+suspend=$'\U000F04B2  Suspend'
+logout=$'\U000F0343  Log out'
+reboot=$'\U000F0709  Reboot'
+poweroff=$'\U000F0425  Shut down'
 
 pick=$(printf '%s\n' "$lock" "$suspend" "$logout" "$reboot" "$poweroff" | menu Power) || exit 0
 
