@@ -1,5 +1,5 @@
--- Hyprland config entry point (Lua). Hyprland prefers this file over
--- hyprland.conf when both exist; the .conf files stay as a fallback until P8.
+-- Hyprland config entry point (Lua). The hyprlang config (hyprland.conf and
+-- configs/*.conf) was retired in P8; hypridle and hyprlock stay hyprlang.
 --
 -- `rice` is the one global shared by the modules and reachable from
 -- `hyprctl eval`. Each require() gets its own error scope, so a broken

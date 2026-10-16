@@ -1,5 +1,4 @@
--- Window, layer and workspace rules, ported from configs/windowrules.conf
--- in P5 in the same order; P6 removed dead and duplicate rules. All rules are anonymous on purpose:
+-- Window, layer and workspace rules. All rules are anonymous on purpose:
 -- named rules are evaluated before anonymous ones, which would reorder them.
 local p = rice.palette
 
