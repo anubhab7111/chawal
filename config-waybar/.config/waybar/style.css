@@ -135,6 +135,7 @@ window#waybar {
 #network,
 #bluetooth,
 #custom-caffeine,
+#custom-nightlight,
 #custom-pacman-update {
     padding: 2px 12px;
     margin: 4px 0px 4px 8px;
@@ -239,6 +240,20 @@ window#waybar {
     box-shadow:
         0 6px 16px rgba(0, 0, 0, 0.4),
         0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+}
+
+/* ================================
+   NIGHT LIGHT (rice-nightlight)
+   ================================ */
+#custom-nightlight {
+    color: @text;
+    background: @surface1;
+    font-size: 16px;
+}
+
+#custom-nightlight.on {
+    color: @base;
+    background: linear-gradient(135deg, @peach 0%, @yellow 100%);
 }
 
 /* ================================

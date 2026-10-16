@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# rice-nightlight: warm screen tint through hyprsunset (Waybar's moon button).
+#
+#   rice-nightlight on|off|toggle
+#   rice-nightlight status     JSON for Waybar's custom/nightlight module
+#
+# hyprsunset starts neutral (--identity) at login; this switches it over its
+# IPC and keeps a flag in $XDG_RUNTIME_DIR/rice so the state survives a
+# hyprsunset restart (it is re-applied when hyprsunset is started here).
+
+set -euo pipefail
+
+RUN="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice"
+FLAG="$RUN/nightlight"
+WARM=${RICE_NIGHTLIGHT_K:-4000}
+
+ensure_daemon() {
+    pgrep -x hyprsunset >/dev/null && return 0
+    setsid -f hyprsunset --identity </dev/null >/dev/null 2>&1
+    for _ in 1 2 3 4 5 6 7 8 9 10; do
+        hyprctl hyprsunset temperature >/dev/null 2>&1 && return 0
+        sleep 0.2
+    done
+    echo "rice-nightlight: hyprsunset did not start" >&2
+    return 1
+}
+
+on() {
+    ensure_daemon
+    hyprctl hyprsunset temperature "$WARM" >/dev/null
+    mkdir -p "$RUN"
+    : > "$FLAG"
+}
+
+off() {
+    if pgrep -x hyprsunset >/dev/null; then
+        hyprctl hyprsunset identity >/dev/null
+    fi
+    rm -f "$FLAG"
+}
+
+notify_bar() { "$HOME/.config/rice/bin/rice-sync" nightlight; }
+
+case ${1:-} in
+on) on; notify_bar ;;
+off) off; notify_bar ;;
+toggle)
+    if [ -f "$FLAG" ]; then off; else on; fi
+    notify_bar
+    ;;
+status)
+    if [ -f "$FLAG" ]; then
+        printf '{"text":"\U000F0594","class":"on","alt":"on","tooltip":"Night light on (%sK)"}\n' "$WARM"
+    else
+        printf '{"text":"\U000F0599","class":"off","alt":"off","tooltip":"Night light off"}\n'
+    fi
+    ;;
+*)
+    sed -n '3,6s/^# \{0,1\}//p' "$0" >&2
+    exit 2
+    ;;
+esac
