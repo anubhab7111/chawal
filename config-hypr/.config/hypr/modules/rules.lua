@@ -167,3 +167,13 @@ hl.workspace_rule({ workspace = "1", persistent = true })
 hl.workspace_rule({ workspace = "2", persistent = true })
 hl.workspace_rule({ workspace = "special:music", on_created_empty = "spotify" })
 hl.workspace_rule({ workspace = "special:term", on_created_empty = "alacritty" })
+hl.workspace_rule({ workspace = "special:dropdown", on_created_empty = "alacritty --class dropdown" })
+
+-- Drop-down terminal (SUPER+grave): a wide strip under the bar, sliding in
+rule(class([[^(dropdown)$]]), {
+    float = true,
+    size = { "monitor_w*0.98", "monitor_h*0.45" },
+    move = { "monitor_w*0.01", "60" },
+    animation = "slide top",
+    opacity = "0.95 0.90 override",
+})
