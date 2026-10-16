@@ -59,8 +59,9 @@ pick() {
     mapfile -t files < <(images)
     ((${#files[@]})) || { echo "rice-wall: no images in $WALLS" >&2; exit 1; }
 
-    # thumbnails build in the background; until then rofi scales the original
-    (nice -n 19 "$0" thumbs >/dev/null 2>&1 &)
+    # thumbnails build in the background (own session, so it outlives this
+    # script and whatever launched it); until then rofi scales the original
+    setsid -f nice -n 19 "$0" thumbs >/dev/null 2>&1 </dev/null
 
     idx=$(for f in "${files[@]}"; do
         t=$(thumb_of "$f")
