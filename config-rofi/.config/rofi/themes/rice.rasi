@@ -1,6 +1,7 @@
-/* Rice look for every rofi window: centred card, one accent, flat rows.
+/* Rice look for every rofi window: the Waybar glass -- translucent dark
+   panel, hairline border, 14px corners, one cyan accent, pill rows.
    colors.rasi is a slot (rice-theme) -> the active theme's rofi-colors.rasi,
-   which defines bg, bg-alt, surface, fg, fg-dim and accent. */
+   which defines bg, bg-alt, surface, fg, fg-dim, accent, urgent, line, tint. */
 @import "~/.config/rofi/themes/colors.rasi"
 
 * {
@@ -13,16 +14,41 @@ window {
     width: 640px;
     location: center;
     anchor: center;
-    border: 2px;
-    border-color: @accent;
-    border-radius: 15px;
+    border: 1px;
+    border-color: @line;
+    border-radius: 14px;
     background-color: @bg;
-    padding: 16px;
+    padding: 14px;
 }
 
 mainbox {
-    children: [ inputbar, message, listview ];
+    children: [ mode-switcher, inputbar, message, listview ];
     spacing: 12px;
+}
+
+/* Tab strip: one pill per mode, the active one in cyan */
+mode-switcher {
+    spacing: 6px;
+}
+
+button {
+    padding: 6px 14px;
+    border-radius: 10px;
+    background-color: transparent;
+    text-color: @fg-dim;
+    horizontal-align: 0.5;
+    cursor: pointer;
+}
+
+button selected {
+    background-color: @tint;
+    text-color: @accent;
+}
+
+button.selected,
+button selected.normal {
+    background-color: @tint;
+    text-color: @accent;
 }
 
 inputbar {
@@ -33,16 +59,18 @@ inputbar {
     background-color: @bg-alt;
 }
 
+/* The tab strip already names the mode, so the prompt stays out of the way */
 prompt {
-    text-color: @accent;
+    enabled: false;
 }
 
 entry {
-    placeholder: "Search";
+    placeholder: "  Search";
     placeholder-color: @fg-dim;
     cursor: text;
 }
 
+/* Footer-style hint / status line (script modes fill it) */
 message {
     padding: 8px 14px;
     border-radius: 10px;
@@ -51,6 +79,7 @@ message {
 
 textbox {
     text-color: @fg-dim;
+    markup: true;
 }
 
 listview {
@@ -72,9 +101,32 @@ element alternate.normal {
     background-color: transparent;
 }
 
+element normal.active,
+element alternate.active {
+    background-color: @tint;
+    text-color: @accent;
+}
+
+element normal.urgent,
+element alternate.urgent {
+    text-color: @urgent;
+}
+
 element selected.normal {
     background-color: @surface;
     text-color: @accent;
+}
+
+element selected.active {
+    background-color: @tint;
+    text-color: @accent;
+    border: 1px;
+    border-color: @accent;
+}
+
+element selected.urgent {
+    background-color: @surface;
+    text-color: @urgent;
 }
 
 element-icon {
