@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# rice-emoji: emoji and symbol picker (rofimoji, copy-only: wtype is not in the repos).
+#
+#   rice-emoji         open the picker directly (copies the choice to the clipboard)
+#
+# As a hub tab (rofi calls this script back as its "emoji" mode) it is one row
+# that closes the hub and opens the picker; rofimoji is a rofi of its own, so it
+# cannot live inside the hub window.
+
+set -euo pipefail
+
+PICK=(rofimoji --action copy --selector rofi)
+
+if [ -z "${ROFI_RETV:-}" ]; then
+    exec "${PICK[@]}"
+fi
+
+open=$'\U000F0785  Open the emoji and symbol picker'
+if [ "$ROFI_RETV" = 1 ] && [ "${1:-}" = "$open" ]; then
+    # detached, after the hub has gone, so two rofi windows never fight for focus
+    setsid -f sh -c 'sleep 0.2; exec "$@"' sh "${PICK[@]}" >/dev/null 2>&1 </dev/null
+    exit 0
+fi
+printf '\0prompt\x1f%s\n\0no-custom\x1ftrue\n' $'\U000F0785  Emoji'
+printf '\0message\x1f%s\n' "Enter opens the picker; the choice is copied to the clipboard"
+printf '%s\n' "$open"
+exit 0
