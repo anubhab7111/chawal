@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# rice-calc: a calculator as a rofi mode (hub tab).
+#
+#   rice-calc          open rofi on the Calc tab alone
+#
+#   type an expression and press Enter   evaluate it (qalc: units, %, functions)
+#   Alt+2                                copy the newest result and close
+#   Alt+1                                clear the history
+#
+# Rofi calls this script back as its "calc" mode (ROFI_RETV 0 open, 1 pick,
+# 2 typed text, 10-11 = Alt+1..2). The newest result is the first row; the
+# history (up to 20 lines "expression<TAB>result") travels in ROFI_DATA, so it
+# lives only as long as the window. History rows are not selectable: that keeps
+# Enter meaning "evaluate what I typed" instead of picking a fuzzy-matched row.
+
+set -euo pipefail
+
+HINT="Type an expression, Enter    Alt+2 copy result    Alt+1 clear    e.g. 5 km to mi, 18% * 240, sqrt(2)"
+
+if [ -z "${ROFI_RETV:-}" ]; then
+    exec rofi -show calc -modes "calc:$0" \
+        -kb-remove-word-forward "Control+Alt+d" -kb-custom-1 "Alt+1" -kb-custom-2 "Alt+2" \
+        -theme-str 'window { width: 720px; } mainbox { children: [ inputbar, message, listview ]; }'
+fi
+
+evaluate() { # expression -> result on stdout
+    local expr=$1 out
+    # "x to mi" would come back as mixed units (3 mi + 188 yd ...); "to -mi" keeps one unit
+    if [[ $expr =~ ^(.*[[:space:]]to[[:space:]]+)([A-Za-z]+)$ ]]; then
+        local head=${BASH_REMATCH[1]} unit=${BASH_REMATCH[2]}
+        [[ $unit =~ ^(base|prefix|mixed|optimal|bin|oct|hex|dec|roman|bijective|time|fraction)$ ]] ||
+            expr="$head-$unit"
+    fi
+    out=$(timeout 3 qalc -t "$expr" 2>&1 | head -1) || true
+    printf '%s' "${out:-?}"
+}
+
+list() { # $1 = history (newline separated "expr<TAB>result")
+    local hist=$1 line expr res
+    printf '\0prompt\x1f%s\n' $'\U000F00EC  Calc'
+    printf '\0use-hot-keys\x1ftrue\n\0message\x1f%s\n\0data\x1f%s\n' "$HINT" "${hist//$'\n'/$'\x1e'}"
+    [ -n "$hist" ] || return 0
+    while IFS=$'\t' read -r expr res; do
+        [ -n "$expr" ] || continue
+        printf '%s  =  %s\0nonselectable\x1ftrue\n' "$expr" "$res"
+    done <<<"$hist"
+}
+
+hist=${ROFI_DATA:-}
+hist=${hist//$'\x1e'/$'\n'}
+
+case $ROFI_RETV in
+2) # typed text: evaluate, newest first, keep 20
+    [ -n "${1:-}" ] && hist=$(printf '%s\t%s\n%s' "$1" "$(evaluate "$1")" "$hist" | head -20)
+    ;;
+10) hist="" ;;
+11) # copy the newest result and close
+    res=$(head -1 <<<"$hist" | cut -f2)
+    [ -n "$res" ] && printf '%s' "$res" | setsid -f wl-copy >/dev/null 2>&1
+    exit 0
+    ;;
+esac
+list "$hist"
+exit 0

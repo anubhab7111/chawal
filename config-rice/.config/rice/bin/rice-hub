@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # rice-hub: the rofi control hub. One window, Tab / Shift+Tab flip between tabs.
 #
-#   rice-hub [TAB]    TAB is drun (default), toggles, windows, audio, net, bt, clip, wall or power
+#   rice-hub [TAB]    TAB is drun (default), toggles, windows, audio, net, bt, calc, emoji, clip, wall or power
 #                     ("window" still works as an alias for windows)
 #
 # Every tab but Apps is one of the rice-* scripts running as a rofi mode (they
@@ -16,16 +16,16 @@
 
 set -euo pipefail
 
-BIN="$HOME/.config/rice/bin"
+BIN="${RICE_BIN:-$HOME/.config/rice/bin}" # RICE_BIN lets a checkout be tried before it is stowed
 tab=${1:-drun}
 [ "$tab" = window ] && tab=windows
 
 exec rofi -show "$tab" \
-    -modes "drun,toggles:$BIN/rice-toggles,windows:$BIN/rice-windows,audio:$BIN/rice-audio,net:$BIN/rice-net,bt:$BIN/rice-bt,clip:$BIN/rice-clip,wall:$BIN/rice-wall,power:$BIN/rice-power" \
+    -modes "drun,toggles:$BIN/rice-toggles,windows:$BIN/rice-windows,audio:$BIN/rice-audio,net:$BIN/rice-net,bt:$BIN/rice-bt,calc:$BIN/rice-calc,emoji:$BIN/rice-emoji,clip:$BIN/rice-clip,wall:$BIN/rice-wall,power:$BIN/rice-power" \
     -kb-remove-word-forward "Control+Alt+d" \
     -kb-custom-1 "Alt+1,Control+Delete" \
     -kb-custom-2 "Alt+2,Control+Shift+Delete" \
     -kb-custom-3 "Alt+3" \
     -kb-custom-4 "Alt+4" \
     -kb-custom-5 "Alt+5" \
-    -theme-str 'window { width: 1240px; } element-icon { size: 32px; }'
+    -theme-str 'window { width: 1500px; } element-icon { size: 32px; }'
