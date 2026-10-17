@@ -1,10 +1,14 @@
 /* Catppuccin Mocha colours for rofi (themes/rice.rasi imports them through
-   the ~/.config/rofi/themes/colors.rasi slot). */
+   the ~/.config/rofi/themes/colors.rasi slot). accent is the cyan (sky) the
+   Waybar and eww glass use; urgent is red; line is the hairline border. */
 * {
     bg:      #1e1e2ef0;
     bg-alt:  #181825;
     surface: #313244;
     fg:      #cdd6f4;
     fg-dim:  #6c7086;
-    accent:  #cba6f7;
+    accent:  #89dceb;
+    urgent:  #f38ba8;
+    line:    #cdd6f433;
+    tint:    #89dceb26;
 }
