@@ -26,3 +26,37 @@ backup under `~/.dotfiles-backup/` first, never deleted).
 - `config-themes`, `config-theming` — theming
 - `home-fonts`, `home-icons`, `home-themes` — fonts, icon themes, GTK themes
 - `home-xinitrc`
+
+## Rofi control hub
+
+`SUPER+SPACE` opens one rofi window with eleven tabs. `Tab` / `Shift+Tab`
+(or `Ctrl+Tab`) flip between them; `Alt+1` … `Alt+5` are the per-row actions
+of whichever tab is showing. The scripts live in `config-rice/.config/rice/bin`;
+`rice-hub` is the launcher and every other tab is a `rice-*` script running as
+a rofi script mode (each also works on its own: `rice-audio`, `rice-net`, …).
+
+| Tab | Script | Enter | Alt+1 … Alt+5 |
+|---|---|---|---|
+| Apps | rofi `drun` | launch | |
+| Toggles | `rice-toggles` | flip a switch (Wi-Fi, Bluetooth, night light, DND, caffeine, game mode, mute, mic) | |
+| Windows | `rice-windows` | focus | close · float · pin · bring here |
+| Audio | `rice-audio` | make default output | vol − · vol + · mute · play/pause · next |
+| Wi-Fi | `rice-net` | connect / disconnect | forget · rescan |
+| BT | `rice-bt` | connect / disconnect | power · unpair |
+| Calc | `rice-calc` | evaluate what you typed (qalc) | clear history · copy result |
+| Emoji | `rice-emoji` | open the rofimoji picker (copies) | |
+| Clip | `rice-clip` | copy entry back | delete · wipe all (also Ctrl+Delete, Ctrl+Shift+Delete) |
+| Walls | `rice-wall` | open the wallpaper grid | |
+| Power | `rice-power` | lock / suspend / log out / reboot / shut down (asks to confirm) | |
+
+Direct jumps: `SUPER+SHIFT+V` clipboard, `SUPER+/` calculator, `SUPER+.` emoji,
+`SUPER+W` wallpapers, `SUPER+M` / `SUPER+Esc` power, and the top-left hot corner
+opens Windows. Optional dependencies: `qalc` (Calc), `rofimoji` (Emoji),
+`cliphist` + `wl-clipboard` (Clip), `playerctl` (Audio now-playing).
+
+Look: the theme is `config-rofi/.config/rofi/themes/rice.rasi`, coloured from
+`~/.config/theming/current/rofi-colors.rasi`, so `rice-theme` re-colours it.
+rofi has no live preview pane and no animation system; the tabs use the message
+bar for status and thumbnails (Clip, Walls) instead.
+
+To try an unstowed checkout: `RICE_BIN=$PWD/config-rice/.config/rice/bin ./config-rice/.config/rice/bin/rice-hub`.

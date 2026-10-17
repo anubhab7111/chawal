@@ -2,8 +2,8 @@
 # rice-clip: clipboard history in rofi (SUPER+SHIFT+V), over cliphist.
 #
 #   Enter                       copy the entry back to the clipboard
-#   Ctrl+Delete                 delete the entry
-#   Ctrl+Shift+Delete, twice    wipe the whole history
+#   Ctrl+Delete                 delete the entry (in the hub also Alt+1)
+#   Ctrl+Shift+Delete, twice    wipe the whole history (in the hub also Alt+2)
 #
 # Run without arguments to open rofi; rofi then calls this script back as
 # its "clip" mode, with ROFI_RETV saying why (0 open, 1 pick, 10/11 custom

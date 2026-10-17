@@ -7,7 +7,7 @@
 #   Alt+2                                copy the newest result and close
 #   Alt+1                                clear the history
 #
-# Rofi calls this script back as its "calc" mode (ROFI_RETV 0 open, 1 pick,
+# Rofi calls this script back as its "calc" mode (ROFI_RETV 0 open,
 # 2 typed text, 10-11 = Alt+1..2). The newest result is the first row; the
 # history (up to 20 lines "expression<TAB>result") travels in ROFI_DATA, so it
 # lives only as long as the window. History rows are not selectable: that keeps
