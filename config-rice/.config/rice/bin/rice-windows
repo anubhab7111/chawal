@@ -24,6 +24,17 @@ if [ -z "${ROFI_RETV:-}" ]; then
         -theme-str 'window { width: 720px; } mainbox { children: [ inputbar, message, listview ]; }'
 fi
 
+# Hub launch: rice-hub already ran this tab (in parallel with the others) and
+# left its output in $RICE_PRE; rofi would otherwise run every tab one after
+# another before the window can appear. Falls through to a normal run if the
+# output never shows up.
+if [ "${ROFI_RETV:-}" = 0 ] && [ -n "${RICE_PRE:-}" ]; then
+    for ((i = 0; i < 600; i++)); do
+        [ -f "$RICE_PRE/windows.out" ] && exec cat "$RICE_PRE/windows.out"
+        sleep 0.005
+    done
+fi
+
 # a window dispatch, detached and silent (hyprctl output must stay off rofi's pipe)
 act() { # dispatcher-call with a %s for the window selector
     local sel="address:$ROFI_INFO"
@@ -74,6 +85,6 @@ case $ROFI_RETV in
     fi
     ;;
 esac
-sleep 0.15 # let a close or move land before the list is read again
+[ "$ROFI_RETV" = 0 ] || sleep 0.15 # let a close or move land before the list is read again (not at launch)
 list
 exit 0

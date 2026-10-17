@@ -35,40 +35,64 @@ if [ -z "${ROFI_RETV:-}" ]; then
         -theme-str 'window { width: 720px; } mainbox { children: [ inputbar, message, listview ]; }'
 fi
 
+# Hub launch: rice-hub already ran this tab (in parallel with the others) and
+# left its output in $RICE_PRE; rofi would otherwise run every tab one after
+# another before the window can appear. Falls through to a normal run if the
+# output never shows up.
+if [ "${ROFI_RETV:-}" = 0 ] && [ -n "${RICE_PRE:-}" ]; then
+    for ((i = 0; i < 600; i++)); do
+        [ -f "$RICE_PRE/net.out" ] && exec cat "$RICE_PRE/net.out"
+        sleep 0.005
+    done
+fi
+
 known() { nmcli -t -f NAME connection show | grep -qxF -- "$1"; }
 
-bars() { # signal 0-100 -> 󰤯󰤟󰤢󰤥󰤨
+bars() { # signal 0-100, result variable name -> 󰤯󰤟󰤢󰤥󰤨 (no subshell)
     local s=$1
-    if ((s >= 80)); then printf '\U000F0928'
-    elif ((s >= 60)); then printf '\U000F0925'
-    elif ((s >= 40)); then printf '\U000F0922'
-    elif ((s >= 20)); then printf '\U000F091F'
-    else printf '\U000F092F'; fi
+    if ((s >= 80)); then printf -v "$2" '\U000F0928'
+    elif ((s >= 60)); then printf -v "$2" '\U000F0925'
+    elif ((s >= 40)); then printf -v "$2" '\U000F0922'
+    elif ((s >= 20)); then printf -v "$2" '\U000F091F'
+    else printf -v "$2" '\U000F092F'; fi
 }
 
 list() {
+    local lock_g=$'\U000F033E' saved_g=$'\U000F0E1A' use ssid sig sec glyph name tags dir
+    # three independent nmcli calls (each ~25 ms): run them side by side.
+    # --rescan no: the default rescans when the last scan is over 30 s old and
+    # waits for it, which stalled the whole hub for seconds; Alt+2 rescans.
+    dir=$(mktemp -d)
+    nmcli radio wifi >"$dir/radio" 2>/dev/null &
+    nmcli -t -f NAME connection show >"$dir/saved" 2>/dev/null &
+    nmcli -t -f IN-USE,SIGNAL,SECURITY,SSID device wifi list --rescan no >"$dir/list" 2>/dev/null &
+    wait
     printf '\0prompt\x1f%s\n' $'\U000F05A9  Wi-Fi'
     printf '\0no-custom\x1ftrue\n\0use-hot-keys\x1ftrue\n\0keep-selection\x1ftrue\n'
-    if [ "$(nmcli radio wifi)" != enabled ]; then
+    if [ "$(<"$dir/radio")" != enabled ]; then
         printf '\0message\x1f%s\n' "Wi-Fi is off. Turn it on in the Toggles tab."
+        rm -rf "$dir"
         return 0
     fi
     printf '\0message\x1f%s\n' "$HINT"
-    local lock_g=$'\U000F033E' saved_g=$'\U000F0E1A' use ssid sig sec
+    # saved profiles, read once (a lookup per network would fork nmcli per row)
+    local -A saved=()
+    while IFS= read -r name; do saved[$name]=1; done <"$dir/saved"
     # one row per SSID, keeping the AP in use (else the strongest); in-use first, then strongest
-    nmcli -t -f IN-USE,SIGNAL,SECURITY,SSID device wifi list 2>/dev/null |
-        sort -t: -k1,1r -k2,2nr | awk -F: '$4 != "" && !seen[$4]++' |
+    sort -t: -k1,1r -k2,2nr "$dir/list" | awk -F: '$4 != "" && !seen[$4]++' |
         while IFS=: read -r use sig sec ssid; do
-            local tags=""
+            bars "$sig" glyph
+            tags=""
             [ -n "$sec" ] && tags+="  $lock_g"
-            known "$ssid" && tags+="  $saved_g"
-            printf '%s  %s  ·  %s%%%s\0info\x1f%s' "$(bars "$sig")" "$ssid" "$sig" "$tags" "$ssid"
+            [ -n "${saved[$ssid]:-}" ] && tags+="  $saved_g"
+            printf '%s  %s  ·  %s%%%s\0info\x1f%s' "$glyph" "$ssid" "$sig" "$tags" "$ssid"
             [ "$use" = '*' ] && printf '\x1factive\x1ftrue'
             printf '\n'
         done
+    rm -rf "$dir"
 }
 
-active_ssid() { nmcli -t -f ACTIVE,SSID device wifi list | awk -F: '$1 == "yes" { print $2; exit }'; }
+active_ssid() { nmcli -t -f ACTIVE,SSID device wifi list --rescan no | awk -F: '$1 == "yes" { print $2; exit }'; }
 
 pick() {
     local ssid=$ROFI_INFO sec
@@ -78,7 +102,7 @@ pick() {
         timeout 12 nmcli connection up id "$ssid" >/dev/null 2>&1 ||
             notify-send -u critical -i network-error "Wi-Fi" "Could not connect to $ssid"
     else
-        sec=$(nmcli -t -f SSID,SECURITY device wifi list | awk -F: -v s="$ssid" '$1 == s { print $2; exit }')
+        sec=$(nmcli -t -f SSID,SECURITY device wifi list --rescan no | awk -F: -v s="$ssid" '$1 == s { print $2; exit }')
         if [ -z "$sec" ]; then
             timeout 12 nmcli device wifi connect "$ssid" >/dev/null 2>&1 ||
                 notify-send -u critical -i network-error "Wi-Fi" "Could not connect to $ssid"

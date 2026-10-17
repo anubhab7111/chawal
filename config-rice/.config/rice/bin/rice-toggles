@@ -20,6 +20,17 @@ if [ -z "${ROFI_RETV:-}" ]; then
         -theme-str 'window { width: 460px; } listview { lines: 8; } mainbox { children: [ inputbar, message, listview ]; }'
 fi
 
+# Hub launch: rice-hub already ran this tab (in parallel with the others) and
+# left its output in $RICE_PRE; rofi would otherwise run every tab one after
+# another before the window can appear. Falls through to a normal run if the
+# output never shows up.
+if [ "${ROFI_RETV:-}" = 0 ] && [ -n "${RICE_PRE:-}" ]; then
+    for ((i = 0; i < 600; i++)); do
+        [ -f "$RICE_PRE/toggles.out" ] && exec cat "$RICE_PRE/toggles.out"
+        sleep 0.005
+    done
+fi
+
 # id|glyph|label, in display order. Glyphs are Material Design escapes.
 ROWS=(
     $'wifi|\U000F05A9|Wi-Fi'
@@ -66,20 +77,27 @@ flip() { # id: toggle the switch; output off rofi's pipe
 }
 
 list() {
-    local row id glyph label state
+    local row id glyph label tmp
+    # the eight state checks are independent commands: run them side by side
+    # (a file per switch that is on) instead of one after another
+    tmp=$(mktemp -d)
+    for row in "${ROWS[@]}"; do
+        id=${row%%|*}
+        (is_on "$id" && : >"$tmp/$id") &
+    done
+    wait
     printf '\0prompt\x1f%s\n' $'\U000F0521  Toggles'
     printf '\0no-custom\x1ftrue\n\0keep-selection\x1ftrue\n'
     printf '\0message\x1f%s\n' "Enter flips a switch    Tab next tab"
     for row in "${ROWS[@]}"; do
         IFS='|' read -r id glyph label <<<"$row"
-        if is_on "$id"; then
-            state=on
-            printf '%s  %s  ·  %s\0info\x1f%s\x1factive\x1ftrue\n' "$glyph" "$label" "$state" "$id"
+        if [ -e "$tmp/$id" ]; then
+            printf '%s  %s  ·  on\0info\x1f%s\x1factive\x1ftrue\n' "$glyph" "$label" "$id"
         else
-            state=off
-            printf '%s  %s  ·  %s\0info\x1f%s\n' "$glyph" "$label" "$state" "$id"
+            printf '%s  %s  ·  off\0info\x1f%s\n' "$glyph" "$label" "$id"
         fi
     done
+    rm -rf "$tmp"
 }
 
 [ "$ROFI_RETV" = 1 ] && [ -n "${ROFI_INFO:-}" ] && flip "$ROFI_INFO"

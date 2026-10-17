@@ -60,4 +60,10 @@ Look: the theme is `config-rofi/.config/rofi/themes/rice.rasi`, coloured from
 rofi has no live preview pane and no animation system; the tabs use the message
 bar for status and thumbnails (Clip, Walls) instead.
 
+Startup speed: rofi runs every tab's script once at launch (it reads each tab's
+name from it) and only draws after the last one returns, so `rice-hub` runs the
+data tabs in parallel first and hands each script its finished output
+(`RICE_PRE`). Keep tab scripts cheap on `ROFI_RETV=0`: no `sleep`, no per-row
+forks, no `nmcli` rescans (use `--rescan no`).
+
 To try an unstowed checkout: `RICE_BIN=$PWD/config-rice/.config/rice/bin ./config-rice/.config/rice/bin/rice-hub`.

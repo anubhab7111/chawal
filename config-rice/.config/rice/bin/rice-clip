@@ -22,6 +22,17 @@ if [ -z "${ROFI_RETV:-}" ]; then
         -theme-str 'element-icon { size: 48px; } window { width: 720px; }'
 fi
 
+# Hub launch: rice-hub already ran this tab (in parallel with the others) and
+# left its output in $RICE_PRE; rofi would otherwise run every tab one after
+# another before the window can appear. Falls through to a normal run if the
+# output never shows up.
+if [ "${ROFI_RETV:-}" = 0 ] && [ -n "${RICE_PRE:-}" ]; then
+    for ((i = 0; i < 600; i++)); do
+        [ -f "$RICE_PRE/clip.out" ] && exec cat "$RICE_PRE/clip.out"
+        sleep 0.005
+    done
+fi
+
 # cliphist reads entries in its list format ("id<TAB>preview")
 entry() { printf '%s\t' "$1"; }
 

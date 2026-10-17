@@ -20,6 +20,22 @@ BIN="${RICE_BIN:-$HOME/.config/rice/bin}" # RICE_BIN lets a checkout be tried be
 tab=${1:-drun}
 [ "$tab" = window ] && tab=windows
 
+# Startup speed. Rofi runs every tab's script once at launch (it needs each
+# one's \0prompt for the tab label) and the window only appears after the last
+# one finishes, so run the data-gathering tabs here, all at once, and let
+# each script hand rofi its finished output (RICE_PRE; see the top of
+# rice-toggles and friends). Typically ~100 ms for all tabs instead of the sum.
+RICE_PRE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice/hub-pre"
+rm -rf "$RICE_PRE"
+mkdir -p "$RICE_PRE"
+for t in toggles windows audio net bt clip; do
+    (
+        ROFI_RETV=0 "$BIN/rice-$t" >"$RICE_PRE/$t.tmp" 2>/dev/null </dev/null || true
+        mv "$RICE_PRE/$t.tmp" "$RICE_PRE/$t.out"
+    ) &
+done
+export RICE_PRE
+
 exec rofi -show "$tab" \
     -modes "drun,toggles:$BIN/rice-toggles,windows:$BIN/rice-windows,audio:$BIN/rice-audio,net:$BIN/rice-net,bt:$BIN/rice-bt,calc:$BIN/rice-calc,emoji:$BIN/rice-emoji,clip:$BIN/rice-clip,wall:$BIN/rice-wall,power:$BIN/rice-power" \
     -kb-remove-word-forward "Control+Alt+d" \
