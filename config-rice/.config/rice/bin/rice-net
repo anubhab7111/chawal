@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+# rice-net: Wi-Fi networks as a rofi mode (hub tab).
+#
+#   rice-net           open rofi on the Wi-Fi tab alone
+#
+#   Enter    connect (asks for the password once for a new secured network);
+#            on the connected network it disconnects
+#   Alt+1    forget the saved network
+#   Alt+2    rescan
+#
+# Rofi calls this script back as its "net" mode (ROFI_RETV 0 open, 1 pick,
+# 10-11 the Alt+1..2 keys); the SSID arrives as ROFI_INFO. The one-shot
+# password prompt is this same script run as "rice-net --ask SSID".
+
+set -euo pipefail
+
+HINT="Enter connect / disconnect    Alt+1 forget    Alt+2 rescan"
+
+if [ "${1:-}" = --ask ]; then # detached password prompt for a new secured network
+    ssid=$2
+    pw=$(rofi -dmenu -password -p "󰌾  $ssid" -mesg "Wi-Fi password for $ssid" \
+        -theme-str 'window { width: 480px; } listview { enabled: false; }' </dev/null) || exit 0
+    if out=$(nmcli device wifi connect "$ssid" password "$pw" 2>&1); then
+        notify-send -i network-wireless "Wi-Fi" "Connected to $ssid"
+    else
+        notify-send -u critical -i network-error "Wi-Fi" "$ssid: ${out##*: }"
+    fi
+    exit 0
+fi
+
+if [ -z "${ROFI_RETV:-}" ]; then
+    exec rofi -show net -modes "net:$0" \
+        -kb-remove-word-forward "Control+Alt+d" \
+        -kb-custom-1 "Alt+1" -kb-custom-2 "Alt+2" \
+        -theme-str 'window { width: 720px; } mainbox { children: [ inputbar, message, listview ]; }'
+fi
+
+known() { nmcli -t -f NAME connection show | grep -qxF -- "$1"; }
+
+bars() { # signal 0-100 -> 󰤯󰤟󰤢󰤥󰤨
+    local s=$1
+    if ((s >= 80)); then printf '\U000F0928'
+    elif ((s >= 60)); then printf '\U000F0925'
+    elif ((s >= 40)); then printf '\U000F0922'
+    elif ((s >= 20)); then printf '\U000F091F'
+    else printf '\U000F092F'; fi
+}
+
+list() {
+    printf '\0prompt\x1f%s\n' $'\U000F05A9  Wi-Fi'
+    printf '\0no-custom\x1ftrue\n\0use-hot-keys\x1ftrue\n\0keep-selection\x1ftrue\n'
+    if [ "$(nmcli radio wifi)" != enabled ]; then
+        printf '\0message\x1f%s\n' "Wi-Fi is off. Turn it on in the Toggles tab."
+        return 0
+    fi
+    printf '\0message\x1f%s\n' "$HINT"
+    local lock_g=$'\U000F033E' saved_g=$'\U000F0E1A' use ssid sig sec
+    # one row per SSID, keeping the AP in use (else the strongest); in-use first, then strongest
+    nmcli -t -f IN-USE,SIGNAL,SECURITY,SSID device wifi list 2>/dev/null |
+        sort -t: -k1,1r -k2,2nr | awk -F: '$4 != "" && !seen[$4]++' |
+        while IFS=: read -r use sig sec ssid; do
+            local tags=""
+            [ -n "$sec" ] && tags+="  $lock_g"
+            known "$ssid" && tags+="  $saved_g"
+            printf '%s  %s  ·  %s%%%s\0info\x1f%s' "$(bars "$sig")" "$ssid" "$sig" "$tags" "$ssid"
+            [ "$use" = '*' ] && printf '\x1factive\x1ftrue'
+            printf '\n'
+        done
+}
+
+active_ssid() { nmcli -t -f ACTIVE,SSID device wifi list | awk -F: '$1 == "yes" { print $2; exit }'; }
+
+pick() {
+    local ssid=$ROFI_INFO sec
+    if [ "$ssid" = "$(active_ssid)" ]; then
+        nmcli connection down id "$ssid" >/dev/null 2>&1 || true
+    elif known "$ssid"; then
+        timeout 12 nmcli connection up id "$ssid" >/dev/null 2>&1 ||
+            notify-send -u critical -i network-error "Wi-Fi" "Could not connect to $ssid"
+    else
+        sec=$(nmcli -t -f SSID,SECURITY device wifi list | awk -F: -v s="$ssid" '$1 == s { print $2; exit }')
+        if [ -z "$sec" ]; then
+            timeout 12 nmcli device wifi connect "$ssid" >/dev/null 2>&1 ||
+                notify-send -u critical -i network-error "Wi-Fi" "Could not connect to $ssid"
+        else
+            # needs a password: ask in a separate window and close this one
+            setsid -f "$0" --ask "$ssid" >/dev/null 2>&1 </dev/null
+            exit 0
+        fi
+    fi
+}
+
+case $ROFI_RETV in
+1) [ -n "${ROFI_INFO:-}" ] && pick ;;
+10) [ -n "${ROFI_INFO:-}" ] && nmcli connection delete id "$ROFI_INFO" >/dev/null 2>&1 || true ;;
+11) nmcli device wifi rescan >/dev/null 2>&1 || true ;;
+esac
+[ "$ROFI_RETV" = 11 ] && sleep 2
+list
+exit 0
