@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# rice-windows: window switcher with row actions, as a rofi mode (hub tab, top-left hot corner).
+#
+#   rice-windows       open rofi on the Windows tab alone
+#
+#   Enter    focus the window (switches workspace if needed)
+#   Alt+1    close it
+#   Alt+2    toggle floating
+#   Alt+3    toggle pinned (a pinned floating window follows you across workspaces)
+#   Alt+4    bring it to the current workspace
+#
+# Rofi calls this script back as its "windows" mode (ROFI_RETV 0 open, 1 pick,
+# 10-13 the Alt+1..4 keys); the window address arrives as ROFI_INFO.
+# Most-recently-used first. After an action the list is redrawn in place.
+
+set -euo pipefail
+
+HINT="Enter focus    Alt+1 close    Alt+2 float    Alt+3 pin    Alt+4 bring here"
+
+if [ -z "${ROFI_RETV:-}" ]; then
+    exec rofi -show windows -modes "windows:$0" \
+        -kb-remove-word-forward "Control+Alt+d" \
+        -kb-custom-1 "Alt+1" -kb-custom-2 "Alt+2" -kb-custom-3 "Alt+3" -kb-custom-4 "Alt+4" \
+        -theme-str 'window { width: 720px; } mainbox { children: [ inputbar, message, listview ]; }'
+fi
+
+# a window dispatch, detached and silent (hyprctl output must stay off rofi's pipe)
+act() { # dispatcher-call with a %s for the window selector
+    local sel="address:$ROFI_INFO"
+    # shellcheck disable=SC2059
+    hyprctl dispatch "$(printf "$1" "$sel")" >/dev/null 2>&1 || true
+}
+
+list() {
+    printf '\0prompt\x1f%s\n' $'\U000F0A31  Windows'
+    printf '\0no-custom\x1ftrue\n\0use-hot-keys\x1ftrue\n\0keep-selection\x1ftrue\n'
+    printf '\0message\x1f%s\n' "$HINT"
+    local addr class title ws wsl floating pinned focused flags icon
+    local pin_g=$'\U000F0403' float_g=$'\U000F0DEE'
+    hyprctl clients -j | jq -r '
+        map(select(.mapped and (.hidden | not)))
+        | sort_by(.focusHistoryID)
+        | .[] | [.address, .class, .title, .workspace.name, .floating, .pinned, (.focusHistoryID == 0)]
+        | @tsv' |
+        while IFS=$'\t' read -r addr class title ws floating pinned focused; do
+            flags=""
+            wsl=$ws # special workspaces: [*music] instead of [special:music]
+            [[ $ws == special:* ]] && wsl="*${ws#special:}"
+            [ "$pinned" = true ] && flags+="  $pin_g"
+            [ "$floating" = true ] && flags+="  $float_g"
+            icon=${class,,}
+            if [ "$focused" = true ]; then
+                printf '%-4s %s  ·  %s%s\0icon\x1f%s\x1finfo\x1f%s\x1factive\x1ftrue\n' \
+                    "[$wsl]" "$class" "$title" "$flags" "$icon" "$addr"
+            else
+                printf '%-4s %s  ·  %s%s\0icon\x1f%s\x1finfo\x1f%s\n' \
+                    "[$wsl]" "$class" "$title" "$flags" "$icon" "$addr"
+            fi
+        done
+}
+
+case $ROFI_RETV in
+1) # focus and close rofi (no output)
+    [ -n "${ROFI_INFO:-}" ] && act 'hl.dsp.focus({ window = "%s" })'
+    exit 0
+    ;;
+10) [ -n "${ROFI_INFO:-}" ] && act 'hl.dsp.window.close({ window = "%s" })' ;;
+11) [ -n "${ROFI_INFO:-}" ] && act 'hl.dsp.window.float({ action = "toggle", window = "%s" })' ;;
+12) [ -n "${ROFI_INFO:-}" ] && act 'hl.dsp.window.pin({ action = "toggle", window = "%s" })' ;;
+13)
+    if [ -n "${ROFI_INFO:-}" ]; then
+        ws=$(hyprctl activeworkspace -j | jq -r .name)
+        act "hl.dsp.window.move({ workspace = \"$ws\", window = \"%s\" })"
+    fi
+    ;;
+esac
+sleep 0.15 # let a close or move land before the list is read again
+list
+exit 0
