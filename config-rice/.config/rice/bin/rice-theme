@@ -51,6 +51,7 @@ bootstrap() {
 
     slot "$STATE/current" "$CURRENT"
     slot "$CURRENT/waybar-colors.css" "$HOME/.config/waybar/colors.css"
+    slot "$CURRENT/waybar-colors.css" "$HOME/.config/swaync/colors.css" # same @define-color palette
     slot "$CURRENT/cava.theme" "$HOME/.config/cava/themes/rice"
     slot "$CURRENT/btop.theme" "$HOME/.config/btop/themes/rice.theme"
     slot "$CURRENT/rofi-colors.rasi" "$HOME/.config/rofi/themes/colors.rasi"
@@ -135,7 +136,7 @@ reload_apps() {
 
     pkill -USR2 -x waybar >/dev/null 2>&1 || true # full reload: config + css
     pkill -USR2 -x cava >/dev/null 2>&1 || true   # colours only
-    makoctl reload >/dev/null 2>&1 || true
+    swaync-client -rs -sw >/dev/null 2>&1 || true # reload the stylesheet (colours)
 
     local dir
     for dir in volume-edge brightness-edge; do

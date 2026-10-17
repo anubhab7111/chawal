@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# rice-dnd: do-not-disturb for notifications (mako's do-not-disturb mode).
+# rice-dnd: do-not-disturb for notifications (swaync's DND switch; notifications
+# still land in the control center while it is on).
 #
 #   rice-dnd on|off|toggle|status
 #   rice-dnd hold KEY      turn DND on for KEY (e.g. gamemode), remembering
@@ -9,11 +10,11 @@
 set -euo pipefail
 
 RUN="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice"
-MODE=do-not-disturb
 
-is_on() { makoctl mode 2>/dev/null | grep -qx "$MODE"; }
-on() { is_on || makoctl mode -a "$MODE" >/dev/null; }
-off() { ! is_on || makoctl mode -r "$MODE" >/dev/null; }
+# -sw: do not wait when swaync is not running yet (answers "false" / fails fast)
+is_on() { [ "$(swaync-client -D -sw 2>/dev/null)" = true ]; }
+on() { is_on || swaync-client -dn -sw >/dev/null; }
+off() { ! is_on || swaync-client -df -sw >/dev/null; }
 
 case ${1:-} in
 on) on ;;
@@ -35,7 +36,7 @@ release)
     fi
     ;;
 *)
-    sed -n '3,8s/^# \{0,1\}//p' "$0" >&2
+    sed -n '4,9s/^# \{0,1\}//p' "$0" >&2
     exit 2
     ;;
 esac

@@ -136,6 +136,7 @@ window#waybar {
 #bluetooth,
 #custom-caffeine,
 #custom-nightlight,
+#custom-notification,
 #custom-gamemode,
 #custom-recording,
 #custom-pacman-update {
@@ -272,6 +273,26 @@ window#waybar {
 }
 
 #custom-nightlight.on {
+    color: @base;
+    background: linear-gradient(135deg, @peach 0%, @yellow 100%);
+}
+
+/* ================================
+   NOTIFICATIONS (swaync: click = panel, right-click = do not disturb)
+   ================================ */
+#custom-notification {
+    color: @text;
+    background: @surface1;
+    font-size: 16px;
+}
+
+#custom-notification.notification {
+    color: @base;
+    background: linear-gradient(135deg, @sky 0%, @sapphire 100%);
+}
+
+#custom-notification.dnd-none,
+#custom-notification.dnd-notification {
     color: @base;
     background: linear-gradient(135deg, @peach 0%, @yellow 100%);
 }

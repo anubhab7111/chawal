@@ -12,7 +12,7 @@ backup under `~/.dotfiles-backup/` first, never deleted).
 
 - `config-hypr` — Hyprland, hyprlock, hypridle
 - `config-waybar` — bar
-- `config-mako` — notifications
+- `config-swaync` — notifications and the control center
 - `config-rofi`, `config-wofi` — launchers
 - `config-eww` — widgets
 - `config-nwg-look`, `config-wlogout` — GTK settings/logout UI

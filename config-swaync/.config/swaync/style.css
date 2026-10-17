@@ -1,0 +1,159 @@
+/* swaync, in the Waybar glass style. Colours come from the theme slot
+   (colors.css -> ~/.config/theming/current/waybar-colors.css, set up by
+   rice-theme), so switching themes re-colours it. */
+@import url("colors.css");
+
+* {
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 13px;
+}
+
+/* ---- popup notifications ---- */
+.notification-row {
+    outline: none;
+    background: transparent;
+}
+
+.notification-row:focus,
+.notification-row:hover {
+    background: transparent;
+}
+
+.notification {
+    background: alpha(@base, 0.92);
+    color: @text;
+    border: 1px solid alpha(@text, 0.2);
+    border-radius: 14px;
+    margin: 6px 12px;
+    padding: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.notification.low {
+    border-color: alpha(@teal, 0.6);
+}
+
+.notification.critical {
+    border-color: @red;
+}
+
+.notification-content {
+    background: transparent;
+    padding: 10px;
+    border-radius: 14px;
+}
+
+.summary {
+    font-weight: 700;
+    color: @text;
+}
+
+.time {
+    color: @overlay1;
+}
+
+.body {
+    color: @subtext1;
+}
+
+.close-button {
+    background: @surface1;
+    color: @text;
+    border-radius: 50%;
+    padding: 0;
+    margin: 6px;
+    min-width: 22px;
+    min-height: 22px;
+}
+
+.close-button:hover {
+    background: @red;
+    color: @base;
+}
+
+.notification-action {
+    background: @surface0;
+    color: @text;
+    border-radius: 10px;
+    margin: 4px;
+}
+
+.notification-action:hover {
+    background: alpha(@sky, 0.3);
+}
+
+.inline-reply-entry {
+    background: @surface0;
+    color: @text;
+    border-radius: 10px;
+}
+
+/* ---- control center ---- */
+.control-center {
+    background: alpha(@base, 0.92);
+    color: @text;
+    border: 1px solid alpha(@text, 0.2);
+    border-radius: 14px;
+    padding: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.control-center .notification-row .notification {
+    margin: 6px;
+    background: alpha(@surface0, 0.8);
+}
+
+.widget-title {
+    margin: 8px 10px;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.widget-title > button {
+    background: @surface1;
+    color: @text;
+    border-radius: 14px;
+    padding: 2px 14px;
+}
+
+.widget-title > button:hover {
+    background: alpha(@sky, 0.3);
+}
+
+.widget-dnd {
+    margin: 4px 10px;
+    font-weight: 600;
+}
+
+.widget-dnd > switch {
+    background: @surface1;
+    border-radius: 14px;
+}
+
+.widget-dnd > switch:checked {
+    background: @sky;
+}
+
+.widget-dnd > switch slider {
+    background: @text;
+    border-radius: 14px;
+}
+
+.widget-mpris {
+    margin: 6px 10px;
+    padding: 6px;
+    background: alpha(@surface0, 0.8);
+    border-radius: 14px;
+}
+
+.widget-mpris-title {
+    font-weight: 700;
+}
+
+.widget-mpris-subtitle {
+    color: @subtext0;
+}
+
+.control-center-list-placeholder {
+    color: @overlay1;
+}
