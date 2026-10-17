@@ -1,0 +1,8 @@
+#!/bin/sh
+# darkman hook: warm screen after sunset, neutral after sunrise.
+# darkman runs this at every transition (and once at start) with the new mode
+# as $1. A manual rice-nightlight toggle holds until the next transition.
+case "$1" in
+dark) exec "$HOME/.config/rice/bin/rice-nightlight" on ;;
+light) exec "$HOME/.config/rice/bin/rice-nightlight" off ;;
+esac

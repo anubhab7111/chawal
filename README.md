@@ -24,6 +24,7 @@ backup under `~/.dotfiles-backup/` first, never deleted).
 - `config-starship.toml` — shell prompt
 - `config-yazi` — file manager
 - `config-themes`, `config-theming` — theming
+- `config-darkman`, `home-darkman-hooks` — dark/light by the sun (night light hook)
 - `home-fonts`, `home-icons`, `home-themes` — fonts, icon themes, GTK themes
 - `home-xinitrc`
 
