@@ -27,6 +27,11 @@ local commands = {
     -- Night light daemon, neutral until rice-nightlight turns it warm
     "hyprsunset --identity",
 
+    -- Dark/light by the sun (darkman hooks switch the night light). Restarted
+    -- here, after the environment import above, so its hooks can reach
+    -- Hyprland; the delay lets hyprsunset above come up first.
+    "bash -c 'sleep 3; systemctl --user restart darkman'",
+
     -- Caffeine starts off every login (its inhibitor can outlive a logout)
     "~/.config/rice/bin/rice-caffeine off",
 

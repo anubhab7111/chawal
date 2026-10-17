@@ -1,0 +1,7 @@
+# darkman: dark/light by the sun, for Kolkata. No geoclue lookup, and no XDG
+# portal (apps keep following their own theme; the hooks in
+# home-darkman-hooks drive the night light).
+lat: 22.6
+lng: 88.4
+usegeoclue: false
+portal: false
