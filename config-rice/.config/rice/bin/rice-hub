@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 # rice-hub: the rofi control hub. One window, Tab / Shift+Tab flip between tabs.
 #
-#   rice-hub [TAB]    TAB is drun (default), window, clip, wall or power
+#   rice-hub [TAB]    TAB is drun (default), toggles, window, clip, wall or power
 #
 # Each script tab is one of the rice-* scripts running as a rofi mode (they
 # detect ROFI_RETV and answer rofi instead of opening their own menu).
+#
+# Tab names: builtin modes use -display-*; script modes show the prompt they
+# print themselves (\0prompt), so every script sets "<glyph>  Name".
 #
 # Hotkeys: Alt+1 / Alt+2 are the per-row actions of the current tab, whatever
 # it calls them (clip: delete / wipe all). Ctrl+Delete and Ctrl+Shift+Delete
@@ -16,12 +19,13 @@ BIN="$HOME/.config/rice/bin"
 tab=${1:-drun}
 
 exec rofi -show "$tab" \
-    -modes "drun,window,clip:$BIN/rice-clip,wall:$BIN/rice-wall,power:$BIN/rice-power" \
+    -modes "drun,toggles:$BIN/rice-toggles,window,clip:$BIN/rice-clip,wall:$BIN/rice-wall,power:$BIN/rice-power" \
+    -display-toggles $'\U000F0521  Toggles' \
     -display-window $'\U000F0A31  Windows' \
-    -display-clip $'\U000F014C  Clipboard' \
-    -display-wall $'\U000F0976  Wallpapers' \
+    -display-clip $'\U000F014C  Clip' \
+    -display-wall $'\U000F0976  Walls' \
     -display-power $'\U000F0425  Power' \
     -kb-remove-word-forward "Control+Alt+d" \
     -kb-custom-1 "Alt+1,Control+Delete" \
     -kb-custom-2 "Alt+2,Control+Shift+Delete" \
-    -theme-str 'element-icon { size: 32px; }'
+    -theme-str 'window { width: 900px; } element-icon { size: 32px; }'

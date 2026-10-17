@@ -24,7 +24,7 @@ fi
 go() { setsid -f "$@" >/dev/null 2>&1 </dev/null; }
 
 screen() { # print rofi's mode options for a screen
-    printf '\0prompt\x1fPower\n\0no-custom\x1ftrue\n\0message\x1f%s\n\0data\x1f%s\n' "$1" "${2:-}"
+    printf '\0prompt\x1f%s\n\0no-custom\x1ftrue\n\0message\x1f%s\n\0data\x1f%s\n' $'\U000F0425  Power' "$1" "${2:-}"
 }
 
 menu() {
