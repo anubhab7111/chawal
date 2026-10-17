@@ -22,18 +22,29 @@ if [ -z "${ROFI_RETV:-}" ]; then
         -theme-str 'window { width: 720px; } mainbox { children: [ inputbar, message, listview ]; }'
 fi
 
+# Hub launch: rice-hub already ran this tab (in parallel with the others) and
+# left its output in $RICE_PRE; rofi would otherwise run every tab one after
+# another before the window can appear. Falls through to a normal run if the
+# output never shows up.
+if [ "${ROFI_RETV:-}" = 0 ] && [ -n "${RICE_PRE:-}" ]; then
+    for ((i = 0; i < 600; i++)); do
+        [ -f "$RICE_PRE/bt.out" ] && exec cat "$RICE_PRE/bt.out"
+        sleep 0.005
+    done
+fi
+
 powered() { bluetoothctl show | grep -q 'Powered: yes'; }
 
-icon_for() { # bluez Icon field -> glyph
+icon_for() { # bluez Icon field, result variable name -> glyph (no subshell)
     case $1 in
-    audio-headphones | audio-headset) printf '\U000F02CB' ;;
-    audio-card | audio-speakers) printf '\U000F04C3' ;;
-    input-mouse) printf '\U000F037D' ;;
-    input-keyboard) printf '\U000F030C' ;;
-    input-gaming) printf '\U000F0297' ;;
-    phone) printf '\U000F011C' ;;
-    video-display) printf '\U000F0502' ;;
-    *) printf '\U000F00AF' ;;
+    audio-headphones | audio-headset) printf -v "$2" '\U000F02CB' ;;
+    audio-card | audio-speakers) printf -v "$2" '\U000F04C3' ;;
+    input-mouse) printf -v "$2" '\U000F037D' ;;
+    input-keyboard) printf -v "$2" '\U000F030C' ;;
+    input-gaming) printf -v "$2" '\U000F0297' ;;
+    phone) printf -v "$2" '\U000F011C' ;;
+    video-display) printf -v "$2" '\U000F0502' ;;
+    *) printf -v "$2" '\U000F00AF' ;;
     esac
 }
 
@@ -45,18 +56,35 @@ list() {
         return 0
     fi
     printf '\0message\x1f%s\n' "$HINT"
-    local line mac name info conn bat icon pass
-    local -a recs=()
-    while read -r line; do
-        mac=$(awk '{print $2}' <<<"$line")
-        name=${line#Device $mac }
-        info=$(bluetoothctl info "$mac" 2>/dev/null || true)
-        conn=no
-        grep -q 'Connected: yes' <<<"$info" && conn=yes
-        bat=$(sed -n 's/.*Battery Percentage:.*(\([0-9]*\)).*/\1/p' <<<"$info" | head -1)
-        icon=$(icon_for "$(sed -n 's/.*Icon: //p' <<<"$info" | head -1)")
-        recs+=("$conn|$mac|$icon|$bat|$name")
+    local line mac name info conn bat icon icon_name tmp pass dir i=0
+    local -a recs=() macs=() names=()
+    # bash builtins past one bluetoothctl call per device, and those calls run
+    # side by side: this runs for every hub launch
+    dir=$(mktemp -d)
+    while read -r _ mac name; do
+        macs[i]=$mac names[i]=$name
+        bluetoothctl info "$mac" >"$dir/$i" 2>/dev/null &
+        i=$((i + 1))
     done < <(bluetoothctl devices)
+    wait
+    for ((i = 0; i < ${#macs[@]}; i++)); do
+        mac=${macs[i]} name=${names[i]}
+        info=$(<"$dir/$i")
+        conn=no bat="" icon_name=""
+        while IFS= read -r line; do
+            case $line in
+            *"Connected: yes"*) conn=yes ;;
+            *"Icon: "*) icon_name=${line##*Icon: } ;;
+            *"Battery Percentage:"*)
+                tmp=${line##*(}
+                bat=${tmp%%)*}
+                ;;
+            esac
+        done <<<"$info"
+        icon_for "$icon_name" icon
+        recs+=("$conn|$mac|$icon|$bat|$name")
+    done
+    rm -rf "$dir"
     # connected devices first, then the rest in bluez's order
     for pass in yes no; do
         for line in "${recs[@]}"; do
@@ -92,6 +120,6 @@ case $ROFI_RETV in
     ;;
 11) [ -n "${ROFI_INFO:-}" ] && bluetoothctl remove "$ROFI_INFO" >/dev/null 2>&1 || true ;;
 esac
-sleep 0.3
+[ "$ROFI_RETV" = 0 ] || sleep 0.3 # after an action, not at launch
 list
 exit 0
