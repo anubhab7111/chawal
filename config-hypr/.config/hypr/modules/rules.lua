@@ -83,8 +83,7 @@ rule(title([[^(.*Steam[A-Za-z0-9\s]*)$]]), { no_blur = true })
 
 rule(class([[^(mpv)$]]), { no_blur = true })
 rule(class([[^(vlc)$]]), { no_blur = true })
-rule(class([[^(spotify)$]]), { no_blur = true })
-rule(class([[^(Spotify)$]]), { no_blur = true })
+rule(class([[^(com\.github\.th-ch\.youtube-music)$]]), { no_blur = true })
 
 rule(class([[^(gamescope)$]]), { no_blur = true })
 
@@ -135,7 +134,7 @@ rule(class([[^(qalculate-gtk)$]]), { animation = "popin 80%" })
 rule(title([[^(Picture-in-Picture)$]]), { animation = "fade" })
 
 -- Tiling exceptions
-rule(class([[^(Spotify)$]]), { tile = true })
+rule(class([[^(com\.github\.th-ch\.youtube-music)$]]), { tile = true })
 rule(class([[^(discord)$]]), { tile = true })
 
 -- Window borders
@@ -154,7 +153,7 @@ rule(class([[^(discord)$]]), { border_color = "rgb(" .. p.peach .. ")" })
 rule(title([[^(Picture-in-Picture)$]]), { pin = true })
 
 rule(class([[^(steam)$]]), { no_initial_focus = true })
-rule(class([[^(spotify)$]]), { no_initial_focus = true })
+rule(class([[^(com\.github\.th-ch\.youtube-music)$]]), { no_initial_focus = true })
 
 rule(class([[^(steam_app_.*)$]]), { immediate = true })
 rule(class([[^(cs2)$]]), { immediate = true })
@@ -165,7 +164,7 @@ rule({ xwayland = true }, { rounding = 12 })
 -- Workspace rules
 hl.workspace_rule({ workspace = "1", persistent = true })
 hl.workspace_rule({ workspace = "2", persistent = true })
-hl.workspace_rule({ workspace = "special:music", on_created_empty = "spotify" })
+hl.workspace_rule({ workspace = "special:music", on_created_empty = "youtube-music" })
 hl.workspace_rule({ workspace = "special:term", on_created_empty = "alacritty" })
 hl.workspace_rule({ workspace = "special:dropdown", on_created_empty = "alacritty --class dropdown" })
 
