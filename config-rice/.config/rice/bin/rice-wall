@@ -80,6 +80,28 @@ pick() {
     set_wall "$output" "${files[$idx]}"
 }
 
+# Hub tab: rofi calls this script back as its "wall" mode (ROFI_RETV set). The
+# grid needs its own window layout, so the tab only hands off to it.
+tab() {
+    local grid=$'\U000F0B3F  Open the wallpaper grid' rand=$'\U000F0566  Random wallpaper'
+    local output files=()
+    if [ "$ROFI_RETV" = 1 ]; then
+        case ${1:-} in
+        "$grid") setsid -f sh -c 'sleep 0.2; exec "$0"' "$0" >/dev/null 2>&1 </dev/null; exit 0 ;;
+        "$rand")
+            output=$(hyprctl -j monitors | jq -r '.[] | select(.focused) | .name')
+            mapfile -t files < <(images)
+            ((${#files[@]})) && set_wall "$output" "${files[RANDOM % ${#files[@]}]}"
+            exit 0
+            ;;
+        esac
+    fi
+    printf '\0prompt\x1fWallpaper\n\0no-custom\x1ftrue\n\0message\x1f%s\n' "Enter picks; SUPER+W opens the grid directly"
+    printf '%s\n' "$grid" "$rand"
+}
+
+[ -n "${ROFI_RETV:-}" ] && { tab "$@"; exit 0; }
+
 case ${1:-} in
 "") pick ;;
 set) set_wall "${2:?usage: rice-wall set OUTPUT FILE}" "${3:?usage: rice-wall set OUTPUT FILE}" ;;

@@ -1,16 +1,12 @@
 #!/usr/bin/env bash
-# rice-power: rofi power menu (SUPER+M, SUPER+Escape, Waybar power button).
+# rice-power: rofi power menu (SUPER+M, SUPER+Escape, Waybar power button, hub tab).
 # Log out, reboot and shut down ask Yes/No first, with No preselected.
+#
+# Run without arguments to open rofi; rofi then calls this script back as its
+# "power" mode, with ROFI_RETV saying why (0 open, 1 pick) and the picked row
+# in $1. The confirm step keeps its question in ROFI_DATA.
 
 set -euo pipefail
-
-menu() { # prompt, then one item per line on stdin; prints the pick
-    rofi -dmenu -i -no-custom -p "$1" -theme-str 'window { width: 360px; } listview { lines: 5; }'
-}
-
-confirm() {
-    [ "$(printf 'No\nYes\n' | menu "$1?")" = Yes ]
-}
 
 # Material Design nerd-font icons as escapes (Basic-plane glyphs get lost in editors)
 lock=$'\U000F033E  Lock'
@@ -19,13 +15,55 @@ logout=$'\U000F0343  Log out'
 reboot=$'\U000F0709  Reboot'
 poweroff=$'\U000F0425  Shut down'
 
-pick=$(printf '%s\n' "$lock" "$suspend" "$logout" "$reboot" "$poweroff" | menu Power) || exit 0
+if [ -z "${ROFI_RETV:-}" ]; then
+    exec rofi -show power -modes "power:$0" \
+        -theme-str 'window { width: 360px; } listview { lines: 5; } mainbox { children: [ inputbar, message, listview ]; }'
+fi
 
-case $pick in
-"$lock") loginctl lock-session ;;
-"$suspend") systemctl suspend ;; # hypridle locks first (before_sleep_cmd)
-"$logout") confirm "Log out" && hyprctl dispatch 'hl.dsp.exit()' ;;
-"$reboot") confirm "Reboot" && systemctl reboot ;;
-"$poweroff") confirm "Shut down" && systemctl poweroff ;;
+# run a command detached, with stdout off rofi's pipe, or rofi never closes
+go() { setsid -f "$@" >/dev/null 2>&1 </dev/null; }
+
+screen() { # print rofi's mode options for a screen
+    printf '\0prompt\x1fPower\n\0no-custom\x1ftrue\n\0message\x1f%s\n\0data\x1f%s\n' "$1" "${2:-}"
+}
+
+menu() {
+    screen "Esc closes"
+    printf '%s\n' "$lock" "$suspend" "$logout" "$reboot" "$poweroff"
+}
+
+confirm() { # label, action id: ask Yes/No, No first
+    screen "$1?" "confirm:$2"
+    printf 'No\nYes\n'
+}
+
+run_action() {
+    case $1 in
+    logout) go hyprctl dispatch 'hl.dsp.exit()' ;;
+    reboot) go systemctl reboot ;;
+    poweroff) go systemctl poweroff ;;
+    esac
+}
+
+pick=${1:-}
+case ${ROFI_DATA:-} in
+confirm:*)
+    [ "$pick" = Yes ] && run_action "${ROFI_DATA#confirm:}" || menu
+    exit 0
+    ;;
+esac
+
+case $ROFI_RETV in
+1)
+    case $pick in
+    "$lock") go loginctl lock-session ;;
+    "$suspend") go systemctl suspend ;; # hypridle locks first (before_sleep_cmd)
+    "$logout") confirm "Log out" logout ;;
+    "$reboot") confirm "Reboot" reboot ;;
+    "$poweroff") confirm "Shut down" poweroff ;;
+    *) menu ;;
+    esac
+    ;;
+*) menu ;;
 esac
 exit 0

@@ -4,7 +4,7 @@
 -- repeat it. Nothing fires in fullscreen or game mode. (Lua cannot see a
 -- drag in progress; the dwell keeps a drag through a corner from firing.)
 --
---   top-left   window overview: rofi -show window (hyprshell's overview
+--   top-left   window overview: rice-hub window (hyprshell's overview
 --              replaces it in P24 once installed)
 --   top-right  quick settings, wired in P29
 --
@@ -15,7 +15,7 @@ rice.corners = {
     size = 2,         -- px from the edge
     dwell_ticks = 3,  -- x 100 ms
     actions = {
-        top_left = function() hl.exec_cmd("rofi -show window") end,
+        top_left = function() hl.exec_cmd("~/.config/rice/bin/rice-hub window") end,
     },
 }
 
