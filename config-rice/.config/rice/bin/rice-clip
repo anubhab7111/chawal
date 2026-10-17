@@ -28,6 +28,7 @@ entry() { printf '%s\t' "$1"; }
 # list [message] [data]: print rofi's mode options, then one row per entry
 list() {
     printf '\0use-hot-keys\x1ftrue\n\0no-custom\x1ftrue\n'
+    printf '\0prompt\x1f%s\n' $'\U000F014C  Clip'
     printf '\0message\x1f%s\n' "${1:-$HINT}"
     printf '\0data\x1f%s\n' "${2:-}"
 

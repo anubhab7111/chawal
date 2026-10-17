@@ -96,7 +96,7 @@ tab() {
             ;;
         esac
     fi
-    printf '\0prompt\x1fWallpaper\n\0no-custom\x1ftrue\n\0message\x1f%s\n' "Enter picks; SUPER+W opens the grid directly"
+    printf '\0prompt\x1f%s\n\0no-custom\x1ftrue\n\0message\x1f%s\n' $'\U000F0976  Walls' "Enter picks; SUPER+W opens the grid directly"
     printf '%s\n' "$grid" "$rand"
 }
 
