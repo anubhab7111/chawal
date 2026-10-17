@@ -32,7 +32,7 @@ local commands = {
 
     -- UI components (waybar and the eww edge widgets start with the theme above)
     "hypridle",
-    "mako",
+    "swaync",
 
     -- Tray applets
     "nm-applet --indicator & blueman-applet",

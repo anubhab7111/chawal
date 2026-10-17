@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# rice-notify-sound: the "new notification" ping, run by swaync for every
+# notification it receives (config-swaync, "scripts"). swaync runs scripts
+# even while do-not-disturb is on, so check it here.
+#
+# Detached on purpose: swaync waits for its scripts, and swaync-client needs
+# swaync to answer, so asking it from the foreground would deadlock.
+
+( [ "$(swaync-client -D -sw 2>/dev/null)" = true ] ||
+    paplay /usr/share/sounds/freedesktop/stereo/message.oga ) >/dev/null 2>&1 &
