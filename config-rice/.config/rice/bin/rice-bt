@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+# rice-bt: Bluetooth devices as a rofi mode (hub tab).
+#
+#   rice-bt            open rofi on the Bluetooth tab alone
+#
+#   Enter    connect / disconnect the device
+#   Alt+1    power the adapter on / off
+#   Alt+2    unpair (forget) the device
+#
+# Rofi calls this script back as its "bt" mode (ROFI_RETV 0 open, 1 pick,
+# 10-11 the Alt+1..2 keys); the MAC address arrives as ROFI_INFO. Connected
+# devices are highlighted and show their battery when the device reports one.
+
+set -euo pipefail
+
+HINT="Enter connect / disconnect    Alt+1 power    Alt+2 unpair"
+
+if [ -z "${ROFI_RETV:-}" ]; then
+    exec rofi -show bt -modes "bt:$0" \
+        -kb-remove-word-forward "Control+Alt+d" \
+        -kb-custom-1 "Alt+1" -kb-custom-2 "Alt+2" \
+        -theme-str 'window { width: 720px; } mainbox { children: [ inputbar, message, listview ]; }'
+fi
+
+powered() { bluetoothctl show | grep -q 'Powered: yes'; }
+
+icon_for() { # bluez Icon field -> glyph
+    case $1 in
+    audio-headphones | audio-headset) printf '\U000F02CB' ;;
+    audio-card | audio-speakers) printf '\U000F04C3' ;;
+    input-mouse) printf '\U000F037D' ;;
+    input-keyboard) printf '\U000F030C' ;;
+    input-gaming) printf '\U000F0297' ;;
+    phone) printf '\U000F011C' ;;
+    video-display) printf '\U000F0502' ;;
+    *) printf '\U000F00AF' ;;
+    esac
+}
+
+list() {
+    printf '\0prompt\x1f%s\n' $'\U000F00AF  BT'
+    printf '\0no-custom\x1ftrue\n\0use-hot-keys\x1ftrue\n\0keep-selection\x1ftrue\n'
+    if ! powered; then
+        printf '\0message\x1f%s\n' "Bluetooth is off.    Alt+1 power on"
+        return 0
+    fi
+    printf '\0message\x1f%s\n' "$HINT"
+    local line mac name info conn bat icon pass
+    local -a recs=()
+    while read -r line; do
+        mac=$(awk '{print $2}' <<<"$line")
+        name=${line#Device $mac }
+        info=$(bluetoothctl info "$mac" 2>/dev/null || true)
+        conn=no
+        grep -q 'Connected: yes' <<<"$info" && conn=yes
+        bat=$(sed -n 's/.*Battery Percentage:.*(\([0-9]*\)).*/\1/p' <<<"$info" | head -1)
+        icon=$(icon_for "$(sed -n 's/.*Icon: //p' <<<"$info" | head -1)")
+        recs+=("$conn|$mac|$icon|$bat|$name")
+    done < <(bluetoothctl devices)
+    # connected devices first, then the rest in bluez's order
+    for pass in yes no; do
+        for line in "${recs[@]}"; do
+            IFS="|" read -r conn mac icon bat name <<<"$line"
+            [ "$conn" = "$pass" ] || continue
+            printf '%s  %s' "$icon" "$name"
+            [ "$conn" = yes ] && printf '  ·  connected'
+            [ -n "$bat" ] && printf '  ·  %s%%' "$bat"
+            printf '\0info\x1f%s' "$mac"
+            [ "$conn" = yes ] && printf '\x1factive\x1ftrue'
+            printf '\n'
+        done
+    done
+}
+
+pick() {
+    local mac=$ROFI_INFO
+    if bluetoothctl info "$mac" 2>/dev/null | grep -q 'Connected: yes'; then
+        timeout 8 bluetoothctl disconnect "$mac" >/dev/null 2>&1 || true
+    else
+        timeout 8 bluetoothctl connect "$mac" >/dev/null 2>&1 ||
+            notify-send -u critical -i bluetooth "Bluetooth" "Could not connect (is it on and in range?)"
+    fi
+}
+
+case $ROFI_RETV in
+1) [ -n "${ROFI_INFO:-}" ] && powered && pick ;;
+10)
+    if powered; then bluetoothctl power off >/dev/null 2>&1; else
+        rfkill unblock bluetooth 2>/dev/null || true
+        bluetoothctl power on >/dev/null 2>&1
+    fi || true
+    ;;
+11) [ -n "${ROFI_INFO:-}" ] && bluetoothctl remove "$ROFI_INFO" >/dev/null 2>&1 || true ;;
+esac
+sleep 0.3
+list
+exit 0
