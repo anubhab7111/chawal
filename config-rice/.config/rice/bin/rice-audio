@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+# rice-audio: output devices with volume controls, as a rofi mode (hub tab).
+#
+#   rice-audio         open rofi on the Audio tab alone
+#
+#   Enter    make the sink the default output
+#   Alt+1    volume -5%        (on the highlighted sink)
+#   Alt+2    volume +5%
+#   Alt+3    mute / unmute
+#   Alt+4    play / pause      (playerctl, whatever is playing)
+#   Alt+5    next track
+#
+# Rofi calls this script back as its "audio" mode (ROFI_RETV 0 open, 1 pick,
+# 10-14 the Alt+1..5 keys); the sink name arrives as ROFI_INFO. The message bar
+# shows the default output's volume and the current track.
+
+set -euo pipefail
+
+HINT="Enter use    Alt+1/2 vol -/+5%    Alt+3 mute    Alt+4 play/pause    Alt+5 next"
+
+if [ -z "${ROFI_RETV:-}" ]; then
+    exec rofi -show audio -modes "audio:$0" \
+        -kb-remove-word-forward "Control+Alt+d" \
+        -kb-custom-1 "Alt+1" -kb-custom-2 "Alt+2" -kb-custom-3 "Alt+3" \
+        -kb-custom-4 "Alt+4" -kb-custom-5 "Alt+5" \
+        -theme-str 'window { width: 720px; } mainbox { children: [ inputbar, message, listview ]; }'
+fi
+
+bar() { # percent -> ▰▰▰▱▱▱▱▱▱▱ (10 cells, clamped)
+    local p=$1 n i out=""
+    n=$(((p + 5) / 10))
+    ((n > 10)) && n=10
+    for ((i = 0; i < 10; i++)); do ((i < n)) && out+="▰" || out+="▱"; done
+    printf '%s' "$out"
+}
+
+list() {
+    local def sink_g=$'\U000F04C3' mute_g=$'\U000F075F' track="" status=""
+    def=$(pactl get-default-sink 2>/dev/null || true)
+
+    printf '\0prompt\x1f%s\n' $'\U000F057E  Audio'
+    printf '\0no-custom\x1ftrue\n\0use-hot-keys\x1ftrue\n\0keep-selection\x1ftrue\n'
+
+    status=$(playerctl status 2>/dev/null || true)
+    if [ -n "$status" ] && [ "$status" != Stopped ]; then
+        track=$(playerctl metadata --format '{{artist}} - {{title}}' 2>/dev/null || true)
+        [ "$status" = Playing ] && track=$'\U000F040A'"  $track" || track=$'\U000F03E4'"  $track"
+    fi
+    # the message line: now playing when there is a track, else the key hints
+    printf '\0message\x1f%s\n' "${track:+$track
+}$HINT"
+
+    # sinks whose active port reports "not available" (unplugged jack, idle HDMI)
+    # cannot be made default, so they are left out
+    pactl -f json list sinks | jq -r '
+        .[] | select(.active_port as $p | [.ports[] | select(.name == $p) | .availability] | index("not available") | not)
+        | [.name, .description, (.volume | to_entries[0].value.value_percent | rtrimstr("%")), .mute]
+        | @tsv' |
+        while IFS=$'\t' read -r name desc vol mute; do
+            desc=${desc##*Controller }
+            if [ "$mute" = true ]; then
+                printf '%s  %s  ·  muted\0icon\x1f%s\x1finfo\x1f%s' "$mute_g" "$desc" "audio-volume-muted" "$name"
+            else
+                printf '%s  %s  ·  %s %s%%\0icon\x1f%s\x1finfo\x1f%s' "$sink_g" "$desc" "$(bar "$vol")" "$vol" "audio-speakers" "$name"
+            fi
+            [ "$name" = "$def" ] && printf '\x1factive\x1ftrue'
+            printf '\n'
+        done
+}
+
+nudge() { # relative volume change on $ROFI_INFO, kept inside 0..100
+    local cur new
+    cur=$(pactl -f json list sinks | jq -r --arg n "$ROFI_INFO" \
+        '.[] | select(.name == $n) | .volume | to_entries[0].value.value_percent | rtrimstr("%")')
+    [ -n "$cur" ] || return 0
+    new=$((cur + $1))
+    ((new < 0)) && new=0
+    ((new > 100)) && new=100
+    pactl set-sink-volume "$ROFI_INFO" "${new}%" >/dev/null 2>&1 || true
+}
+
+case $ROFI_RETV in
+1) [ -n "${ROFI_INFO:-}" ] && pactl set-default-sink "$ROFI_INFO" >/dev/null 2>&1 || true ;;
+10) [ -n "${ROFI_INFO:-}" ] && nudge -5 ;;
+11) [ -n "${ROFI_INFO:-}" ] && nudge 5 ;;
+12) [ -n "${ROFI_INFO:-}" ] && pactl set-sink-mute "$ROFI_INFO" toggle >/dev/null 2>&1 || true ;;
+13) playerctl play-pause >/dev/null 2>&1 || true ;;
+14) playerctl next >/dev/null 2>&1 || true ;;
+esac
+sleep 0.1 # let the change land before the list is read again
+list
+exit 0
