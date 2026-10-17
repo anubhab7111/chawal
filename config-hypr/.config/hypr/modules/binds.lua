@@ -3,7 +3,7 @@
 
 local terminal    = "alacritty"
 local fileManager = "thunar"
-local menu        = "rofi -show drun"
+local menu        = "~/.config/rice/bin/rice-hub"
 local code        = "vscodium"
 local browser     = "firefox"
 
@@ -24,7 +24,7 @@ bind(mainMod .. " + escape", exec(power_menu))
 -- Applications
 bind(mainMod .. " + Q", exec(terminal))
 bind(mainMod .. " + E", exec(fileManager))
-bind(mainMod .. " + SPACE", exec(menu))                                        -- App launcher
+bind(mainMod .. " + SPACE", exec(menu))                                        -- Rofi hub (apps first; Tab flips tabs)
 bind(mainMod .. " + SHIFT + C", exec(code))
 bind(mainMod .. " + B", exec(browser))
 bind(mainMod .. " + SHIFT + B", exec("chromium"))
@@ -120,7 +120,7 @@ bind("CTRL + PRINT", exec("~/.config/rice/bin/rice-record toggle region"))
 bind("CTRL + SHIFT + PRINT", exec("~/.config/rice/bin/rice-record toggle screen"))
 
 -- Utilities
-bind("SUPER + SHIFT + V", exec("~/.config/rice/bin/rice-clip"))                -- Clipboard history
+bind("SUPER + SHIFT + V", exec("~/.config/rice/bin/rice-hub clip"))           -- Clipboard history (hub tab)
 bind("SUPER + W", exec("~/.config/rice/bin/rice-wall"))                         -- Wallpaper picker
 
 -- Zoom

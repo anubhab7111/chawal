@@ -129,7 +129,7 @@
   "custom/launcher": {
     "format": "󰣇",
     "tooltip": false,
-    "on-click": "rofi -show drun"
+    "on-click": "~/.config/rice/bin/rice-hub"
   },
   "custom/power-menu": {
     "format": "⏻",
