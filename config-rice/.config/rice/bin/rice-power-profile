@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# rice-power-profile: TLP power profile, through tlp-pd (tlpctl).
+#
+#   rice-power-profile get          print power-saver, balanced or performance
+#   rice-power-profile cycle        power-saver -> balanced -> performance -> ...
+#   rice-power-profile set PROFILE  switch to PROFILE
+#
+# The profile only changes TLP's runtime settings; /etc/tlp.conf is not touched.
+
+set -u
+
+get() { timeout 3 tlpctl get 2>/dev/null | tr -d '[:space:]'; }
+
+case ${1:-} in
+get) p=$(get) && [ -n "$p" ] && printf '%s\n' "$p" ;;
+set) timeout 5 tlpctl set "${2:?usage: rice-power-profile set PROFILE}" >/dev/null 2>&1 ;;
+cycle)
+    case $(get) in
+    power-saver) next=balanced ;;
+    balanced) next=performance ;;
+    performance) next=power-saver ;;
+    *) exit 1 ;;
+    esac
+    timeout 5 tlpctl set "$next" >/dev/null 2>&1
+    ;;
+*)
+    sed -n '3,7s/^# \{0,1\}//p' "$0" >&2
+    exit 2
+    ;;
+esac

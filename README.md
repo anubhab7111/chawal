@@ -68,8 +68,8 @@ To try an unstowed checkout: `RICE_BIN=$PWD/config-rice/.config/rice/bin ./confi
 
 `SUPER+N` or the top-right corner opens a card of toggle tiles (Wi-Fi,
 Bluetooth, do not disturb, night light, caffeine, game mode, the Mocha/Latte
-theme, and power profile, which stays disabled until it has something to
-switch). Click a tile to flip it; click outside the card or press `Esc` to
+theme, and the power profile, which cycles TLP's power-saver / balanced /
+performance through `rice-power-profile` and `tlp-pd`). Click a tile to flip it; click outside the card or press `Esc` to
 close. It is eww:
 `config-eww/.config/eww/widgets/qs.yuck`, opened by `scripts/qs-ctl`, with the
 switches behind `rice-toggle`. No eww window exists while it is closed. `Esc`

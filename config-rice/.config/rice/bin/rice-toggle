@@ -7,12 +7,13 @@
 #   rice-toggle state ID    print on or off
 #
 # Tiles: wifi, bluetooth, dnd, night, caffeine, game, power, theme.
-# power (power profiles) is listed but disabled until P18 gives it something
-# to switch. theme is on while Latte is the active theme. Each tile is
+# power is the TLP profile (a click cycles power-saver / balanced /
+# performance; on = not balanced; disabled when tlp-pd doesn't answer). theme
+# is on while Latte is the active theme. Each tile is
 #   {"id","icon","label","sub","on","enabled"}
 # where sub is the small line under the label (the network name for Wi-Fi).
 #
-# Backends: nmcli, bluetoothctl, rice-dnd, rice-nightlight, rice-caffeine and
+# Backends: nmcli, bluetoothctl, rice-dnd, rice-nightlight, rice-caffeine, rice-power-profile and
 # rice-gamemode. RICE_BIN overrides where those live (tests).
 
 set -u
@@ -41,6 +42,10 @@ on() { # id: succeed when the switch is on
     caffeine) "$BIN/rice-caffeine" status 2>/dev/null | grep -q '"alt":"on"' ;;
     game) [ -f "$RUN/gamemode" ] ;;
     theme) [ "$("$BIN/rice-theme" get 2>/dev/null)" = latte ] ;;
+    power) # on = a non-default profile (power-saver or performance)
+        local p
+        p=$("$BIN/rice-power-profile" get 2>/dev/null) && [ "$p" != balanced ]
+        ;;
     *) return 1 ;;
     esac
 }
@@ -54,7 +59,7 @@ sub() { # id on?: the small line under the label
             printf '%s' "${s:-On}"
         else printf Off; fi
         ;;
-    power) printf 'Not set up' ;;
+    power) "$BIN/rice-power-profile" get 2>/dev/null || printf 'Unavailable' ;;
     theme) if [ "$2" = 1 ]; then printf Latte; else printf Mocha; fi ;;
     *) [ "$2" = 1 ] && printf On || printf Off ;;
     esac
@@ -77,8 +82,9 @@ lines() {
     for row in "${TILES[@]}"; do
         IFS='|' read -r id icon label <<<"$row"
         local en=1 o s
-        case $id in power) en=0 ;; esac
         IFS=$'\t' read -r o s <"$dir/$id"
+        # power profile: disabled (and off) while tlp-pd doesn't answer
+        case $id in power) [ "$s" = Unavailable ] && en=0 ;; esac
         printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$id" "$icon" "$label" "$o" "$en" "$s"
     done
     rm -rf "$dir"
@@ -105,6 +111,7 @@ flip() {
         caffeine) "$BIN/rice-caffeine" toggle ;;
         game) "$BIN/rice-gamemode" toggle ;;
         theme) "$BIN/rice-theme" toggle ;;
+        power) "$BIN/rice-power-profile" cycle ;;
         esac
     } >/dev/null 2>&1 || true
 }

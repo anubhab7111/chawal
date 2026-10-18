@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# rice-batsignal: battery warnings (batsignal) at 20% / 10% / 5%, through the
+# notification daemon. Started from autostart.lua.
+#
+# It does not start when there is no battery, or when the battery reads 0%
+# while not discharging (a stuck gauge would warn forever). Restart it after
+# the battery is fixed or replaced.
+
+set -u
+
+BAT=/sys/class/power_supply/BAT0
+[ -r "$BAT/capacity" ] || exit 0
+if [ "$(cat "$BAT/capacity")" -eq 0 ] && [ "$(cat "$BAT/status" 2>/dev/null)" != Discharging ]; then
+    echo "rice-batsignal: BAT0 reads 0% and is not discharging, not starting" >&2
+    exit 0
+fi
+
+# -d 0: no "danger" level (it only exists to run a command, and none is set)
+exec batsignal -w 20 -c 10 -d 0 -W "Battery low" -C "Battery critical, plug in" -I battery-low
