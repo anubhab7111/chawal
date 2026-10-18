@@ -84,14 +84,14 @@
     "format-disconnected": "<b>󰤭</b>",
     "tooltip": true,
     "tooltip-format-wifi": "{essid} ({signalStrength}%)\n󰓅 {ipaddr}/{cidr}",
-    "on-click": "bash ~/.config/waybar/scripts/wofi-wifi-menu.sh",
+    "on-click": "~/.config/rice/bin/rice-hub net",
     "interval": 5
   },
   "bluetooth": {
     "format": "<b>󰂯</b>",
     "format-connected": "<b>󰂱 {num_connections}</b>",
     "format-disabled": "<b>󰂲</b>",
-    "on-click": "bash ~/.config/waybar/scripts/wofi-bluetooth",
+    "on-click": "~/.config/rice/bin/rice-hub bt",
     "interval": 30
   },
   "battery": {
