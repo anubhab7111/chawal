@@ -162,7 +162,7 @@ stowed packages.
 | `SUPER+left drag` / `right drag` | move / resize a window |
 | `SUPER+R` | resize mode (arrows, then `Esc` or `R`) |
 | `SUPER+S` / `SHIFT+S` | magic scratchpad / send window to it |
-| `SUPER+grave` / `T` / `U` | drop-down terminal / terminal / music scratchpads |
+| `SUPER+grave` / `T` / `M` | drop-down terminal / terminal / music scratchpads |
 | `SUPER+F1` | game mode |
 | `SUPER+=` / `-` / `SHIFT+-` | screen zoom in / out / reset |
 | `SUPER+SHIFT+T`, touchpad key | toggle the touchpad (`modules/lid.lua`) |

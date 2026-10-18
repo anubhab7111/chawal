@@ -60,7 +60,7 @@ bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic"
 -- Scratchpads: each starts its app the first time (workspace rules in rules.lua)
 bind(mainMod .. " + grave", hl.dsp.workspace.toggle_special("dropdown"))      -- drop-down terminal
 bind(mainMod .. " + T", hl.dsp.workspace.toggle_special("term"))
-bind(mainMod .. " + U", hl.dsp.workspace.toggle_special("music"))
+bind(mainMod .. " + M", hl.dsp.workspace.toggle_special("music"))
 
 -- Mouse: scroll through workspaces, LMB drag moves, RMB drag resizes
 bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
