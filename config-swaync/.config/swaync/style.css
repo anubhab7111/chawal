@@ -19,21 +19,17 @@
     background: transparent;
 }
 
-/* Loud look. A card is three stacked backgrounds: a 4px urgency strip down
-   the left edge (the Waybar pill gradient for that urgency), the glass fill,
-   and underneath the tri-colour ring (same stops as the Hyprland border) that
-   shows through the 2px transparent border. swaync has no per-app CSS hook,
-   so the colour follows urgency: normal mauve, low green, critical red. */
+/* Loud look. A popup is the glass fill over the tri-colour ring (same stops as
+   the Hyprland border) that shows through the 2px transparent border;
+   critical swaps the ring for solid red. */
 .notification {
     background-color: transparent;
     background-image:
-        linear-gradient(180deg, @pill_network_1, @pill_network_2),
         linear-gradient(alpha(@base, 0.92), alpha(@base, 0.92)),
         linear-gradient(135deg, @mauve, @blue, @teal);
-    background-size: 4px 100%, 100% 100%, 100% 100%;
     background-repeat: no-repeat;
-    background-origin: padding-box, padding-box, border-box;
-    background-clip: padding-box, padding-box, border-box;
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
     color: @text;
     border: 2px solid transparent;
     border-radius: 14px;
@@ -42,16 +38,8 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.notification.low {
-    background-image:
-        linear-gradient(180deg, @pill_battery_1, @pill_battery_2),
-        linear-gradient(alpha(@base, 0.92), alpha(@base, 0.92)),
-        linear-gradient(135deg, @mauve, @blue, @teal);
-}
-
 .notification.critical {
     background-image:
-        linear-gradient(180deg, @pill_dnd_1, @pill_dnd_2),
         linear-gradient(alpha(@base, 0.92), alpha(@base, 0.92)),
         linear-gradient(@red, @red);
 }
@@ -138,28 +126,19 @@
     box-shadow: none;
 }
 
-/* Inside the panel the cards need no ring of their own: strip + fill only */
+/* Inside the panel the cards need no ring of their own: a plain fill, with a
+   red outline when critical */
 .control-center .notification-row .notification {
     margin: 6px;
-    border: 0;
+    border: 2px solid transparent;
     background-image:
-        linear-gradient(180deg, @pill_network_1, @pill_network_2),
         linear-gradient(alpha(@surface0, 0.8), alpha(@surface0, 0.8));
-    background-size: 4px 100%, 100% 100%;
-    background-origin: padding-box, padding-box;
-    background-clip: padding-box, padding-box;
-}
-
-.control-center .notification-row .notification.low {
-    background-image:
-        linear-gradient(180deg, @pill_battery_1, @pill_battery_2),
-        linear-gradient(alpha(@surface0, 0.8), alpha(@surface0, 0.8));
+    background-origin: padding-box;
+    background-clip: padding-box;
 }
 
 .control-center .notification-row .notification.critical {
-    background-image:
-        linear-gradient(180deg, @pill_dnd_1, @pill_dnd_2),
-        linear-gradient(alpha(@surface0, 0.8), alpha(@surface0, 0.8));
+    border-color: @red;
 }
 
 .widget-title {
