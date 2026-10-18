@@ -21,3 +21,7 @@ config-tmux/.config/tmux/colors.conf
 # themes/rice slot lives here too.
 config-cava/.config/cava/themes/
 config-cava/.config/cava/shaders/
+# GTK4 css links that rice-theme points at the active GTK theme
+config-gtk-4.0/.config/gtk-4.0/gtk.css
+config-gtk-4.0/.config/gtk-4.0/gtk-dark.css
+config-gtk-4.0/.config/gtk-4.0/assets

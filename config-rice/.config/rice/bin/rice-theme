@@ -42,6 +42,18 @@ slot() {
     ln -sfn "$target" "$link"
 }
 
+# gtk_theme_dir: print the directory of the active theme's GTK theme (named in
+# its gtk-theme file); fail when it isn't installed.
+gtk_theme_dir() {
+    local name d
+    [ -f "$CURRENT/gtk-theme" ] || return 1
+    name=$(tr -d '[:space:]' < "$CURRENT/gtk-theme")
+    for d in "$HOME/.themes/$name" "/usr/share/themes/$name"; do
+        [ -d "$d" ] && { printf '%s\n' "$d"; return 0; }
+    done
+    return 1
+}
+
 bootstrap() {
     local name
     name=$(get)
@@ -56,6 +68,16 @@ bootstrap() {
     slot "$CURRENT/btop.theme" "$HOME/.config/btop/themes/rice.theme"
     slot "$CURRENT/rofi-colors.rasi" "$HOME/.config/rofi/themes/colors.rasi"
     slot "$CURRENT/tmux-colors.conf" "$HOME/.config/tmux/colors.conf"
+
+    # GTK4 reads the theme's css from ~/.config/gtk-4.0. Point it at the
+    # active GTK theme, but only when that theme is installed (Latte's is
+    # an AUR package), so a missing package never breaks the links.
+    local gtk
+    if gtk=$(gtk_theme_dir); then
+        slot "$gtk/gtk-4.0/gtk.css" "$HOME/.config/gtk-4.0/gtk.css"
+        slot "$gtk/gtk-4.0/gtk-dark.css" "$HOME/.config/gtk-4.0/gtk-dark.css"
+        slot "$gtk/gtk-4.0/assets" "$HOME/.config/gtk-4.0/assets"
+    fi
 
     # alacritty watches the inode of the file it imports, so a retargeted
     # symlink goes unnoticed: copy the colours over the same file instead.
@@ -133,6 +155,17 @@ reload_apps() {
     if [ -f "$CURRENT/gtk-icon-theme" ]; then
         gsettings set org.gnome.desktop.interface icon-theme \
             "$(tr -d '[:space:]' < "$CURRENT/gtk-icon-theme")" >/dev/null 2>&1 || true
+    fi
+
+    # Light/dark for libadwaita, Firefox and Brave, and the GTK theme for the
+    # rest (settings.ini no longer names one, so gsettings decides).
+    if [ -f "$CURRENT/color-scheme" ]; then
+        gsettings set org.gnome.desktop.interface color-scheme \
+            "$(tr -d '[:space:]' < "$CURRENT/color-scheme")" >/dev/null 2>&1 || true
+    fi
+    local gtk
+    if gtk=$(gtk_theme_dir); then
+        gsettings set org.gnome.desktop.interface gtk-theme "${gtk##*/}" >/dev/null 2>&1 || true
     fi
 
     pkill -USR2 -x waybar >/dev/null 2>&1 || true # full reload: config + css
