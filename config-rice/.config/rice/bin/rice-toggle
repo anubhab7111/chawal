@@ -12,8 +12,7 @@
 #   {"id","icon","label","sub","on","enabled"}
 # where sub is the small line under the label (the network name for Wi-Fi).
 #
-# The same switches as the rofi Toggles tab (rice-toggles), with the same
-# backends: nmcli, bluetoothctl, rice-dnd, rice-nightlight, rice-caffeine and
+# Backends: nmcli, bluetoothctl, rice-dnd, rice-nightlight, rice-caffeine and
 # rice-gamemode. RICE_BIN overrides where those live (tests).
 
 set -u

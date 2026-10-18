@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# rice-nightlight: warm screen tint through hyprsunset (Waybar's moon button).
+# rice-nightlight: warm screen tint through hyprsunset (the quick-settings Night light tile; darkman switches it by the sun).
 #
 #   rice-nightlight on|off|toggle
-#   rice-nightlight status     JSON for Waybar's custom/nightlight module
+#   rice-nightlight status     JSON state
 #
 # hyprsunset starts neutral (--identity) at login; this switches it over its
 # IPC and keeps a flag in $XDG_RUNTIME_DIR/rice so the state survives a
@@ -39,14 +39,11 @@ off() {
     rm -f "$FLAG"
 }
 
-notify_bar() { "$HOME/.config/rice/bin/rice-sync" nightlight; }
-
 case ${1:-} in
-on) on; notify_bar ;;
-off) off; notify_bar ;;
+on) on ;;
+off) off ;;
 toggle)
     if [ -f "$FLAG" ]; then off; else on; fi
-    notify_bar
     ;;
 status)
     if [ -f "$FLAG" ]; then

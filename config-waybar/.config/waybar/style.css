@@ -134,9 +134,6 @@ window#waybar {
 #pulseaudio,
 #network,
 #bluetooth,
-#custom-caffeine,
-#custom-nightlight,
-#custom-notification,
 #custom-gamemode,
 #custom-recording,
 #custom-pacman-update {
@@ -223,29 +220,6 @@ window#waybar {
 }
 
 /* ================================
-   CAFFEINE (rice-caffeine; was idle_inhibitor)
-   ================================ */
-#custom-caffeine {
-    color: @base;
-    background: linear-gradient(135deg, @yellow 0%, @peach 100%);
-    font-size: 16px;
-}
-
-#custom-caffeine.on {
-    color: @base;
-    background: linear-gradient(135deg, @green 0%, @teal 100%);
-    box-shadow:
-        0 4px 16px rgba(166, 227, 161, 0.4),
-        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-}
-
-#custom-caffeine:hover {
-    box-shadow:
-        0 6px 16px rgba(0, 0, 0, 0.4),
-        0 0 0 1px rgba(255, 255, 255, 0.08) inset;
-}
-
-/* ================================
    RECORDING (rice-record; only shown while recording)
    ================================ */
 #custom-recording {
@@ -261,40 +235,6 @@ window#waybar {
     color: @base;
     background: linear-gradient(135deg, @red 0%, @maroon 100%);
     font-size: 16px;
-}
-
-/* ================================
-   NIGHT LIGHT (rice-nightlight)
-   ================================ */
-#custom-nightlight {
-    color: @text;
-    background: @surface1;
-    font-size: 16px;
-}
-
-#custom-nightlight.on {
-    color: @base;
-    background: linear-gradient(135deg, @peach 0%, @yellow 100%);
-}
-
-/* ================================
-   NOTIFICATIONS (swaync: click = panel, right-click = do not disturb)
-   ================================ */
-#custom-notification {
-    color: @text;
-    background: @surface1;
-    font-size: 16px;
-}
-
-#custom-notification.notification {
-    color: @base;
-    background: linear-gradient(135deg, @sky 0%, @sapphire 100%);
-}
-
-#custom-notification.dnd-none,
-#custom-notification.dnd-notification {
-    color: @base;
-    background: linear-gradient(135deg, @peach 0%, @yellow 100%);
 }
 
 /* ================================
@@ -324,16 +264,6 @@ window#waybar {
     background: @crust;
     color: @blue;
     font-weight: bolder;
-}
-
-/* ================================
-   SYSTEM TRAY
-   ================================ */
-#tray {
-    background: rgba(49, 50, 68, 0.95);
-    padding: 3px 12px;
-    margin: 6px 0px 6px 8px;
-    border-radius: 14px;
 }
 
 /* ================================

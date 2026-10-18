@@ -30,18 +30,16 @@ backup under `~/.dotfiles-backup/` first, never deleted).
 
 ## Rofi control hub
 
-`SUPER+SPACE` opens one rofi window with eleven tabs. `Tab` / `Shift+Tab`
+`SUPER+SPACE` opens one rofi window with nine tabs. `Tab` / `Shift+Tab`
 (or `Ctrl+Tab`) flip between them; `Alt+1` … `Alt+5` are the per-row actions
 of whichever tab is showing. The scripts live in `config-rice/.config/rice/bin`;
 `rice-hub` is the launcher and every other tab is a `rice-*` script running as
-a rofi script mode (each also works on its own: `rice-audio`, `rice-net`, …).
+a rofi script mode (each also works on its own: `rice-net`, `rice-windows`, …).
 
 | Tab | Script | Enter | Alt+1 … Alt+5 |
 |---|---|---|---|
 | Apps | rofi `drun` | launch | |
-| Toggles | `rice-toggles` | flip a switch (Wi-Fi, Bluetooth, night light, DND, caffeine, game mode, mute, mic) | |
 | Windows | `rice-windows` | focus | close · float · pin · bring here |
-| Audio | `rice-audio` | make default output | vol − · vol + · mute · play/pause · next |
 | Wi-Fi | `rice-net` | connect / disconnect | forget · rescan |
 | BT | `rice-bt` | connect / disconnect | power · unpair |
 | Calc | `rice-calc` | evaluate what you typed (qalc) | clear history · copy result |
@@ -53,7 +51,7 @@ a rofi script mode (each also works on its own: `rice-audio`, `rice-net`, …).
 Direct jumps: `SUPER+SHIFT+V` clipboard, `SUPER+/` calculator, `SUPER+.` emoji,
 `SUPER+W` wallpapers, `SUPER+M` / `SUPER+Esc` power, and the top-left hot corner
 opens Windows. Optional dependencies: `qalc` (Calc), `rofimoji` (Emoji),
-`cliphist` + `wl-clipboard` (Clip), `playerctl` (Audio now-playing).
+`cliphist` + `wl-clipboard` (Clip). Switches and sliders live in the quick-settings panel (`SUPER+N`) and the right-edge gauges, not here.
 
 Look: the theme is `config-rofi/.config/rofi/themes/rice.rasi`, coloured from
 `~/.config/theming/current/rofi-colors.rasi`, so `rice-theme` re-colours it.
@@ -75,6 +73,15 @@ Bluetooth, do not disturb, night light, caffeine, game mode, plus power profile
 and theme, which stay disabled until they have something to switch). Click a
 tile to flip it; click outside the card or press `Esc` to close. It is eww:
 `config-eww/.config/eww/widgets/qs.yuck`, opened by `scripts/qs-ctl`, with the
-switches behind `rice-toggle` (the same backends as the rofi Toggles tab). No
-window exists while it is closed. `Esc` is a Hyprland bind that exists only
-while the panel is open (`config-hypr/.config/hypr/modules/qs.lua`).
+switches behind `rice-toggle`. No eww window exists while it is closed. `Esc`
+is a Hyprland bind that exists only while the panel is open
+(`config-hypr/.config/hypr/modules/qs.lua`).
+
+All notifications are listed right under the panel (scrollable, with a Clear
+button): swaync's control centre, opened and closed together with the panel by
+`qs-ctl` and positioned just below it (`control-center-margin-top` in
+`config-swaync/.config/swaync/config.json` = panel height + margins; change it if
+the panel's height changes). Do not disturb, night light and caffeine are only
+here: Waybar has no bell, moon or caffeine button (night light still switches
+itself by the sun through darkman), and Waybar has no tray, so the nm-applet and
+blueman helpers (Wi-Fi password and pairing prompts) run without an icon.

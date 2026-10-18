@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# rice-caffeine: keep the session awake (Waybar's caffeine button).
+# rice-caffeine: keep the session awake (the quick-settings Caffeine tile).
 #
 #   rice-caffeine toggle|on|off
-#   rice-caffeine status      JSON for Waybar's custom/caffeine module
+#   rice-caffeine status      JSON state
 #
 # "On" is a `systemd-inhibit --what=idle` holder, which hypridle honours, so
 # no dim, lock, screen-off or suspend fires. Autostart runs `off` at login.
@@ -37,14 +37,11 @@ off() {
     rm -f "$PIDFILE"
 }
 
-notify_bar() { "$HOME/.config/rice/bin/rice-sync" caffeine; }
-
 case ${1:-} in
-on) on; notify_bar ;;
-off) off; notify_bar ;;
+on) on ;;
+off) off ;;
 toggle)
     if running; then off; else on; fi
-    notify_bar
     ;;
 status)
     if running; then

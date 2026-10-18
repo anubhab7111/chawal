@@ -23,16 +23,8 @@
     "network",
     "custom/recording",
     "custom/gamemode",
-    "custom/nightlight",
-    "custom/caffeine",
-    "custom/notification",
-    "tray",
     "custom/power-menu"
   ],
-  "tray": {
-    "icon-size": 18,
-    "spacing": 10
-  },
   "hyprland/workspaces": {
     "on-click": "activate",
     "active-only": false,
@@ -152,41 +144,6 @@
     "signal": 10,
     "on-click": "~/.config/rice/bin/rice-gamemode toggle",
     "tooltip": true
-  },
-  "custom/nightlight": {
-    "exec": "~/.config/rice/bin/rice-nightlight status",
-    "return-type": "json",
-    "interval": "once",
-    "signal": 11,
-    "on-click": "~/.config/rice/bin/rice-nightlight toggle",
-    "tooltip": true
-  },
-  "custom/caffeine": {
-    "exec": "~/.config/rice/bin/rice-caffeine status",
-    "return-type": "json",
-    "interval": "once",
-    "signal": 8,
-    "on-click": "~/.config/rice/bin/rice-caffeine toggle",
-    "tooltip": true
-  },
-  "custom/notification": {
-    "exec": "swaync-client -swb",
-    "return-type": "json",
-    "format": "{icon}",
-    "format-icons": {
-      "notification": "󱅫",
-      "none": "󰂜",
-      "dnd-notification": "󰂛",
-      "dnd-none": "󰂛",
-      "inhibited-notification": "󱅫",
-      "inhibited-none": "󰂜",
-      "dnd-inhibited-notification": "󰂛",
-      "dnd-inhibited-none": "󰂛"
-    },
-    "on-click": "swaync-client -t -sw",
-    "on-click-right": "swaync-client -d -sw",
-    "tooltip": false,
-    "escape": true
   },
   "custom/media": {
     "format": "{}",

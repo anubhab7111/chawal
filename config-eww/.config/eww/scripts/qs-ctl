@@ -7,7 +7,8 @@
 #   qs-ctl status      open | closed
 #
 # Open: fill the tiles first (so the first paint is not an empty card), map the
-# scrim, then the panel, on the focused monitor, and turn on the Escape bind
+# scrim, then the notification list (swaync's control centre), then the panel
+# above it, all on the focused monitor, and turn on the Escape bind
 # (rice.qs.escape_on, hypr modules/qs.lua: it exists only while the panel does).
 # Close: the reverse, at once; the compositor's layer animation (rules.lua) does
 # the sliding. While the panel is closed no window exists, so nothing can block
@@ -30,6 +31,10 @@ eww_() {
         esac
 }
 hypr() { hyprctl eval "$1" >/dev/null 2>&1 || true; }
+# The notification list under the panel is swaync's control centre (see
+# config-swaync: layer overlay, top margin = panel height). -sw: do not wait for
+# swaync's scripts; timeout: a hung daemon must not hang the panel.
+cc() { timeout 3 "${SWAYNC_CLIENT:-swaync-client}" "$1" -sw >/dev/null 2>&1 || true; } # SWAYNC_CLIENT: tests
 
 state() { [ -f "$RUN/state" ] && cat "$RUN/state" || printf closed; }
 
@@ -52,7 +57,18 @@ cmd_open() {
     mon=$(focused_monitor)
     rows=$("$CFG/scripts/qs-rows" 2>/dev/null)
     eww_ update "qs_rows=${rows:-[]}" qs_open=true
-    eww_ open qs-scrim --screen "$mon" # first, so the panel is mapped above it
+    # Stacking is map order, bottom to top: scrim, notification list, panel.
+    # swaync's window is a transparent rectangle from the bar down to the bottom
+    # of the list (its top margin is padding, not a layer margin) and takes
+    # clicks everywhere, so the panel must be mapped after it or its tiles
+    # would be dead; the scrim must be below it or the list would be.
+    eww_ open qs-scrim --screen "$mon"
+    cc -op
+    local i
+    for i in 1 2 3 4 5 6 7 8 9 10 11 12; do # cc -op returns before the window is mapped
+        hyprctl layers 2>/dev/null | grep -q 'namespace: swaync-control-center' && break
+        sleep 0.05
+    done
     eww_ open qs-panel --screen "$mon"
     printf open >"$RUN/state"
     hypr 'rice.qs.escape_on()'
@@ -62,6 +78,7 @@ cmd_close() {
     [ "$(state)" = open ] || return 0
     printf closed >"$RUN/state"
     hypr 'rice.qs.escape_off()'
+    cc -cp
     eww_ close qs-panel qs-scrim
     eww_ update qs_open=false
 }
