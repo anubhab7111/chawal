@@ -1,23 +1,31 @@
 #!/usr/bin/env bash
 # rice-volume: the volume keys. Change the default output's volume, then flash
-# the volume gauge on the right edge (edge-ctl osd).
+# the volume gauge on the right edge (edge-ctl osd); the mic key does the same
+# for the microphone gauge.
 #
 #   rice-volume up      +5%, capped at 100%, unmutes first
 #   rice-volume down    -5%, unmutes first
 #   rice-volume mute    toggle mute
+#   rice-volume mic-mute  toggle the microphone's mute
 
 set -u
 
 SINK=@DEFAULT_AUDIO_SINK@
+SOURCE=@DEFAULT_AUDIO_SOURCE@
+gauge=volume
 
 case ${1:-} in
 up) wpctl set-mute "$SINK" 0; wpctl set-volume -l 1.0 "$SINK" 5%+ ;;
 down) wpctl set-mute "$SINK" 0; wpctl set-volume -l 1.0 "$SINK" 5%- ;;
 mute) wpctl set-mute "$SINK" toggle ;;
+mic-mute)
+    wpctl set-mute "$SOURCE" toggle
+    gauge=mic
+    ;;
 *)
-    sed -n '3,8s/^# \{0,1\}//p' "$0" >&2
+    sed -n '3,10s/^# \{0,1\}//p' "$0" >&2
     exit 2
     ;;
 esac
 
-exec "${EDGE_CTL:-$HOME/.config/eww/scripts/edge-ctl}" osd volume # EDGE_CTL: tests
+exec "${EDGE_CTL:-$HOME/.config/eww/scripts/edge-ctl}" osd "$gauge" # EDGE_CTL: tests

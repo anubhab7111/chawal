@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# edge-ctl: lifecycle of the right-edge gauges (volume, brightness).
+# edge-ctl: lifecycle of the right-edge gauges (brightness, volume, mic).
 #
 #   edge-ctl edge             the pointer touched the right screen edge (called by
 #                             hypr pointer.lua): open the gauge whose rectangle it is at
@@ -10,7 +10,7 @@
 #   edge-ctl close [GAUGE]    close now (default: both)
 #   edge-ctl status           print each gauge's state
 #
-# GAUGE is volume or brightness. Each has a state: closed -> (hover|osd) ->
+# GAUGE is volume, brightness or mic. Each has a state: closed -> (hover|osd) ->
 # closing -> closed. Every command runs under one flock, and every timer
 # carries the token that was current when it was armed; any state change bumps
 # the token, so a stale timer finds a different token and does nothing.
@@ -98,6 +98,10 @@ gauge_rect() {
     brightness)
         ANCHOR="right top" POS="${GAP}x100"
         Y0=$((ut + 100))
+        ;;
+    mic)
+        ANCHOR="right bottom" POS="${GAP}x100"
+        Y0=$((ut + uh - 100 - HEIGHT))
         ;;
     esac
     Y1=$((Y0 + HEIGHT))
@@ -218,7 +222,7 @@ cmd_osd() {
 cmd_edge() {
     local g
     monitor_under_pointer
-    for g in volume brightness; do
+    for g in volume brightness mic; do
         gauge_rect "$g"
         if [ "$CY" -ge "$Y0" ] && [ "$CY" -lt "$Y1" ]; then
             cmd_hover "$g"
@@ -266,7 +270,7 @@ cmd_osdtimer() { # GAUGE: one per gauge; sleeps until the (movable) deadline
 
 cmd_close() {
     local g
-    for g in ${1:-volume brightness}; do
+    for g in ${1:-volume brightness mic}; do
         [ "$(state "$g")" = closed ] && continue
         begin_close "$g"
     done
@@ -286,7 +290,7 @@ esac
 case $cmd in
 status)
     flock 8
-    for g in volume brightness; do printf '%s: %s (token %s)\n' "$g" "$(state "$g")" "$(token "$g")"; done
+    for g in volume brightness mic; do printf '%s: %s (token %s)\n' "$g" "$(state "$g")" "$(token "$g")"; done
     ;;
 edge | hover | osd | enter | leave | close | _expire | _finish | _osdtimer)
     case $cmd in

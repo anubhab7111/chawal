@@ -287,3 +287,94 @@ window.background,
 .qs-tile.on .qs-tile-sub {
     color: @surface1;
 }
+
+/* ---- microphone gauge: the volume construction again, @mauve fill ---- */
+.mic-card {
+    background: @base;
+    border-radius: 14px;
+    padding: 0px;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+    transition: box-shadow 180ms ease;
+}
+
+.mic-card:hover {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+}
+
+/* The scale IS the box: trough stretched to fill it completely, rounded to
+   match the panel so the fill reads as one continuous gauge. */
+.mic-scale,
+.mic-scale trough {
+    border-radius: 14px;
+    min-width: 90px;
+}
+
+.mic-scale trough {
+    background-color: @base;
+    min-height: 260px;
+}
+
+/* The fill rises from the bottom. GTK3 can't clip children to a rounded
+   parent, so the fill carries its own radius: only the BOTTOM corners are
+   rounded (matching the trough). Its top edge stays straight while the
+   level is partial, so it reads as a clean level line instead of a pill
+   with soft corners poking out of the trough. At 100% (`.full`) the top
+   corners round as well so the fill meets the panel's own corners exactly. */
+.mic-scale trough highlight {
+    background-color: @mauve;
+    border-radius: 0px 0px 14px 14px;
+    transition:
+        background-color 160ms ease,
+        opacity 200ms ease,
+        box-shadow 180ms ease;
+}
+
+.mic-scale.full trough highlight {
+    border-radius: 14px;
+}
+
+.mic-scale.muted trough highlight {
+    opacity: 0.3;
+}
+
+.mic-scale trough:hover highlight {
+    box-shadow: inset 0 0 24px rgba(255, 255, 255, 0.3);
+}
+
+/* No traditional knob -- the fill's edge is the only "handle" there is. */
+.mic-scale slider {
+    background-color: transparent;
+    min-width: 0px;
+    min-height: 0px;
+    box-shadow: none;
+    margin: 0px;
+}
+
+/* Icon/percentage float on top of whatever the fill is doing underneath
+   (dark base at low volume, bright cyan at high), so a dark halo keeps
+   them legible either way without volume-dependent color logic. */
+.mic-icon,
+.mic-pct {
+    color: @text;
+    text-shadow:
+        0px 0px 3px @crust,
+        0px 0px 3px @crust,
+        0px 1px 2px @crust;
+}
+
+.mic-icon {
+    font-size: 18px;
+    font-weight: 800;
+    margin-top: 10px;
+    transition: color 140ms ease;
+}
+
+.mic-icon:hover {
+    color: @mauve;
+}
+
+.mic-pct {
+    font-size: 11px;
+    font-weight: 800;
+    margin-bottom: 10px;
+}

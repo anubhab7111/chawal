@@ -1,5 +1,5 @@
-;; Right-edge gauges: a volume panel and a brightness panel, each a 90x260
-;; layer-shell window that exists only while it is shown.
+;; Right-edge gauges: brightness (upper), volume (middle) and microphone
+;; (lower) panels, each a 90x260 layer-shell window that exists only while it is shown.
 ;;
 ;; scripts/edge-ctl owns the lifecycle (closed / osd / hover / closing, under
 ;; flock): it opens the window, then flips `volume_open` / `brightness_open`
@@ -26,7 +26,11 @@
 (deflisten bright_state :initial "{\"brightness\": 0}"
   "scripts/brightness-listen.sh")
 
+(deflisten mic_state :initial "{\"mic\": 0, \"muted\": false}"
+  "scripts/mic-listen.sh")
+
 (defvar volume_open false)
+(defvar mic_open false)
 (defvar brightness_open false)
 
 (defwindow volume-panel
@@ -60,6 +64,22 @@
               :duration "220ms"
               :halign "end"
       (brightness-panel-content :brightness {jq(bright_state, ".brightness")}))))
+
+(defwindow mic-panel
+  :monitor 0
+  :stacking "overlay"
+  :exclusive false
+  :focusable false
+  :namespace "mic-panel"
+  :geometry (geometry :anchor "right bottom" :x "10px" :y "100px" :width "90px" :height "260px")
+  (eventbox :onhover "scripts/edge-ctl enter mic"
+            :onhoverlost "scripts/edge-ctl leave mic"
+            :onscroll "scripts/scroll-mic.sh {}"
+    (revealer :reveal mic_open
+              :transition "slideleft"
+              :duration "220ms"
+              :halign "end"
+      (mic-panel-content :mic {jq(mic_state, ".mic")} :muted {jq(mic_state, ".muted")}))))
 
 (defwidget volume-panel-content [volume muted]
   ;; No traditional track-and-knob: the GtkScale itself IS the whole box
@@ -107,3 +127,23 @@
       (label :class "bri-icon" :halign "center" :valign "start"
              :text {brightness > 66 ? "󰃠" : (brightness > 33 ? "󰃟" : "󰃞")})
       (label :class "bri-pct" :halign "center" :valign "end" :text "${brightness}%"))))
+
+(defwidget mic-panel-content [mic muted]
+  ;; Same gauge-style GtkScale as the volume panel, on the microphone. Clicking
+  ;; the icon mutes; a muted mic dims the fill.
+  (box :class "mic-card" :hexpand true :vexpand true
+    (overlay
+      (scale :class "mic-scale${mic >= 99 ? ' full' : ''}${muted ? ' muted' : ''}"
+             :orientation "v"
+             :flipped true
+             :hexpand true
+             :vexpand true
+             :cursor "pointer"
+             :value mic
+             :min 0
+             :max 100
+             :onchange "scripts/set-mic.sh {}")
+      (eventbox :class "mic-icon-hit" :cursor "pointer" :onclick "scripts/toggle-mic-mute.sh"
+                :halign "center" :valign "start"
+        (label :class "mic-icon" :text {muted ? "󰍭" : "󰍬"}))
+      (label :class "mic-pct" :halign "center" :valign "end" :text "${mic}%"))))
