@@ -127,7 +127,7 @@
   "custom/power-menu": {
     "format": "⏻",
     "tooltip": false,
-    "on-click": "~/.config/rice/bin/rice-power"
+    "on-click": "wlogout"
   },
   "custom/recording": {
     "exec": "~/.config/rice/bin/rice-record status",

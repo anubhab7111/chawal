@@ -95,6 +95,10 @@ layer("wofi", { dim_around = true })
 
 layer("rofi", { blur = true, ignore_alpha = 0.5, animation = "popin 80%", dim_around = true })
 
+-- Power grid: same treatment as rofi (blur behind the translucent window,
+-- popin, dim the desktop behind it)
+layer("wlogout", { blur = true, ignore_alpha = 0.5, animation = "popin 80%", dim_around = true })
+
 layer("swaync-notification-window", { blur = true })
 layer("swaync-notification-window", { animation = "slide right" })
 layer("swaync-control-center", { blur = true })

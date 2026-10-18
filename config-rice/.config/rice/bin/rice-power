@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# rice-power: rofi power menu (SUPER+M, SUPER+Escape, Waybar power button).
+# rice-power: rofi power menu. Nothing binds it any more (SUPER+Esc and the
+# Waybar power button open wlogout, the config-wlogout package); kept for
+# manual use: run `rice-power`.
 # Log out, reboot and shut down ask Yes/No first, with No preselected.
 #
 # Run without arguments to open rofi; rofi then calls this script back as its

@@ -62,7 +62,7 @@ Names are Arch packages; `(AUR)` ones come from the AUR (for example with
 | Audio, media | `pamixer` `playerctl` `pwvucontrol` (AUR) `brightnessctl` |
 | Network, Bluetooth | `networkmanager` `network-manager-applet` `bluez` `bluez-utils` `blueman` |
 | Capture | `grim` `slurp` `wf-recorder` |
-| Power, night light | `tlp` `tlp-pd` (profiles; enable `tlp.service`) `batsignal` `darkman` |
+| Power, night light | `wlogout` `tlp` `tlp-pd` (profiles; enable `tlp.service`) `batsignal` `darkman` |
 | Theming | `qt6ct` `kvantum` `kvantum-theme-catppuccin-git` (AUR) `catppuccin-gtk-theme-mocha` and `catppuccin-gtk-theme-latte` (AUR) `bibata-cursor-theme` (AUR) `nwg-look` `ttf-jetbrains-mono-nerd` |
 | Icons | `candy-icons`, installed by hand into `~/.local/share/icons/` (it is what `gtk-icon-theme` in each theme names) |
 | Apps the binds start | `thunar`, `firefox`, `chromium`, `vscodium`, `obsidian`, `zapzap` (AUR), `claude-desktop` (change them at the top of `config-hypr/.config/hypr/modules/binds.lua`) |
@@ -83,6 +83,7 @@ directly under `$HOME`.
 - `config-waybar` — bar
 - `config-swaync` — notifications and the control centre
 - `config-rofi` — launcher and the control hub theme (`config-wofi` is a leftover, unused)
+- `config-wlogout` — the power grid (`layout`, `style.css`, `icons/`)
 - `config-eww` — quick-settings panel and the right-edge gauges
 - `config-rice` — the `rice-*` scripts (`~/.config/rice/bin`)
 - `config-theming` — the themes (`themes/mocha`, `themes/latte`) and the `current` slot
@@ -100,7 +101,8 @@ directly under `$HOME`.
 A few files contain an absolute `/home/ushtro/` (eww and Qt cannot expand `~`
 in these places): `config-eww/.config/eww/eww.css`,
 `config-qt6ct/.config/qt6ct/qt6ct.conf`, the wallpaper lines in
-`config-theming/.config/theming/themes/*/wallpaper.conf`, and the GTK
+`config-theming/.config/theming/themes/*/wallpaper.conf`, the icon `url()`s in
+`config-wlogout/.config/wlogout/style.css`, and the GTK
 bookmarks and `~/.gtkrc-2.0`. On another user name, replace that prefix
 (`grep -rl /home/ushtro config-* home-*`).
 
@@ -148,7 +150,7 @@ stowed packages.
 | `SUPER+SHIFT+V` | hub on the Clip tab |
 | `SUPER+W` | wallpaper grid (picks are remembered per theme and output) |
 | `SUPER+N` | quick-settings panel (also the top-right corner) |
-| `SUPER+M` / `SUPER+Esc` | power menu |
+| `SUPER+Esc` | power grid (wlogout; also the Waybar power button) |
 | `SUPER+L` | lock |
 | `SUPER+C` | close window |
 | `SUPER+V` | toggle floating |
@@ -191,8 +193,10 @@ a rofi script mode (each also works on its own: `rice-net`, `rice-windows`, …)
 
 Direct jumps: `SUPER+SHIFT+V` clipboard, the top-left hot corner opens Windows,
 and the Waybar Wi-Fi and Bluetooth pills open their tabs. The wallpaper grid
-(`rice-wall`, `SUPER+W`) and the power menu (`rice-power`, `SUPER+M` /
-`SUPER+Esc`, Waybar power button) are separate rofi menus, not hub tabs.
+(`rice-wall`, `SUPER+W`) is a separate rofi menu, not a hub tab; the power menu
+is no longer rofi at all — `SUPER+Esc` and the Waybar power button run
+`wlogout`, from the `config-wlogout` package (`layout`, `style.css`, `icons/`).
+The old rofi `rice-power` script is still in `config-rice` but nothing calls it.
 Optional dependency: `cliphist` + `wl-clipboard` (Clip). Switches live in the
 quick-settings panel (`SUPER+N`) and the sliders in the right-edge gauges, not
 here.

@@ -13,13 +13,12 @@ local bind = hl.bind
 local exec = hl.dsp.exec_cmd
 
 -- System
--- Power menu (lock, suspend, log out, reboot, shut down; the last three confirm)
-local power_menu = "~/.config/rice/bin/rice-power"
-bind(mainMod .. " + M", exec(power_menu))
 -- Lock through logind so hypridle's lock_cmd (single hyprlock instance) runs
 bind(mainMod .. " + L", exec("loginctl lock-session"))
 bind(mainMod .. " + F1", function() rice.gamemode.toggle() end)          -- Game mode (modes.lua)
-bind(mainMod .. " + escape", exec(power_menu))
+-- Power grid. wlogout's own config (layout, style.css and icons) is the
+-- config-wlogout package, stowed to ~/.config/wlogout.
+bind(mainMod .. " + escape", exec("wlogout"))
 
 -- Applications
 bind(mainMod .. " + Q", exec(terminal))
