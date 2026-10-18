@@ -29,3 +29,17 @@
 /* Derived shades used by specific waybar gradients (not part of the base palette) */
 @define-color yellow_dark #96804e;
 @define-color teal_soft #8bd5ca;
+@define-color ink #11111b; /* text on the light stripes/gradients (clock, playing media) */
+
+/* Right-hand Waybar pills: gradient stops and the text colour on them */
+@define-color pill_fg #1e1e2e;
+@define-color pill_backlight_1 #fab387;
+@define-color pill_backlight_2 #f9e2af;
+@define-color pill_pulseaudio_1 #94e2d5;
+@define-color pill_pulseaudio_2 #89dceb;
+@define-color pill_battery_1 #a6e3a1;
+@define-color pill_battery_2 #94e2d5;
+@define-color pill_network_1 #cba6f7;
+@define-color pill_network_2 #b4befe;
+@define-color pill_bluetooth_1 #f2cdcd;
+@define-color pill_bluetooth_2 #f5c2e7;

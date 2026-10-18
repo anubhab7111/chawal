@@ -1,0 +1,45 @@
+/* Catppuccin Latte palette, consumed via @define-color by waybar/style.css */
+@define-color rosewater #dc8a78;
+@define-color flamingo #dd7878;
+@define-color pink #ea76cb;
+@define-color mauve #8839ef;
+@define-color red #d20f39;
+@define-color maroon #e64553;
+@define-color peach #fe640b;
+@define-color yellow #df8e1d;
+@define-color green #40a02b;
+@define-color teal #179299;
+@define-color sky #04a5e5;
+@define-color sapphire #209fb5;
+@define-color blue #1e66f5;
+@define-color lavender #7287fd;
+@define-color text #4c4f69;
+@define-color subtext1 #5c5f77;
+@define-color subtext0 #6c6f85;
+@define-color overlay2 #7c7f93;
+@define-color overlay1 #8c8fa1;
+@define-color overlay0 #9ca0b0;
+@define-color surface2 #acb0be;
+@define-color surface1 #bcc0cc;
+@define-color surface0 #ccd0da;
+@define-color base #eff1f5;
+@define-color mantle #e6e9ef;
+@define-color crust #dce0e8;
+
+/* Derived shades used by specific waybar gradients (not part of the base palette) */
+@define-color yellow_dark #a35f0a;
+@define-color teal_soft #2bb0a9;
+@define-color ink #4c4f69; /* text on the light stripes/gradients (clock, playing media) */
+
+/* Right-hand Waybar pills: gradient stops and the text colour on them */
+@define-color pill_fg #4c4f69;
+@define-color pill_backlight_1 #f5b693;
+@define-color pill_backlight_2 #e8c79a;
+@define-color pill_pulseaudio_1 #94c9ce;
+@define-color pill_pulseaudio_2 #8cd1ee;
+@define-color pill_battery_1 #a6cfa0;
+@define-color pill_battery_2 #94c9ce;
+@define-color pill_network_1 #c4a4f2;
+@define-color pill_network_2 #bac4f8;
+@define-color pill_bluetooth_1 #e7bec1;
+@define-color pill_bluetooth_2 #edbde3;

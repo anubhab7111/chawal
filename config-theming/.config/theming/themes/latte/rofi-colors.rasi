@@ -1,0 +1,14 @@
+/* Catppuccin Latte colours for rofi (themes/rice.rasi imports them through
+   the ~/.config/rofi/themes/colors.rasi slot). accent is the cyan (sky) the
+   Waybar and eww glass use; urgent is red; line is the hairline border. */
+* {
+    bg:      #eff1f5f0;
+    bg-alt:  #e6e9ef;
+    surface: #ccd0da;
+    fg:      #4c4f69;
+    fg-dim:  #9ca0b0;
+    accent:  #04a5e5;
+    urgent:  #d20f39;
+    line:    #4c4f6933;
+    tint:    #04a5e526;
+}
