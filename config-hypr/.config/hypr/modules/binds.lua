@@ -116,8 +116,6 @@ bind("CTRL + SHIFT + PRINT", exec("~/.config/rice/bin/rice-record toggle screen"
 bind("SUPER + SHIFT + V", exec("~/.config/rice/bin/rice-hub clip"))           -- Clipboard history (hub tab)
 bind("SUPER + W", exec("~/.config/rice/bin/rice-wall"))                         -- Wallpaper picker
 bind("SUPER + N", exec("~/.config/eww/scripts/qs-ctl toggle"))                  -- Quick settings (eww)
-bind("SUPER + slash", exec("~/.config/rice/bin/rice-hub calc"))                 -- Calculator (hub tab)
-bind("SUPER + period", exec("~/.config/rice/bin/rice-emoji"))                   -- Emoji and symbols
 
 -- Zoom
 local function zoom_by(factor)

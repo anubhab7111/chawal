@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# rice-power: rofi power menu (SUPER+M, SUPER+Escape, Waybar power button, hub tab).
+# rice-power: rofi power menu (SUPER+M, SUPER+Escape, Waybar power button).
 # Log out, reboot and shut down ask Yes/No first, with No preselected.
 #
 # Run without arguments to open rofi; rofi then calls this script back as its

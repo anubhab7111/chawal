@@ -30,7 +30,7 @@ backup under `~/.dotfiles-backup/` first, never deleted).
 
 ## Rofi control hub
 
-`SUPER+SPACE` opens one rofi window with nine tabs. `Tab` / `Shift+Tab`
+`SUPER+SPACE` opens one rofi window with five tabs. `Tab` / `Shift+Tab`
 (or `Ctrl+Tab`) flip between them; `Alt+1` … `Alt+5` are the per-row actions
 of whichever tab is showing. The scripts live in `config-rice/.config/rice/bin`;
 `rice-hub` is the launcher and every other tab is a `rice-*` script running as
@@ -42,21 +42,19 @@ a rofi script mode (each also works on its own: `rice-net`, `rice-windows`, …)
 | Windows | `rice-windows` | focus | close · float · pin · bring here |
 | Wi-Fi | `rice-net` | connect / disconnect | forget · rescan |
 | BT | `rice-bt` | connect / disconnect | power · unpair |
-| Calc | `rice-calc` | evaluate what you typed (qalc) | clear history · copy result |
-| Emoji | `rice-emoji` | open the rofimoji picker (copies) | |
 | Clip | `rice-clip` | copy entry back | delete · wipe all (also Ctrl+Delete, Ctrl+Shift+Delete) |
-| Walls | `rice-wall` | open the wallpaper grid | |
-| Power | `rice-power` | lock / suspend / log out / reboot / shut down (asks to confirm) | |
 
-Direct jumps: `SUPER+SHIFT+V` clipboard, `SUPER+/` calculator, `SUPER+.` emoji,
-`SUPER+W` wallpapers, `SUPER+M` / `SUPER+Esc` power, and the top-left hot corner
-opens Windows. Optional dependencies: `qalc` (Calc), `rofimoji` (Emoji),
-`cliphist` + `wl-clipboard` (Clip). Switches and sliders live in the quick-settings panel (`SUPER+N`) and the right-edge gauges, not here.
+Direct jumps: `SUPER+SHIFT+V` clipboard, and the top-left hot corner opens
+Windows. The wallpaper grid (`rice-wall`, `SUPER+W`) and the power menu
+(`rice-power`, `SUPER+M` / `SUPER+Esc`, Waybar power button) are separate rofi
+menus, not hub tabs. Optional dependency: `cliphist` + `wl-clipboard` (Clip).
+Switches live in the quick-settings panel (`SUPER+N`) and the sliders in the
+right-edge gauges, not here.
 
 Look: the theme is `config-rofi/.config/rofi/themes/rice.rasi`, coloured from
 `~/.config/theming/current/rofi-colors.rasi`, so `rice-theme` re-colours it.
 rofi has no live preview pane and no animation system; the tabs use the message
-bar for status and thumbnails (Clip, Walls) instead.
+bar for status and thumbnails (Clip) instead.
 
 Startup speed: rofi runs every tab's script once at launch (it reads each tab's
 name from it) and only draws after the last one returns, so `rice-hub` runs the
