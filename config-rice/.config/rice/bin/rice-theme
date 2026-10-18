@@ -55,6 +55,7 @@ bootstrap() {
     slot "$CURRENT/cava.theme" "$HOME/.config/cava/themes/rice"
     slot "$CURRENT/btop.theme" "$HOME/.config/btop/themes/rice.theme"
     slot "$CURRENT/rofi-colors.rasi" "$HOME/.config/rofi/themes/colors.rasi"
+    slot "$CURRENT/tmux-colors.conf" "$HOME/.config/tmux/colors.conf"
 
     # alacritty watches the inode of the file it imports, so a retargeted
     # symlink goes unnoticed: copy the colours over the same file instead.
@@ -152,6 +153,10 @@ reload_apps() {
         [ -S "$sock" ] || continue
         timeout 2 nvim --server "$sock" --remote-expr 'luaeval("require(\"rice\").reload_async()")' >/dev/null 2>&1 || true
     done
+    # tmux: re-read the config (it bakes the colours in at load time)
+    if tmux has-session >/dev/null 2>&1; then
+        tmux source-file "$HOME/.config/tmux/tmux.conf" >/dev/null 2>&1 || true
+    fi
     # btop reads its theme at start; alacritty follows the copied file.
 }
 
