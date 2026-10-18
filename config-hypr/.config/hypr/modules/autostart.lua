@@ -35,6 +35,9 @@ local commands = {
     -- Caffeine starts off every login (its inhibitor can outlive a logout)
     "~/.config/rice/bin/rice-caffeine off",
 
+    -- Battery warnings at 20/10% (skips itself while the battery reads a stuck 0%)
+    "~/.config/rice/bin/rice-batsignal",
+
     -- UI components (waybar and the eww edge widgets start with the theme above)
     "hypridle",
     "swaync",
