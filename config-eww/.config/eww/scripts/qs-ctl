@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# qs-ctl: open and close the quick-settings panel (widgets/qs.yuck).
+#
+#   qs-ctl toggle      open if closed, close if open (SUPER+N, top-right hot corner)
+#   qs-ctl open
+#   qs-ctl close       (scrim click, Esc, toggle)
+#   qs-ctl status      open | closed
+#
+# Open: fill the tiles first (so the first paint is not an empty card), map the
+# scrim, then the panel, on the focused monitor, and turn on the Escape bind
+# (rice.qs.escape_on, hypr modules/qs.lua: it exists only while the panel does).
+# Close: the reverse, at once; the compositor's layer animation (rules.lua) does
+# the sliding. While the panel is closed no window exists, so nothing can block
+# clicks. Everything runs under one flock.
+
+set -u
+
+CFG=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)
+RUN="${QS_RUN:-${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice/qs}" # QS_RUN: tests
+mkdir -p "$RUN"
+exec 8>"$RUN/lock"
+
+LOGF="${XDG_CACHE_HOME:-$HOME/.cache}/rice/qs-ctl.log"
+mkdir -p "$(dirname "$LOGF")"
+eww_() {
+    local out
+    out=$(eww --config "$CFG" "$@" 2>&1) ||
+        case $out in *"no such window was open"*) ;; *) # closing a closed window is fine
+            printf '%s eww %s: %s\n' "$(date +%T)" "$*" "$out" >>"$LOGF" ;;
+        esac
+}
+hypr() { hyprctl eval "$1" >/dev/null 2>&1 || true; }
+
+state() { [ -f "$RUN/state" ] && cat "$RUN/state" || printf closed; }
+
+focused_monitor() {
+    # eww numbers only the ACTIVE outputs, so its index is the focused monitor's
+    # position among the active monitors sorted by Hyprland id (not the id: with
+    # the lid closed eDP-1 is id 0 but disabled and the external screen is id 1,
+    # index 0). Same rule as edge-ctl.
+    local id
+    id=$(hyprctl monitors -j 2>/dev/null | jq -r '
+        . as $all | (map(.id) | sort) as $order
+        | (map(select(.focused))[0] // $all[0]) as $sel
+        | ($order | index($sel.id)) // 0' 2>/dev/null)
+    [[ ${id:-} =~ ^[0-9]+$ ]] && printf '%s' "$id" || printf 0
+}
+
+cmd_open() {
+    [ "$(state)" = open ] && return 0
+    local mon rows
+    mon=$(focused_monitor)
+    rows=$("$CFG/scripts/qs-rows" 2>/dev/null)
+    eww_ update "qs_rows=${rows:-[]}" qs_open=true
+    eww_ open qs-scrim --screen "$mon" # first, so the panel is mapped above it
+    eww_ open qs-panel --screen "$mon"
+    printf open >"$RUN/state"
+    hypr 'rice.qs.escape_on()'
+}
+
+cmd_close() {
+    [ "$(state)" = open ] || return 0
+    printf closed >"$RUN/state"
+    hypr 'rice.qs.escape_off()'
+    eww_ close qs-panel qs-scrim
+    eww_ update qs_open=false
+}
+
+case ${1:-} in
+toggle | open | close)
+    flock 8
+    case $1 in
+    toggle) if [ "$(state)" = open ]; then cmd_close; else cmd_open; fi ;;
+    open) cmd_open ;;
+    close) cmd_close ;;
+    esac
+    ;;
+status) flock 8; state ;;
+*)
+    sed -n '3,8s/^# \{0,1\}//p' "$0" >&2
+    exit 2
+    ;;
+esac

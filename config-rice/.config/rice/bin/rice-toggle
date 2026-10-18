@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+# rice-toggle: the quick toggles behind the eww quick-settings panel (qs).
+#
+#   rice-toggle json        all tiles as a JSON array, for the panel
+#   rice-toggle rows        the same, as [[tile, tile], [tile, tile], ...] (two per row)
+#   rice-toggle flip ID     flip one switch (ids below)
+#   rice-toggle state ID    print on or off
+#
+# Tiles: wifi, bluetooth, dnd, night, caffeine, game, power, theme.
+# power (power profiles) and theme (Latte/Mocha) are listed but disabled until
+# P18 and P34 give them something to switch. Each tile is
+#   {"id","icon","label","sub","on","enabled"}
+# where sub is the small line under the label (the network name for Wi-Fi).
+#
+# The same switches as the rofi Toggles tab (rice-toggles), with the same
+# backends: nmcli, bluetoothctl, rice-dnd, rice-nightlight, rice-caffeine and
+# rice-gamemode. RICE_BIN overrides where those live (tests).
+
+set -u
+
+BIN="${RICE_BIN:-$HOME/.config/rice/bin}"
+RUN="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice"
+
+# id|icon|label (Material Design glyphs), in display order
+TILES=(
+    $'wifi|\U000F05A9|Wi-Fi'
+    $'bluetooth|\U000F00AF|Bluetooth'
+    $'dnd|\U000F009B|Do not disturb'
+    $'night|\U000F0594|Night light'
+    $'caffeine|\U000F0176|Caffeine'
+    $'game|\U000F0297|Game mode'
+    $'power|\U000F140B|Power profile'
+    $'theme|\U000F0B2F|Theme'
+)
+
+on() { # id: succeed when the switch is on
+    case $1 in
+    wifi) [ "$(nmcli radio wifi 2>/dev/null)" = enabled ] ;;
+    bluetooth) timeout 2 bluetoothctl show 2>/dev/null | grep -q 'Powered: yes' ;;
+    dnd) [ "$("$BIN/rice-dnd" status 2>/dev/null)" = on ] ;;
+    night) [ -f "$RUN/nightlight" ] ;;
+    caffeine) "$BIN/rice-caffeine" status 2>/dev/null | grep -q '"alt":"on"' ;;
+    game) [ -f "$RUN/gamemode" ] ;;
+    *) return 1 ;;
+    esac
+}
+
+sub() { # id on?: the small line under the label
+    case $1 in
+    wifi)
+        if [ "$2" = 1 ]; then
+            local s
+            s=$(nmcli -t -f ACTIVE,SSID device wifi list --rescan no 2>/dev/null | awk -F: '$1 == "yes" { print $2; exit }')
+            printf '%s' "${s:-On}"
+        else printf Off; fi
+        ;;
+    power) printf 'Not set up' ;;
+    theme) printf 'Mocha' ;; # until P34 adds Latte
+    *) [ "$2" = 1 ] && printf On || printf Off ;;
+    esac
+}
+
+# one line per tile: id TAB icon TAB label TAB on TAB enabled TAB sub
+lines() {
+    local dir row id icon label
+    dir=$(mktemp -d)
+    # the state checks are independent commands: run them side by side
+    for row in "${TILES[@]}"; do
+        id=${row%%|*}
+        (
+            o=0
+            on "$id" && o=1
+            printf '%s\t%s' "$o" "$(sub "$id" "$o")" >"$dir/$id"
+        ) &
+    done
+    wait
+    for row in "${TILES[@]}"; do
+        IFS='|' read -r id icon label <<<"$row"
+        local en=1 o s
+        case $id in power | theme) en=0 ;; esac
+        IFS=$'\t' read -r o s <"$dir/$id"
+        printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$id" "$icon" "$label" "$o" "$en" "$s"
+    done
+    rm -rf "$dir"
+}
+
+json() {
+    lines | jq -R -s -c '
+        split("\n")[:-1] | map(split("\t"))
+        | map({id: .[0], icon: .[1], label: .[2], on: (.[3] == "1"), enabled: (.[4] == "1"), sub: .[5]})'
+}
+
+flip() {
+    {
+        case $1 in
+        wifi) if on wifi; then nmcli radio wifi off; else nmcli radio wifi on; fi ;;
+        bluetooth)
+            if on bluetooth; then timeout 5 bluetoothctl power off; else
+                rfkill unblock bluetooth 2>/dev/null || true
+                timeout 5 bluetoothctl power on
+            fi
+            ;;
+        dnd) "$BIN/rice-dnd" toggle ;;
+        night) "$BIN/rice-nightlight" toggle ;;
+        caffeine) "$BIN/rice-caffeine" toggle ;;
+        game) "$BIN/rice-gamemode" toggle ;;
+        esac
+    } >/dev/null 2>&1 || true
+}
+
+case ${1:-} in
+json) json ;;
+rows) json | jq -c '. as $t | [range(0; length; 2) | $t[.:.+2]]' ;;
+flip) flip "${2:?usage: rice-toggle flip ID}" ;;
+state) if on "${2:?usage: rice-toggle state ID}"; then echo on; else echo off; fi ;;
+*)
+    sed -n '3,8s/^# \{0,1\}//p' "$0" >&2
+    exit 2
+    ;;
+esac

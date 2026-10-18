@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# qs-flip ID: a tile was clicked. Flip that switch, then refresh the tiles at
+# once instead of waiting for the 2 s poll.
+BIN="${RICE_BIN:-$HOME/.config/rice/bin}"
+CFG=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)
+
+"$BIN/rice-toggle" flip "${1:?usage: qs-flip ID}"
+eww --config "$CFG" update "qs_rows=$("$CFG/scripts/qs-rows")" >/dev/null 2>&1

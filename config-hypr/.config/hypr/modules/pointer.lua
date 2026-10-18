@@ -6,7 +6,7 @@
 --
 --   top-left   window overview: rice-hub window (hyprshell's overview
 --              replaces it in P24 once installed)
---   top-right  quick settings, wired in P29
+--   top-right  quick settings panel (eww qs-ctl toggle)
 --
 -- rice.corners.actions maps a corner to a function, so tests and later
 -- phases can swap them.
@@ -16,6 +16,7 @@ rice.corners = {
     dwell_ticks = 3,  -- x 100 ms
     actions = {
         top_left = function() hl.exec_cmd("~/.config/rice/bin/rice-hub window") end,
+        top_right = function() hl.exec_cmd("~/.config/eww/scripts/qs-ctl toggle") end,
     },
 }
 
