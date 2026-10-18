@@ -90,6 +90,13 @@ for pkg in "${packages[@]}"; do
   reconcile "$DOTFILES_DIR/$pkg" "$(package_rel "$DOTFILES_DIR/$pkg")"
 done
 
+# home-darkman-hooks is the only package under ~/.local, so on a fresh home stow
+# would link all of ~/.local into the repo (and rice-theme's state and colour
+# schemes would then be written into it). A real ~/.local/share keeps the link
+# at ~/.local/share/darkman. Created here, after reconcile, which rmdirs
+# empty directories.
+mkdir -p "$HOME/.local/share"
+
 stow --dir="$DOTFILES_DIR" --target="$HOME" --verbose=1 --restow "${packages[@]}"
 
 if [ "$backed_up" -eq 1 ]; then
