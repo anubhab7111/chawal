@@ -6,8 +6,7 @@
 #   qs-ctl close       (scrim click, Esc, toggle)
 #   qs-ctl status      open | closed
 #
-# Open: fill the tiles, sliders and media card first (so the first paint is not
-# an empty card), map the
+# Open: fill the tiles first (so the first paint is not an empty card), map the
 # scrim, then the panel, on the focused monitor, and turn on the Escape bind
 # (rice.qs.escape_on, hypr modules/qs.lua: it exists only while the panel does).
 # Close: the reverse, at once; the compositor's layer animation (rules.lua) does
@@ -49,14 +48,10 @@ focused_monitor() {
 
 cmd_open() {
     [ "$(state)" = open ] && return 0
-    local mon rows levels media
+    local mon rows
     mon=$(focused_monitor)
     rows=$("$CFG/scripts/qs-rows" 2>/dev/null)
-    levels=$("$CFG/scripts/qs-levels" 2>/dev/null)
-    media=$("$CFG/scripts/qs-media" 2>/dev/null)
     eww_ update "qs_rows=${rows:-[]}" qs_open=true
-    [ -n "$levels" ] && eww_ update "qs_levels=$levels"
-    [ -n "$media" ] && eww_ update "qs_media=$media"
     eww_ open qs-scrim --screen "$mon" # first, so the panel is mapped above it
     eww_ open qs-panel --screen "$mon"
     printf open >"$RUN/state"

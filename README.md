@@ -78,11 +78,3 @@ tile to flip it; click outside the card or press `Esc` to close. It is eww:
 switches behind `rice-toggle` (the same backends as the rofi Toggles tab). No
 window exists while it is closed. `Esc` is a Hyprland bind that exists only
 while the panel is open (`config-hypr/.config/hypr/modules/qs.lua`).
-
-Below the tiles are volume, microphone and brightness sliders (drag, or click
-the volume or mic icon to mute; the levels are re-read every second while the
-panel is open, so the volume and brightness keys keep them in sync) and a media
-card for whichever player `playerctl` sees: cover, title, artist, previous /
-play-pause / next. The card is hidden when no player runs; covers that a player
-publishes as a URL are cached once in `~/.cache/rice/covers`. Both are polled
-only while the panel is open (`scripts/qs-levels`, `scripts/qs-media`).
