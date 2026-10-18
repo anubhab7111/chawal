@@ -62,8 +62,11 @@ bump() { printf '%s' $(($(token "$1") + 1)) >"$RUN/$1.token"; }
 
 # --- geometry -----------------------------------------------------------------
 
-# Sets MON (eww's monitor index = Hyprland's monitor id) MX MY MW MH RT RB: the monitor
+# Sets MON (eww's monitor index) MX MY MW MH RT RB: the monitor
 # under the pointer (else the focused one); PREFER=focused reverses that (key-press osd).
+# eww numbers only the ACTIVE outputs, in registry order, so its index is the monitor's
+# position among the active monitors sorted by Hyprland id, not the id itself (lid closed
+# with an external screen: eDP-1 is id 0 but disabled, the external one is id 1 and index 0).
 monitor_under_pointer() {
     local cx cy line
     read -r cx cy < <(hyprctl cursorpos | tr -d ',')
@@ -75,8 +78,10 @@ monitor_under_pointer() {
         map(. + {s: (.scale // 1)}) as $m
         | ($m | map(select(.x <= $cx and $cx < .x + (.width / .s) and .y <= $cy and $cy < .y + (.height / .s)))) as $under
         | ($m | map(select(.focused))) as $focus
+        | ($m | sort_by(.id) | map(.id)) as $order
         | (if $prefer == "focused" then $focus + $under + $m else $under + $focus + $m end)[0]
-        | [.id, .x, .y, (.width / .s | floor), (.height / .s | floor), (.reserved[1] // 0), (.reserved[3] // 0)] | @tsv')
+        | . as $sel
+        | [($order | index($sel.id)), .x, .y, (.width / .s | floor), (.height / .s | floor), (.reserved[1] // 0), (.reserved[3] // 0)] | @tsv')
     IFS=$'\t' read -r MON MX MY MW MH RT RB <<<"$line"
 }
 
