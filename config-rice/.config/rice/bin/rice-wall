@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # rice-wall: wallpaper picker (SUPER+W).
 #
-#   rice-wall            rofi grid of ~/Pictures/wallpapers; the pick goes on
-#                        the focused output and is remembered for the theme
+#   rice-wall            rofi grid of the Catppuccin Mocha wallpapers in
+#                        ~/Pictures/wallpapers/walls-catppuccin-mocha (RICE_WALLS overrides); the
+#                        pick goes on the focused output and is remembered for the theme
 #   rice-wall set OUTPUT FILE   apply and remember without the picker
 #   rice-wall thumbs     build missing thumbnails (the picker starts this in
 #                        the background)
@@ -12,7 +13,7 @@
 
 set -euo pipefail
 
-WALLS="${RICE_WALLS:-$HOME/Pictures/wallpapers}"
+WALLS="${RICE_WALLS:-$HOME/Pictures/wallpapers/walls-catppuccin-mocha}"
 CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/rice/walls"
 STATE="${XDG_STATE_HOME:-$HOME/.local/state}/rice"
 RICE_THEME="$HOME/.config/rice/bin/rice-theme"
