@@ -19,10 +19,23 @@
     background: transparent;
 }
 
+/* Loud look. A card is three stacked backgrounds: a 4px urgency strip down
+   the left edge (the Waybar pill gradient for that urgency), the glass fill,
+   and underneath the tri-colour ring (same stops as the Hyprland border) that
+   shows through the 2px transparent border. swaync has no per-app CSS hook,
+   so the colour follows urgency: normal mauve, low green, critical red. */
 .notification {
-    background: alpha(@base, 0.92);
+    background-color: transparent;
+    background-image:
+        linear-gradient(180deg, @pill_network_1, @pill_network_2),
+        linear-gradient(alpha(@base, 0.92), alpha(@base, 0.92)),
+        linear-gradient(135deg, @mauve, @blue, @teal);
+    background-size: 4px 100%, 100% 100%, 100% 100%;
+    background-repeat: no-repeat;
+    background-origin: padding-box, padding-box, border-box;
+    background-clip: padding-box, padding-box, border-box;
     color: @text;
-    border: 1px solid alpha(@text, 0.2);
+    border: 2px solid transparent;
     border-radius: 14px;
     margin: 6px 12px;
     padding: 0;
@@ -30,11 +43,17 @@
 }
 
 .notification.low {
-    border-color: alpha(@teal, 0.6);
+    background-image:
+        linear-gradient(180deg, @pill_battery_1, @pill_battery_2),
+        linear-gradient(alpha(@base, 0.92), alpha(@base, 0.92)),
+        linear-gradient(135deg, @mauve, @blue, @teal);
 }
 
 .notification.critical {
-    border-color: @red;
+    background-image:
+        linear-gradient(180deg, @pill_dnd_1, @pill_dnd_2),
+        linear-gradient(alpha(@base, 0.92), alpha(@base, 0.92)),
+        linear-gradient(@red, @red);
 }
 
 .notification-content {
@@ -72,14 +91,15 @@
 }
 
 .notification-action {
-    background: @surface0;
-    color: @text;
+    background-image: linear-gradient(135deg, @pill_network_1, @pill_network_2);
+    color: @pill_fg;
+    font-weight: 700;
     border-radius: 10px;
     margin: 4px;
 }
 
 .notification-action:hover {
-    background: alpha(@sky, 0.3);
+    background-image: linear-gradient(135deg, @pill_theme_1, @pill_theme_2);
 }
 
 .inline-reply-entry {
@@ -90,9 +110,14 @@
 
 /* ---- control center ---- */
 .control-center {
-    background: alpha(@base, 0.92);
+    background-color: transparent;
+    background-image:
+        linear-gradient(alpha(@base, 0.92), alpha(@base, 0.92)),
+        linear-gradient(135deg, @mauve, @blue, @teal);
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
     color: @text;
-    border: 1px solid alpha(@text, 0.2);
+    border: 2px solid transparent;
     border-radius: 14px;
     padding: 6px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -113,9 +138,28 @@
     box-shadow: none;
 }
 
+/* Inside the panel the cards need no ring of their own: strip + fill only */
 .control-center .notification-row .notification {
     margin: 6px;
-    background: alpha(@surface0, 0.8);
+    border: 0;
+    background-image:
+        linear-gradient(180deg, @pill_network_1, @pill_network_2),
+        linear-gradient(alpha(@surface0, 0.8), alpha(@surface0, 0.8));
+    background-size: 4px 100%, 100% 100%;
+    background-origin: padding-box, padding-box;
+    background-clip: padding-box, padding-box;
+}
+
+.control-center .notification-row .notification.low {
+    background-image:
+        linear-gradient(180deg, @pill_battery_1, @pill_battery_2),
+        linear-gradient(alpha(@surface0, 0.8), alpha(@surface0, 0.8));
+}
+
+.control-center .notification-row .notification.critical {
+    background-image:
+        linear-gradient(180deg, @pill_dnd_1, @pill_dnd_2),
+        linear-gradient(alpha(@surface0, 0.8), alpha(@surface0, 0.8));
 }
 
 .widget-title {
@@ -125,14 +169,15 @@
 }
 
 .widget-title > button {
-    background: @surface1;
-    color: @text;
+    background-image: linear-gradient(135deg, @pill_network_1, @pill_network_2);
+    color: @pill_fg;
+    font-weight: 700;
     border-radius: 14px;
     padding: 2px 14px;
 }
 
 .widget-title > button:hover {
-    background: alpha(@sky, 0.3);
+    background-image: linear-gradient(135deg, @pill_theme_1, @pill_theme_2);
 }
 
 .control-center-list-placeholder {
