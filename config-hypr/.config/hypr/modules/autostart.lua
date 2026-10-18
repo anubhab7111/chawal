@@ -19,7 +19,7 @@ local commands = {
     -- it runs first; apply then replays the saved theme (wallpaper, Hyprland
     -- palette, shader) once awww-daemon is up.
     "awww-daemon",
-    [[bash -c 'rt=~/.config/rice/bin/rice-theme; $rt bootstrap; waybar & eww --config ~/.config/eww/volume-edge open volume-hotzone; eww --config ~/.config/eww/brightness-edge open brightness-hotzone; sleep 1; $rt apply']],
+    [[bash -c 'rt=~/.config/rice/bin/rice-theme; $rt bootstrap; waybar & eww daemon; sleep 1; $rt apply']],
 
     -- Cursor for GTK apps that read gsettings (env.lua sets the rest)
     "gsettings set org.gnome.desktop.interface cursor-theme Bibata-Modern-Classic; gsettings set org.gnome.desktop.interface cursor-size 30",

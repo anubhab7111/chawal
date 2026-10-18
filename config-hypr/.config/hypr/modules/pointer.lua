@@ -1,4 +1,4 @@
--- Hot corners. A 100 ms timer watches the pointer: a corner fires once the
+-- Hot corners and the right-edge gauges. A 100 ms timer watches the pointer: a corner fires once the
 -- pointer has stayed within 2 px of it for 300 ms (3 ticks), and re-arms
 -- only after the pointer leaves, so a quick pass or resting there does not
 -- repeat it. Nothing fires in fullscreen or game mode. (Lua cannot see a
@@ -19,7 +19,23 @@ rice.corners = {
     },
 }
 
-local state = { corner = nil, ticks = 0, fired = false }
+-- Right screen edge. Entering the strip hands over to eww's edge-ctl, which
+-- knows where the volume and brightness gauges are and opens the one the
+-- pointer is level with (and does nothing for any other height). It fires
+-- once per entry, so resting at the edge does not repeat it. There is no
+-- always-mapped window at the edge for this: such a window blocks clicks
+-- (browser scrollbars) in its strip.
+rice.edges = {
+    size = 2, -- px from the right edge
+    action = function() hl.exec_cmd("~/.config/eww/scripts/edge-ctl edge") end,
+}
+
+local state = { corner = nil, ticks = 0, fired = false, edge = false }
+
+local function at_right_edge(pos, m)
+    local scale = m.scale or 1
+    return pos.x >= m.x + m.width / scale - rice.edges.size
+end
 
 local function corner_at(pos, m)
     local scale = m.scale or 1
@@ -42,6 +58,14 @@ local function tick()
     local pos = hl.get_cursor_pos()
     local m = hl.get_monitor_at_cursor()
     local corner = (pos and m) and corner_at(pos, m) or nil
+
+    local edge = (pos and m) and at_right_edge(pos, m) or false
+    if edge and not state.edge then
+        state.edge = true
+        if not suppressed(m) then rice.edges.action() end
+    elseif not edge then
+        state.edge = false
+    end
 
     if corner ~= state.corner then
         state.corner, state.ticks, state.fired = corner, 0, false

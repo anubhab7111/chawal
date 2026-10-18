@@ -1,0 +1,109 @@
+;; Right-edge gauges: a volume panel and a brightness panel, each a 90x260
+;; layer-shell window that exists only while it is shown.
+;;
+;; scripts/edge-ctl owns the lifecycle (closed / osd / hover / closing, under
+;; flock): it opens the window, then flips `volume_open` / `brightness_open`
+;; so the revealer slides the gauge in from the screen edge, and after the
+;; slide-out it closes the window unconditionally (unless something newer
+;; cancelled the close). An unmapped window cannot block clicks on whatever is
+;; underneath, which the earlier always-mapped hover strips did on the right
+;; edge (scrollbars). Hovering the right edge is detected by the Hyprland
+;; pointer watcher (modules/pointer.lua), not by a window.
+;;
+;; Position, size, anchor and monitor are passed by edge-ctl on `eww open`
+;; (the :geometry below is only the default), so they follow the monitor the
+;; pointer is on and nothing assumes a 1920x1080 screen.
+;;
+;; The revealer is safe inside the fixed-size window: the window keeps its
+;; full rectangle (and hover area) while the gauge slides.
+;;
+;; eww gives every window a CSS class equal to its name; the cards are
+;; `.vol-card` / `.bri-card` on purpose (see eww.css).
+
+(deflisten vol_state :initial "{\"volume\": 0, \"muted\": false}"
+  "scripts/volume-listen.sh")
+
+(deflisten bright_state :initial "{\"brightness\": 0}"
+  "scripts/brightness-listen.sh")
+
+(defvar volume_open false)
+(defvar brightness_open false)
+
+(defwindow volume-panel
+  :monitor 0
+  :stacking "overlay"
+  :exclusive false
+  :focusable false
+  :namespace "volume-panel"
+  :geometry (geometry :anchor "right center" :x "10px" :width "90px" :height "260px")
+  (eventbox :onhover "scripts/edge-ctl enter volume"
+            :onhoverlost "scripts/edge-ctl leave volume"
+            :onscroll "scripts/scroll-volume.sh {}"
+    (revealer :reveal volume_open
+              :transition "slideleft"
+              :duration "220ms"
+              :halign "end"
+      (volume-panel-content :volume {jq(vol_state, ".volume")} :muted {jq(vol_state, ".muted")}))))
+
+(defwindow brightness-panel
+  :monitor 0
+  :stacking "overlay"
+  :exclusive false
+  :focusable false
+  :namespace "brightness-panel"
+  :geometry (geometry :anchor "right top" :x "10px" :y "100px" :width "90px" :height "260px")
+  (eventbox :onhover "scripts/edge-ctl enter brightness"
+            :onhoverlost "scripts/edge-ctl leave brightness"
+            :onscroll "scripts/scroll-brightness.sh {}"
+    (revealer :reveal brightness_open
+              :transition "slideleft"
+              :duration "220ms"
+              :halign "end"
+      (brightness-panel-content :brightness {jq(bright_state, ".brightness")}))))
+
+(defwidget volume-panel-content [volume muted]
+  ;; No traditional track-and-knob: the GtkScale itself IS the whole box
+  ;; (trough stretched to fill it, knob hidden via CSS), so the fill level is
+  ;; the only indicator, like a battery gauge. It's still a real GtkScale
+  ;; underneath, so drag/click/scroll all keep working natively. Icon and
+  ;; percentage float on top via `overlay`.
+  ;;
+  ;; `full` squares/rounds the fill's top corners (see eww.css); `muted`
+  ;; dims the fill.
+  (box :class "vol-card" :hexpand true :vexpand true
+    (overlay
+      (scale :class "vol-scale${volume >= 99 ? ' full' : ''}${muted ? ' muted' : ''}"
+             :orientation "v"
+             :flipped true
+             :hexpand true
+             :vexpand true
+             :cursor "pointer"
+             :value volume
+             :min 0
+             :max 100
+             :onchange "scripts/set-volume.sh {}")
+      (eventbox :class "vol-icon-hit" :cursor "pointer" :onclick "scripts/toggle-mute.sh"
+                :halign "center" :valign "start"
+        (label :class "vol-icon"
+               :text {muted ? "󰖁" : (volume > 66 ? "󰕾" : (volume > 0 ? "󰖀" : "󰕿"))}))
+      (label :class "vol-pct" :halign "center" :valign "end" :text "${volume}%"))))
+
+(defwidget brightness-panel-content [brightness]
+  ;; Same gauge-style GtkScale as the volume panel: the fill level is the
+  ;; only indicator, icon and percentage float on top via `overlay`.
+  ;; `full` rounds the fill's top corners at 100% (see eww.css).
+  (box :class "bri-card" :hexpand true :vexpand true
+    (overlay
+      (scale :class "bri-scale${brightness >= 99 ? ' full' : ''}"
+             :orientation "v"
+             :flipped true
+             :hexpand true
+             :vexpand true
+             :cursor "pointer"
+             :value brightness
+             :min 0
+             :max 100
+             :onchange "scripts/set-brightness.sh {}")
+      (label :class "bri-icon" :halign "center" :valign "start"
+             :text {brightness > 66 ? "󰃠" : (brightness > 33 ? "󰃟" : "󰃞")})
+      (label :class "bri-pct" :halign "center" :valign "end" :text "${brightness}%"))))
