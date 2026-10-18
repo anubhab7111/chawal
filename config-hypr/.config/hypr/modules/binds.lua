@@ -91,7 +91,7 @@ local held = { repeating = true, locked = true }
 bind("XF86AudioRaiseVolume", exec("~/.config/rice/bin/rice-volume up"), held)
 bind("XF86AudioLowerVolume", exec("~/.config/rice/bin/rice-volume down"), held)
 bind("XF86AudioMute", exec("~/.config/rice/bin/rice-volume mute"), { locked = true })
-bind("XF86AudioMicMute", exec("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true })
+bind("XF86AudioMicMute", exec("~/.config/rice/bin/rice-volume mic-mute"), { locked = true })
 
 -- Media
 bind("XF86AudioPlay", exec("playerctl play-pause"), { locked = true })

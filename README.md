@@ -83,3 +83,13 @@ the panel's height changes). Do not disturb, night light and caffeine are only
 here: Waybar has no bell, moon or caffeine button (night light still switches
 itself by the sun through darkman), and Waybar has no tray, so the nm-applet and
 blueman helpers (Wi-Fi password and pairing prompts) run without an icon.
+
+## Right-edge gauges
+
+Touching the right edge of the screen slides out the gauge level with the
+pointer: brightness (upper), volume (middle) or microphone (lower). Drag or
+scroll on one to change it; click the volume or mic icon to mute. The volume,
+brightness and mic-mute keys flash their gauge for a moment
+(`config-rice/.config/rice/bin/rice-volume`, `rice-bright`). eww draws them
+(`config-eww/.config/eww/widgets/edge.yuck`) and `scripts/edge-ctl` opens and
+closes them; no window exists while a gauge is hidden.
