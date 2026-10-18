@@ -54,6 +54,46 @@ gtk_theme_dir() {
     return 1
 }
 
+# kde_colors: KDE apps (Dolphin, Okular, ...) ignore the Qt palette and read
+# kdeglobals, so make the active theme visible there:
+#   - the theme's scheme file (kde-colors.colors, named "Rice") is linked into
+#     ~/.local/share/color-schemes and selected by [General] and [UiSettings]
+#     ColorScheme=Rice (apps pick it up at start);
+#   - its [Colors:*] sections replace the ones in kdeglobals (the values
+#     running apps and KColorScheme read);
+#   - [KDE] widgetStyle=kvantum, since a named style (Breeze by default) wins
+#     over the Qt style qt6ct sets.
+# Everything else in kdeglobals is left alone; the first version of the file
+# is kept in the state dir as kdeglobals.orig.
+kde_colors() {
+    local src="$CURRENT/kde-colors.colors" kg="$HOME/.config/kdeglobals" new
+    [ -f "$src" ] || return 0
+    slot "$src" "$HOME/.local/share/color-schemes/Rice.colors"
+    [ -f "$STATE/kdeglobals.orig" ] || { [ -f "$kg" ] && cp "$kg" "$STATE/kdeglobals.orig"; } || true
+    new=$(
+        {
+            [ -f "$kg" ] && awk '
+                /^\[/ { sect = $0; skip = (sect ~ /^\[Colors:/ || sect == "[UiSettings]") }
+                skip { next }
+                sect == "[General]" && /^ColorScheme(Hash)?=/ { next }
+                sect == "[KDE]" && /^widgetStyle=/ { next }
+                { print }
+                $0 == "[General]" { print "ColorScheme=Rice" }
+                $0 == "[KDE]" { print "widgetStyle=kvantum" }
+            ' "$kg"
+            printf '\n'
+            awk '/^\[/ { p = ($0 ~ /^\[Colors:/) } p' "$src"
+            printf '[UiSettings]\nColorScheme=Rice\n'
+        }
+    )
+    # a kdeglobals without these sections still needs the keys
+    case $new in *$'\n[General]\n'* | '[General]'*) ;; *) new+=$'\n\n[General]\nColorScheme=Rice' ;; esac
+    case $new in *$'\n[KDE]\n'* | '[KDE]'*) ;; *) new+=$'\n\n[KDE]\nwidgetStyle=kvantum' ;; esac
+    if [ "$(cat "$kg" 2>/dev/null)" != "$new" ]; then
+        printf '%s\n' "$new" > "$kg"
+    fi
+}
+
 bootstrap() {
     local name
     name=$(get)
@@ -68,6 +108,20 @@ bootstrap() {
     slot "$CURRENT/btop.theme" "$HOME/.config/btop/themes/rice.theme"
     slot "$CURRENT/rofi-colors.rasi" "$HOME/.config/rofi/themes/colors.rasi"
     slot "$CURRENT/tmux-colors.conf" "$HOME/.config/tmux/colors.conf"
+
+    # Qt6 (qt6ct -> Kvantum): Kvantum reads its theme name from a plain file
+    # it watches, so write that file in place (a link swap would go unnoticed).
+    if [ -f "$CURRENT/kvantum-theme" ]; then
+        local kv="$HOME/.config/Kvantum/kvantum.kvconfig" want
+        want=$(printf '[General]\ntheme=%s\n' "$(tr -d '[:space:]' < "$CURRENT/kvantum-theme")")
+        if [ "$(cat "$kv" 2>/dev/null)" != "$want" ]; then
+            mkdir -p "$(dirname "$kv")"
+            printf '%s\n' "$want" > "$kv"
+        fi
+    fi
+
+    slot "$CURRENT/qt6ct-colors.conf" "$HOME/.config/qt6ct/colors/rice.conf"
+    kde_colors
 
     # GTK4 reads the theme's css from ~/.config/gtk-4.0. Point it at the
     # active GTK theme, but only when that theme is installed (Latte's is

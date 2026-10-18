@@ -9,7 +9,9 @@ hl.env("XDG_SESSION_TYPE", "wayland")
 hl.env("QT_AUTO_SCREEN_SCALE_FACTOR", "1")
 hl.env("QT_QPA_PLATFORM", "wayland;xcb")
 hl.env("QT_WAYLAND_DISABLE_WINDOWDECORATION", "1")
--- QT_QPA_PLATFORMTHEME is left unset until qt6ct is installed (P35).
+-- qt6ct hands Qt6 apps the Kvantum style; rice-theme picks the Kvantum
+-- theme (Mocha/Latte) in ~/.config/Kvantum/kvantum.kvconfig.
+hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
 
 -- Cursor: Bibata Modern Classic at 30 everywhere. Hyprland draws the
 -- hyprcursor build (home-icons); XWayland, Qt and anything else that reads
