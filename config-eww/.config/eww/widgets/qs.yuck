@@ -50,18 +50,21 @@
   :geometry (geometry :anchor "top right" :x "8px" :y "8px" :width "360px")
   (qs-card))
 
+;; qs-ring is the tri-colour border: a gradient box with 2 px padding around
+;; the card (GTK3 CSS cannot round a gradient border-image).
 (defwidget qs-card []
-  (box :class "qs-card" :orientation "v" :space-evenly false
-    (label :class "qs-title" :halign "start" :text "Quick settings")
-    (for row in qs_rows
-      (box :class "qs-row" :orientation "h" :space-evenly true
-        (for tile in row
-          (qs-tile :t tile))))))
+  (box :class "qs-ring" :orientation "v" :space-evenly false
+    (box :class "qs-card" :orientation "v" :space-evenly false
+      (label :class "qs-title" :halign "start" :text "Quick settings")
+      (for row in qs_rows
+        (box :class "qs-row" :orientation "h" :space-evenly true
+          (for tile in row
+            (qs-tile :t tile)))))))
 
 (defwidget qs-tile [t]
   (eventbox :cursor {t.enabled ? "pointer" : "default"}
             :onclick {t.enabled ? "scripts/qs-flip ${t.id}" : ""}
-    (box :class "qs-tile ${t.on ? 'on' : 'off'}${t.enabled ? '' : ' disabled'}"
+    (box :class "qs-tile qs-${t.id} ${t.on ? 'on' : 'off'}${t.enabled ? '' : ' disabled'}"
          :orientation "h"
          :space-evenly false
       (label :class "qs-tile-icon" :text {t.icon})
