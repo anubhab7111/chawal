@@ -159,7 +159,7 @@ window#waybar {
         rgba(243,139,168,1) 95%, rgba(205,214,244,1) 95%);
     background-size: 200% 300%;
     animation: gradient_f_nh 4s linear infinite;
-    color: @base;
+    color: @ink;
     text-shadow: none;
     font-size: 15px;
     font-weight: bolder;
@@ -167,7 +167,7 @@ window#waybar {
 }
 
 #clock label {
-    color: @crust;
+    color: @ink;
     font-weight: bolder;
 }
 
@@ -195,28 +195,28 @@ window#waybar {
 }
 
 #battery {
-    color: @base;
-    background: linear-gradient(135deg, @green 0%, @teal 100%);
+    color: @pill_fg;
+    background: linear-gradient(135deg, @pill_battery_1 0%, @pill_battery_2 100%);
 }
 
 #backlight {
-    color: @base;
-    background: linear-gradient(135deg, @peach 0%, @yellow 100%);
+    color: @pill_fg;
+    background: linear-gradient(135deg, @pill_backlight_1 0%, @pill_backlight_2 100%);
 }
 
 #pulseaudio {
-    color: @base;
-    background: linear-gradient(135deg, @teal 0%, @sky 100%);
+    color: @pill_fg;
+    background: linear-gradient(135deg, @pill_pulseaudio_1 0%, @pill_pulseaudio_2 100%);
 }
 
 #network {
-    color: @base;
-    background: linear-gradient(135deg, @mauve 0%, @lavender 100%);
+    color: @pill_fg;
+    background: linear-gradient(135deg, @pill_network_1 0%, @pill_network_2 100%);
 }
 
 #bluetooth {
-    color: @base;
-    background: linear-gradient(135deg, @flamingo 0%, @pink 100%);
+    color: @pill_fg;
+    background: linear-gradient(135deg, @pill_bluetooth_1 0%, @pill_bluetooth_2 100%);
 }
 
 /* ================================
@@ -257,7 +257,7 @@ window#waybar {
     background-size: 400% 400%;
     animation: gradient_f 9s cubic-bezier(.72,.39,.21,1) infinite;
     text-shadow: none;
-    color: @base;
+    color: @ink;
 }
 
 #custom-media.Paused {
