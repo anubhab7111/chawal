@@ -287,3 +287,106 @@ window.background,
 .qs-tile.on .qs-tile-sub {
     color: @surface1;
 }
+
+/* ---- quick-settings sliders and media card ---- */
+.qs-sliders {
+    margin-top: 12px;
+}
+
+.qs-slider-row {
+    margin: 4px 4px;
+}
+
+.qs-slider-icon {
+    color: @text;
+    font-size: 18px;
+    min-width: 26px;
+    margin-right: 8px;
+}
+
+.qs-slider-icon.off {
+    color: @surface2;
+}
+
+.qs-slider,
+.qs-slider trough {
+    min-height: 14px;
+    border-radius: 7px;
+}
+
+.qs-slider trough {
+    background: @surface0;
+}
+
+.qs-slider trough highlight {
+    background: @sky;
+    border-radius: 7px;
+}
+
+.qs-slider.off trough highlight {
+    background: @surface2;
+}
+
+.qs-slider slider {
+    min-width: 0px;
+    min-height: 0px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.qs-slider-pct {
+    color: @subtext0;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 40px;
+}
+
+.qs-media {
+    background: @surface0;
+    border-radius: 12px;
+    padding: 10px;
+    margin: 12px 4px 0px 4px;
+}
+
+.qs-cover {
+    min-width: 64px;
+    min-height: 64px;
+    border-radius: 10px;
+    background-color: @surface1;
+    background-size: cover;
+    background-position: center;
+    margin-right: 12px;
+}
+
+.qs-cover-glyph {
+    color: @subtext0;
+    font-size: 26px;
+}
+
+.qs-media-title {
+    color: @text;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.qs-media-artist {
+    color: @subtext0;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.qs-media-btns {
+    margin-top: 4px;
+}
+
+.qs-media-btn {
+    color: @text;
+    font-size: 20px;
+    padding: 0px 8px 0px 0px;
+}
+
+.qs-media-btn:hover,
+.qs-media-btn.play {
+    color: @sky;
+}

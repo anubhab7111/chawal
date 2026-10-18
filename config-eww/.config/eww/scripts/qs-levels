@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# The slider levels for the quick-settings panel, as one JSON object:
+#   {"vol":55,"muted":false,"mic":80,"micmuted":true,"bri":40}
+# Volume and mic come from WirePlumber, brightness from brightnessctl (the same
+# source as the edge gauge, so keys, gauge and sliders agree).
+# WPCTL / BRIGHTNESSCTL: tests.
+WPCTL="${WPCTL:-wpctl}"
+BRIGHTNESSCTL="${BRIGHTNESSCTL:-brightnessctl}"
+
+# "Volume: 0.55 [MUTED]" -> "55 true"
+level() {
+    local out
+    out=$("$WPCTL" get-volume "$1" 2>/dev/null) || { printf '0 false'; return; }
+    awk '{ printf "%d %s", $2 * 100 + 0.5, ($3 == "[MUTED]" ? "true" : "false") }' <<<"$out"
+}
+
+read -r vol muted < <(level @DEFAULT_AUDIO_SINK@)
+read -r mic micmuted < <(level @DEFAULT_AUDIO_SOURCE@)
+bri=$("$BRIGHTNESSCTL" -m 2>/dev/null | head -n1 | cut -d, -f4 | tr -d '%')
+printf '{"vol":%s,"muted":%s,"mic":%s,"micmuted":%s,"bri":%s}\n' \
+    "${vol:-0}" "${muted:-false}" "${mic:-0}" "${micmuted:-false}" "${bri:-0}"

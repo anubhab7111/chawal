@@ -1,7 +1,7 @@
 ;; Quick-settings panel: a card in the top-right corner with a grid of toggle
 ;; tiles (Wi-Fi, Bluetooth, DND, night light, caffeine, game mode, power
-;; profile, theme). Sliders, the media card and the network lists come later
-;; (P30, P31).
+;; profile, theme), volume / mic / brightness sliders and a media card. The
+;; network lists come later (P31).
 ;;
 ;; Two windows, both created only while the panel is open (scripts/qs-ctl):
 ;;   qs-scrim   transparent, covers the screen under the panel; a click on it
@@ -16,7 +16,9 @@
 ;;
 ;; The tile states come from `rice-toggle rows`, polled every 2 s while the
 ;; panel is open (:run-while), pre-filled by qs-ctl on open and refreshed at
-;; once after a click (qs-flip). Nothing runs while it is closed.
+;; once after a click (qs-flip). The slider levels (qs-levels) and the media
+;; card (qs-media) are polled every 1 s the same way; mute icons and media
+;; buttons refresh their data at once. Nothing runs while the panel is closed.
 ;;
 ;; eww gives every window a CSS class equal to its name ("qs-scrim",
 ;; "qs-panel"); the widget classes are qs-dim / qs-card / qs-tile... so that
@@ -28,6 +30,16 @@
                  :initial "[]"
                  :run-while qs_open
   "scripts/qs-rows")
+
+(defpoll qs_levels :interval "1s"
+                   :initial "{\"vol\":0,\"muted\":false,\"mic\":0,\"micmuted\":false,\"bri\":0}"
+                   :run-while qs_open
+  "scripts/qs-levels")
+
+(defpoll qs_media :interval "1s"
+                  :initial "{\"on\":false,\"status\":\"\",\"title\":\"\",\"artist\":\"\",\"art\":\"\"}"
+                  :run-while qs_open
+  "scripts/qs-media")
 
 (defwindow qs-scrim
   :monitor 0
@@ -53,10 +65,57 @@
 (defwidget qs-card []
   (box :class "qs-card" :orientation "v" :space-evenly false
     (label :class "qs-title" :halign "start" :text "Quick settings")
-    (for row in qs_rows
-      (box :class "qs-row" :orientation "h" :space-evenly true
-        (for tile in row
-          (qs-tile :t tile))))))
+    ;; The tiles get their own box: eww appends `for` children after the static
+    ;; siblings of the box they sit in, which put the rows below the sliders.
+    (box :class "qs-tiles" :orientation "v" :space-evenly false
+      (for row in qs_rows
+        (box :class "qs-row" :orientation "h" :space-evenly true
+          (for tile in row
+            (qs-tile :t tile)))))
+    (box :class "qs-sliders" :orientation "v" :space-evenly false
+      (qs-slider :kind "vol" :value {qs_levels.vol} :off {qs_levels.muted}
+                 :icon {qs_levels.muted ? "󰖁" : (qs_levels.vol > 66 ? "󰕾" : (qs_levels.vol > 0 ? "󰖀" : "󰕿"))}
+                 :mute "scripts/qs-set vol-mute")
+      (qs-slider :kind "mic" :value {qs_levels.mic} :off {qs_levels.micmuted}
+                 :icon {qs_levels.micmuted ? "󰍭" : "󰍬"}
+                 :mute "scripts/qs-set mic-mute")
+      (qs-slider :kind "bri" :value {qs_levels.bri} :off false
+                 :icon {qs_levels.bri > 66 ? "󰃠" : (qs_levels.bri > 33 ? "󰃟" : "󰃞")}
+                 :mute ""))
+    (qs-media)))
+
+;; A slider row: icon (click mutes; volume and mic only), the scale, the value.
+(defwidget qs-slider [kind value off icon mute]
+  (box :class "qs-slider-row" :orientation "h" :space-evenly false
+    (eventbox :cursor {mute != "" ? "pointer" : "default"} :onclick mute
+      (label :class "qs-slider-icon${off ? ' off' : ''}" :text icon))
+    (scale :class "qs-slider${off ? ' off' : ''}"
+           :hexpand true
+           :orientation "h"
+           :min 0
+           :max 100
+           :value value
+           :onchange "scripts/qs-set ${kind} {}")
+    (label :class "qs-slider-pct" :text "${value}%")))
+
+;; The media card: cover (or a note glyph), title and artist, three buttons.
+;; Hidden while no player runs.
+(defwidget qs-media []
+  (box :visible {qs_media.on}
+    (box :class "qs-media" :orientation "h" :space-evenly false
+      (box :class "qs-cover"
+           :style {qs_media.art != "" ? "background-image: url('${qs_media.art}');" : ""}
+        (label :class "qs-cover-glyph" :text {qs_media.art != "" ? "" : "󰎆"}))
+      (box :class "qs-media-text" :orientation "v" :valign "center" :hexpand true :space-evenly false
+        (label :class "qs-media-title" :halign "start" :limit-width 22 :text {qs_media.title})
+        (label :class "qs-media-artist" :halign "start" :limit-width 22 :text {qs_media.artist})
+        (box :class "qs-media-btns" :orientation "h" :halign "start" :space-evenly false
+          (eventbox :cursor "pointer" :onclick "scripts/qs-media-ctl prev"
+            (label :class "qs-media-btn" :text "󰒮"))
+          (eventbox :cursor "pointer" :onclick "scripts/qs-media-ctl toggle"
+            (label :class "qs-media-btn play" :text {qs_media.status == "Playing" ? "󰏤" : "󰐊"}))
+          (eventbox :cursor "pointer" :onclick "scripts/qs-media-ctl next"
+            (label :class "qs-media-btn" :text "󰒭")))))))
 
 (defwidget qs-tile [t]
   (eventbox :cursor {t.enabled ? "pointer" : "default"}
