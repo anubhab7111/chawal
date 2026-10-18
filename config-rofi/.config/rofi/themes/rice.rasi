@@ -61,8 +61,6 @@ inputbar {
     padding: 10px 14px;
     border-radius: 10px;
     background-color: @bg-alt;
-    border: 0px 0px 2px 0px;
-    border-color: @underline;
 }
 
 /* The tab strip already names the mode, so the prompt stays out of the way */
