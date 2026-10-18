@@ -1,0 +1,71 @@
+;; Quick-settings panel: a card in the top-right corner with a grid of toggle
+;; tiles (Wi-Fi, Bluetooth, DND, night light, caffeine, game mode, power
+;; profile, theme). Sliders, the media card and the network lists come later
+;; (P30, P31).
+;;
+;; Two windows, both created only while the panel is open (scripts/qs-ctl):
+;;   qs-scrim   transparent, covers the screen under the panel; a click on it
+;;              closes the panel. Opened first so the panel sits above it.
+;;   qs-panel   the card itself.
+;; Esc closes it too: qs-ctl asks Hyprland (rice.qs.escape_on in modules/qs.lua)
+;; for an Escape bind that exists only while the panel is open.
+;;
+;; No revealer inside the panel (a window sized while its revealer is collapsed
+;; stays 1 px tall): the window always has its content size, and the
+;; compositor's layer animation (rules.lua) slides it in.
+;;
+;; The tile states come from `rice-toggle rows`, polled every 2 s while the
+;; panel is open (:run-while), pre-filled by qs-ctl on open and refreshed at
+;; once after a click (qs-flip). Nothing runs while it is closed.
+;;
+;; eww gives every window a CSS class equal to its name ("qs-scrim",
+;; "qs-panel"); the widget classes are qs-dim / qs-card / qs-tile... so that
+;; no card rule paints the window itself (see eww.css).
+
+(defvar qs_open false)
+
+(defpoll qs_rows :interval "2s"
+                 :initial "[]"
+                 :run-while qs_open
+  "scripts/qs-rows")
+
+(defwindow qs-scrim
+  :monitor 0
+  :stacking "overlay"
+  :exclusive false
+  :focusable false
+  :namespace "qs-scrim"
+  :geometry (geometry :anchor "top left" :width "100%" :height "100%")
+  (eventbox :onclick "scripts/qs-ctl close"
+            :onrightclick "scripts/qs-ctl close"
+            :onmiddleclick "scripts/qs-ctl close"
+    (box :class "qs-dim")))
+
+(defwindow qs-panel
+  :monitor 0
+  :stacking "overlay"
+  :exclusive false
+  :focusable false
+  :namespace "qs-panel"
+  :geometry (geometry :anchor "top right" :x "8px" :y "8px" :width "360px")
+  (qs-card))
+
+(defwidget qs-card []
+  (box :class "qs-card" :orientation "v" :space-evenly false
+    (label :class "qs-title" :halign "start" :text "Quick settings")
+    (for row in qs_rows
+      (box :class "qs-row" :orientation "h" :space-evenly true
+        (for tile in row
+          (qs-tile :t tile))))))
+
+(defwidget qs-tile [t]
+  (eventbox :cursor {t.enabled ? "pointer" : "default"}
+            :onclick {t.enabled ? "scripts/qs-flip ${t.id}" : ""}
+    (box :class "qs-tile ${t.on ? 'on' : 'off'}${t.enabled ? '' : ' disabled'}"
+         :orientation "h"
+         :space-evenly false
+      (label :class "qs-tile-icon" :text {t.icon})
+      (box :class "qs-tile-text" :orientation "v" :valign "center" :halign "start"
+           :hexpand true :space-evenly false
+        (label :class "qs-tile-name" :halign "start" :limit-width 14 :text {t.label})
+        (label :class "qs-tile-sub" :halign "start" :limit-width 14 :text {t.sub})))))

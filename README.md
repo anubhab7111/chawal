@@ -67,3 +67,14 @@ data tabs in parallel first and hands each script its finished output
 forks, no `nmcli` rescans (use `--rescan no`).
 
 To try an unstowed checkout: `RICE_BIN=$PWD/config-rice/.config/rice/bin ./config-rice/.config/rice/bin/rice-hub`.
+
+## Quick-settings panel
+
+`SUPER+N` or the top-right corner opens a card of toggle tiles (Wi-Fi,
+Bluetooth, do not disturb, night light, caffeine, game mode, plus power profile
+and theme, which stay disabled until they have something to switch). Click a
+tile to flip it; click outside the card or press `Esc` to close. It is eww:
+`config-eww/.config/eww/widgets/qs.yuck`, opened by `scripts/qs-ctl`, with the
+switches behind `rice-toggle` (the same backends as the rofi Toggles tab). No
+window exists while it is closed. `Esc` is a Hyprland bind that exists only
+while the panel is open (`config-hypr/.config/hypr/modules/qs.lua`).

@@ -203,3 +203,87 @@ window.background,
     font-weight: 800;
     margin-bottom: 10px;
 }
+
+
+/* ---- quick-settings panel (widgets/qs.yuck) ----
+   Window classes are qs-scrim / qs-panel, so the card is .qs-card (see the
+   note at the top about never reusing window names). Same construction as
+   the gauges: inset ring instead of an outer shadow, which would be clipped
+   to the window rectangle. */
+.qs-dim {
+    background-color: rgba(0, 0, 0, 0.16);
+}
+
+.qs-card {
+    background: @base;
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+}
+
+.qs-title {
+    color: @text;
+    font-size: 14px;
+    font-weight: 800;
+    margin: 0px 4px 10px 4px;
+}
+
+.qs-row {
+    margin-bottom: 8px;
+}
+
+.qs-row:last-child {
+    margin-bottom: 0px;
+}
+
+.qs-tile {
+    background: @surface0;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin: 0px 4px;
+    min-height: 40px;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    transition:
+        background-color 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.qs-tile:hover {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16) inset;
+}
+
+/* on: the cyan used for volume fill, so "active" reads the same everywhere */
+.qs-tile.on {
+    background: @sky;
+}
+
+.qs-tile.disabled {
+    opacity: 0.45;
+}
+
+.qs-tile-icon {
+    color: @text;
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+.qs-tile-name {
+    color: @text;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.qs-tile-sub {
+    color: @subtext0;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.qs-tile.on .qs-tile-icon,
+.qs-tile.on .qs-tile-name {
+    color: @base;
+}
+
+.qs-tile.on .qs-tile-sub {
+    color: @surface1;
+}

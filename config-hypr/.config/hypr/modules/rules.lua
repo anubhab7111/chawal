@@ -116,6 +116,10 @@ layer("swaync-control-center", { animation = "slide right" })
 -- margins as a visible blurred box). It slides in from the right instead.
 layer("volume-panel", { animation = "slide right" })
 
+-- Quick-settings panel (slides down from the top edge) and its click-outside scrim (fades).
+layer("qs-panel", { animation = "slide top" })
+layer("qs-scrim", { animation = "fade" })
+
 layer("gtk-layer-shell", { blur = true })
 layer("selection", { no_anim = true })
 layer("logout_dialog", { blur = true })

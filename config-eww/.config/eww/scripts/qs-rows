@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# The tile states for the quick-settings panel, as JSON rows (see rice-toggle).
+exec "${RICE_BIN:-$HOME/.config/rice/bin}/rice-toggle" rows
