@@ -25,3 +25,7 @@ config-cava/.config/cava/shaders/
 config-gtk-4.0/.config/gtk-4.0/gtk.css
 config-gtk-4.0/.config/gtk-4.0/gtk-dark.css
 config-gtk-4.0/.config/gtk-4.0/assets
+# Written by rice-theme (the Kvantum theme name for the active theme)
+config-kvantum/.config/Kvantum/kvantum.kvconfig
+# qt6ct palette slot link that rice-theme creates
+config-qt6ct/.config/qt6ct/colors/rice.conf

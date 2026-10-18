@@ -18,7 +18,7 @@ backup under `~/.dotfiles-backup/` first, never deleted).
 - `config-nwg-look`, `config-wlogout` — GTK settings/logout UI
 - `config-gtk-2.0`, `config-gtk-3.0`, `config-gtk-4.0`, `config-gtkrc`,
   `config-gtkrc-2.0`, `home-gtkrc-20` (`~/.gtkrc-2.0`) — GTK theming
-- `config-qt5ct`, `config-kvantum` — Qt theming
+- `config-qt6ct`, `config-kvantum` — Qt theming
 - `config-alacritty`, `config-tmux` — terminal
 - `config-btop`, `config-cava`, `config-fastfetch` — system monitors/info
 - `config-starship.toml` — shell prompt
@@ -85,6 +85,15 @@ theme (`gtk-theme`). GTK3 follows through gsettings; GTK4's css links in
 `~/.config/gtk-4.0` are slot links `rice-theme bootstrap` points at the active
 GTK theme (skipped when that theme isn't installed: Latte needs the AUR package
 `catppuccin-gtk-theme-latte`). There is no automatic switching and no keybind.
+
+Qt6 apps follow too: `QT_QPA_PLATFORMTHEME=qt6ct` (env.lua) makes qt6ct hand
+them the Kvantum style (`config-qt6ct`), `rice-theme` writes the Kvantum theme
+(`catppuccin-mocha-peach` / `-latte-peach`) and links a qt6ct palette. KDE apps
+(Dolphin, Okular) read `~/.config/kdeglobals` instead, so `rice-theme` also keeps
+a `Rice` colour scheme there (`[General]`/`[UiSettings] ColorScheme`, the
+`[Colors:*]` sections and `[KDE] widgetStyle=kvantum`) and leaves the rest of the
+file alone; the original is saved as `~/.local/state/rice/kdeglobals.orig`.
+Needs `qt6ct`, `kvantum` and `kvantum-theme-catppuccin-git`.
 
 All notifications are listed right under the panel (scrollable, with a Clear
 button): swaync's control centre, opened and closed together with the panel by
