@@ -85,15 +85,12 @@ hl.define_submap("resize", function()
 end)
 
 -- Volume: 5% steps capped at 100%, repeat while held, work on the lock
--- screen. Either volume key unmutes first.
+-- screen. Either volume key unmutes first. rice-volume / rice-bright also
+-- flash the right-edge gauge (edge-ctl osd).
 local held = { repeating = true, locked = true }
-local sink = "@DEFAULT_AUDIO_SINK@"
-local function volume(step)
-    return exec("wpctl set-mute " .. sink .. " 0; wpctl set-volume -l 1.0 " .. sink .. " " .. step)
-end
-bind("XF86AudioRaiseVolume", volume("5%+"), held)
-bind("XF86AudioLowerVolume", volume("5%-"), held)
-bind("XF86AudioMute", exec("wpctl set-mute " .. sink .. " toggle"), { locked = true })
+bind("XF86AudioRaiseVolume", exec("~/.config/rice/bin/rice-volume up"), held)
+bind("XF86AudioLowerVolume", exec("~/.config/rice/bin/rice-volume down"), held)
+bind("XF86AudioMute", exec("~/.config/rice/bin/rice-volume mute"), { locked = true })
 bind("XF86AudioMicMute", exec("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true })
 
 -- Media
@@ -103,12 +100,8 @@ bind("XF86AudioNext", exec("playerctl next"), { locked = true })
 bind("XF86AudioPrev", exec("playerctl previous"), { locked = true })
 
 -- Brightness: exponential 5% steps (fine near dark), never below 1% of max.
--- brightnessctl 0.5 reads -n as a raw value only, so 1% is computed.
-local function brightness(step)
-    return exec("brightnessctl -e4 -n$(( $(brightnessctl m) / 100 )) set " .. step)
-end
-bind("XF86MonBrightnessUp", brightness("5%+"), held)
-bind("XF86MonBrightnessDown", brightness("5%-"), held)
+bind("XF86MonBrightnessUp", exec("~/.config/rice/bin/rice-bright up"), held)
+bind("XF86MonBrightnessDown", exec("~/.config/rice/bin/rice-bright down"), held)
 
 -- Screenshots
 bind(mainMod .. " + PRINT", exec("hyprshot -m window"))

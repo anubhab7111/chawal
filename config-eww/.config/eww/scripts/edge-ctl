@@ -43,8 +43,11 @@ OSD_MS=${EDGE_OSD_MS:-1500}   # ms: key-press indicator lifetime
 # failures go to the log (eww open fails quietly otherwise): ~/.cache/rice/edge-ctl.log
 LOGF="${XDG_CACHE_HOME:-$HOME/.cache}/rice/edge-ctl.log"
 mkdir -p "$(dirname "$LOGF")"
+# EDGE_TRACE=file logs every eww call and state change (debugging aid)
+trace() { [ -n "${EDGE_TRACE:-}" ] && printf '%s %s\n' "$(date +%T.%N | cut -c1-12)" "$*" >>"$EDGE_TRACE"; return 0; }
 eww_() {
     local out
+    trace "eww $*"
     out=$(eww --config "$CFG" "$@" 2>&1) ||
         case $out in *"no such window was open"*) ;; *) # closing a closed window is fine
             printf '%s eww %s: %s\n' "$(date +%T)" "$*" "$out" >>"$LOGF" ;;
@@ -53,21 +56,26 @@ eww_() {
 ms() { local t=$EPOCHREALTIME; printf '%s' $((${t/./} / 1000)); }
 
 state() { local f="$RUN/$1.state"; [ -f "$f" ] && cat "$f" || printf closed; }
-set_state() { printf '%s' "$2" >"$RUN/$1.state"; }
+set_state() { trace "state $1 -> $2"; printf '%s' "$2" >"$RUN/$1.state"; }
 token() { local f="$RUN/$1.token"; [ -f "$f" ] && cat "$f" || printf 0; }
 bump() { printf '%s' $(($(token "$1") + 1)) >"$RUN/$1.token"; }
 
 # --- geometry -----------------------------------------------------------------
 
-# Sets MON (eww's monitor index = Hyprland's monitor id) MX MY MW MH RT RB: the monitor under the pointer (else the focused one).
+# Sets MON (eww's monitor index = Hyprland's monitor id) MX MY MW MH RT RB: the monitor
+# under the pointer (else the focused one); PREFER=focused reverses that (key-press osd).
 monitor_under_pointer() {
     local cx cy line
     read -r cx cy < <(hyprctl cursorpos | tr -d ',')
-    CX=${cx:-0} CY=${cy:-0}
-    line=$(hyprctl monitors -j | jq -r --argjson cx "$CX" --argjson cy "$CY" '
+    # a failed hyprctl prints an error instead of numbers: treat that as (0, 0)
+    [[ ${cx:-} =~ ^-?[0-9]+$ ]] || cx=0
+    [[ ${cy:-} =~ ^-?[0-9]+$ ]] || cy=0
+    CX=$cx CY=$cy
+    line=$(hyprctl monitors -j | jq -r --argjson cx "$CX" --argjson cy "$CY" --arg prefer "${PREFER:-pointer}" '
         map(. + {s: (.scale // 1)}) as $m
-        | ($m | map(select(.x <= $cx and $cx < .x + (.width / .s) and .y <= $cy and $cy < .y + (.height / .s)))
-           + ($m | map(select(.focused))) + $m)[0]
+        | ($m | map(select(.x <= $cx and $cx < .x + (.width / .s) and .y <= $cy and $cy < .y + (.height / .s)))) as $under
+        | ($m | map(select(.focused))) as $focus
+        | (if $prefer == "focused" then $focus + $under + $m else $under + $focus + $m end)[0]
         | [.id, .x, .y, (.width / .s | floor), (.height / .s | floor), (.reserved[1] // 0), (.reserved[3] // 0)] | @tsv')
     IFS=$'\t' read -r MON MX MY MW MH RT RB <<<"$line"
 }
@@ -98,14 +106,18 @@ pointer_inside() { # GAUGE: is the pointer within the gauge's rectangle?
 
 # --- actions (caller holds the lock) -----------------------------------------------
 
-wake_listener() { # the gauge's value script sleeps while hidden; nudge it
+listener_pid() { # GAUGE: pid of its running value script, if the pid file is not stale
     local pid
-    pid=$(cat "$RUN/$1.listener" 2>/dev/null) || return 0
+    pid=$(cat "$RUN/$1.listener" 2>/dev/null) || return 1
     # the file can outlive its process (eww kills listeners without letting
     # them clean up), and the pid may have been reused: check what it is
-    if [ -n "$pid" ] && tr '\0' ' ' <"/proc/$pid/cmdline" 2>/dev/null | grep -q "$1-listen"; then
-        kill -USR1 "$pid" 2>/dev/null
-    fi
+    [ -n "$pid" ] && tr '\0' ' ' <"/proc/$pid/cmdline" 2>/dev/null | grep -q "$1-listen" || return 1
+    printf '%s' "$pid"
+}
+
+wake_listener() { # the gauge's value script sleeps while hidden; nudge it
+    local pid
+    pid=$(listener_pid "$1") && kill -USR1 "$pid" 2>/dev/null
     return 0
 }
 
@@ -113,9 +125,21 @@ open_panel() { # closed -> window mapped and revealed
     local g=$1
     monitor_under_pointer
     gauge_rect "$g"
+    local cold=0
+    listener_pid "$g" >/dev/null || cold=1 # first open since the daemon started: no value yet
     : >"$RUN/$g.visible"
     wake_listener "$g"
     eww_ open "$g-panel" --screen "$MON" --anchor "$ANCHOR" --pos "$POS" --size "${WIDTH}x${HEIGHT}"
+    if [ "$cold" = 1 ]; then
+        # eww starts the value script with the first window; reveal only once it
+        # has said something, or the gauge slides in showing the 0% placeholder
+        local i
+        for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
+            listener_pid "$g" >/dev/null && break
+            sleep 0.02
+        done
+        sleep 0.08
+    fi
     sleep 0.04 # let the window map collapsed so the revealer animates the slide-in
     eww_ update "${g}_open=true"
 }
@@ -169,7 +193,7 @@ cmd_osd() {
     printf '%s' $(($(ms) + OSD_MS)) >"$RUN/$g.deadline"
     case $(state "$g") in
     closed)
-        open_panel "$g"
+        PREFER=focused open_panel "$g"
         set_state "$g" osd
         bump "$g"
         ;;

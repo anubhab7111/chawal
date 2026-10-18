@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# rice-bright: the brightness keys. Step the backlight, then flash the
+# brightness gauge on the right edge (edge-ctl osd).
+#
+#   rice-bright up      exponential 5% step (fine near dark)
+#   rice-bright down    the same, downwards; never below 1% of max
+#
+# brightnessctl 0.5 reads -n as a raw value only, so 1% is computed.
+
+set -u
+
+case ${1:-} in
+up) step=5%+ ;;
+down) step=5%- ;;
+*)
+    sed -n '3,8s/^# \{0,1\}//p' "$0" >&2
+    exit 2
+    ;;
+esac
+
+brightnessctl -e4 -n$(($(brightnessctl m) / 100)) set "$step" >/dev/null
+
+exec "${EDGE_CTL:-$HOME/.config/eww/scripts/edge-ctl}" osd brightness # EDGE_CTL: tests
