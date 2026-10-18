@@ -108,7 +108,7 @@ layer("rofi", { blur = true, ignore_alpha = 0.5, animation = "popin 80%", dim_ar
 layer("swaync-notification-window", { blur = true })
 layer("swaync-notification-window", { animation = "slide right" })
 layer("swaync-control-center", { blur = true })
-layer("swaync-control-center", { animation = "slide right" })
+layer("swaync-control-center", { animation = "slide top" })
 
 -- Volume edge-hover slider: no blur (its own namespace, so it doesn't inherit
 -- the blanket gtk-layer-shell blur rule below; with ignore_opacity and

@@ -39,7 +39,7 @@ local commands = {
     "hypridle",
     "swaync",
 
-    -- Tray applets
+    -- Wi-Fi password and Bluetooth pairing agents (no tray icon: Waybar has no tray)
     "nm-applet --indicator & blueman-applet",
 
     -- Clipboard history

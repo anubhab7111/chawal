@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # rice-hub: the rofi control hub. One window, Tab / Shift+Tab flip between tabs.
 #
-#   rice-hub [TAB]    TAB is drun (default), toggles, windows, audio, net, bt, calc, emoji, clip, wall or power
+#   rice-hub [TAB]    TAB is drun (default), windows, net, bt, calc, emoji, clip, wall or power
 #                     ("window" still works as an alias for windows)
 #
 # Every tab but Apps is one of the rice-* scripts running as a rofi mode (they
@@ -10,8 +10,8 @@
 # -display-* only names the builtin Apps tab (config.rasi).
 #
 # Hotkeys: Alt+1..5 are the per-row actions of the current tab, whatever it
-# calls them (windows: close / float / pin / bring here; audio: vol - / vol + /
-# mute / play-pause / next; clip: delete / wipe all). Ctrl+Delete and Ctrl+Shift+Delete stay as the clip aliases;
+# calls them (windows: close / float / pin / bring here; net: forget / rescan;
+# clip: delete / wipe all). Ctrl+Delete and Ctrl+Shift+Delete stay as the clip aliases;
 # Control+Alt+d takes over word-delete.
 
 set -euo pipefail
@@ -24,11 +24,11 @@ tab=${1:-drun}
 # one's \0prompt for the tab label) and the window only appears after the last
 # one finishes, so run the data-gathering tabs here, all at once, and let
 # each script hand rofi its finished output (RICE_PRE; see the top of
-# rice-toggles and friends). Typically ~100 ms for all tabs instead of the sum.
+# rice-windows and friends). Typically ~100 ms for all tabs instead of the sum.
 RICE_PRE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice/hub-pre"
 rm -rf "$RICE_PRE"
 mkdir -p "$RICE_PRE"
-for t in toggles windows audio net bt clip; do
+for t in windows net bt clip; do
     (
         ROFI_RETV=0 "$BIN/rice-$t" >"$RICE_PRE/$t.tmp" 2>/dev/null </dev/null || true
         mv "$RICE_PRE/$t.tmp" "$RICE_PRE/$t.out"
@@ -37,7 +37,7 @@ done
 export RICE_PRE
 
 exec rofi -show "$tab" \
-    -modes "drun,toggles:$BIN/rice-toggles,windows:$BIN/rice-windows,audio:$BIN/rice-audio,net:$BIN/rice-net,bt:$BIN/rice-bt,calc:$BIN/rice-calc,emoji:$BIN/rice-emoji,clip:$BIN/rice-clip,wall:$BIN/rice-wall,power:$BIN/rice-power" \
+    -modes "drun,windows:$BIN/rice-windows,net:$BIN/rice-net,bt:$BIN/rice-bt,calc:$BIN/rice-calc,emoji:$BIN/rice-emoji,clip:$BIN/rice-clip,wall:$BIN/rice-wall,power:$BIN/rice-power" \
     -kb-remove-word-forward "Control+Alt+d" \
     -kb-custom-1 "Alt+1,Control+Delete" \
     -kb-custom-2 "Alt+2,Control+Shift+Delete" \
