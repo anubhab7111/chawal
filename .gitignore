@@ -16,6 +16,7 @@ config-waybar/.config/waybar/colors.css
 config-swaync/.config/swaync/colors.css
 config-btop/.config/btop/themes/rice.theme
 config-rofi/.config/rofi/themes/colors.rasi
+config-tmux/.config/tmux/colors.conf
 # cava writes its default themes and shaders here on every start; the
 # themes/rice slot lives here too.
 config-cava/.config/cava/themes/
