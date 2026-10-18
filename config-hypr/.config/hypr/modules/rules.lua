@@ -72,19 +72,9 @@ rule(class([[^(firefox)$]]), { opacity = "1.00 1.00 override" })
 rule(class([[^(steam_app_default)$]]), { opacity = "1.00 1.00 override" })
 rule(class([[^(µVision)$]]), { opacity = "1.00 1.00 override" })
 
--- Blur
-rule(class([[^(firefox)$]]), { no_blur = true })
-rule(class([[^(chromium)$]]), { no_blur = true })
-rule(class([[^(brave-browser)$]]), { no_blur = true })
-rule(class([[^(librewolf)$]]), { no_blur = true })
-rule(class([[^(steam)$]]), { no_blur = true })
-rule(class([[^(Steam)$]]), { no_blur = true })
-rule(title([[^(.*Steam[A-Za-z0-9\s]*)$]]), { no_blur = true })
-
-rule(class([[^(mpv)$]]), { no_blur = true })
-rule(class([[^(vlc)$]]), { no_blur = true })
-rule(class([[^(com\.github\.th-ch\.youtube-music)$]]), { no_blur = true })
-
+-- Blur: every window that has any transparency gets the frosted-glass blur
+-- (decoration.blur in look.lua); an opaque window is never blurred, so this
+-- costs nothing for them. The one exception is gamescope (games).
 rule(class([[^(gamescope)$]]), { no_blur = true })
 
 -- Idle inhibit
