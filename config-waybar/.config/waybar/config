@@ -17,7 +17,6 @@
   ],
   "modules-right": [
     "backlight",
-    "pulseaudio",
     "battery",
     "bluetooth",
     "network",
@@ -56,27 +55,6 @@
     "tooltip": false,
     "on-scroll-up": "brightnessctl set 5%+",
     "on-scroll-down": "brightnessctl set 5%-"
-  },
-  "pulseaudio": {
-    "format": "<b>{icon} {volume}%</b>",
-    "format-bluetooth": "<b>󰂯 {volume}%</b>",
-    "format-bluetooth-muted": "<b>󰂲</b>",
-    "format-muted": "<b>󰖁</b>",
-    "format-icons": {
-      "headphone": "󰋋",
-      "hands-free": "󰋎",
-      "headset": "󰋎",
-      "default": [
-        "󰕿",
-        "󰖀",
-        "󰕾"
-      ]
-    },
-    "tooltip": true,
-    "tooltip-format": "{desc}: {volume}%",
-    "on-click": "pwvucontrol",
-    "on-scroll-up": "pamixer -i 5",
-    "on-scroll-down": "pamixer -d 5"
   },
   "network": {
     "format-wifi": "<b>󰤨 {essid}</b>",

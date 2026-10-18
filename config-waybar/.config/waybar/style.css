@@ -131,7 +131,6 @@ window#waybar {
 #temperature,
 #battery,
 #backlight,
-#pulseaudio,
 #network,
 #bluetooth,
 #custom-gamemode,
@@ -202,11 +201,6 @@ window#waybar {
 #backlight {
     color: @pill_fg;
     background: linear-gradient(135deg, @pill_backlight_1 0%, @pill_backlight_2 100%);
-}
-
-#pulseaudio {
-    color: @pill_fg;
-    background: linear-gradient(135deg, @pill_pulseaudio_1 0%, @pill_pulseaudio_2 100%);
 }
 
 #network {
