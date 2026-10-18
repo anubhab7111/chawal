@@ -1,5 +1,6 @@
 /* Rice look for every rofi window: the Waybar glass -- translucent dark
-   panel, hairline border, 14px corners, one cyan accent, pill rows.
+   panel, 14px corners, the Hyprland tri-colour border, gradient pills for the
+   active tab and the selected row.
    colors.rasi is a slot (rice-theme) -> the active theme's rofi-colors.rasi,
    which defines bg, bg-alt, surface, fg, fg-dim, accent, urgent, line, tint. */
 @import "~/.config/rofi/themes/colors.rasi"
@@ -14,16 +15,19 @@ window {
     width: 640px;
     location: center;
     anchor: center;
-    border: 1px;
-    border-color: @line;
+    /* rofi cannot paint a gradient border (it renders black), so the window
+       is the gradient and shows through as a 2px ring around the mainbox */
+    padding: 2px;
     border-radius: 14px;
-    background-color: @bg;
-    padding: 14px;
+    background-image: @grad-border;
 }
 
 mainbox {
     children: [ mode-switcher, inputbar, message, listview ];
     spacing: 12px;
+    padding: 14px;
+    border-radius: 12px;
+    background-color: @bg;
 }
 
 /* Tab strip: one pill per mode, the active one in cyan */
@@ -41,14 +45,14 @@ button {
 }
 
 button selected {
-    background-color: @tint;
-    text-color: @accent;
+    background-image: @grad-tab;
+    text-color: @ink;
 }
 
 button.selected,
 button selected.normal {
-    background-color: @tint;
-    text-color: @accent;
+    background-image: @grad-tab;
+    text-color: @ink;
 }
 
 inputbar {
@@ -57,6 +61,8 @@ inputbar {
     padding: 10px 14px;
     border-radius: 10px;
     background-color: @bg-alt;
+    border: 0px 0px 2px 0px;
+    border-color: @underline;
 }
 
 /* The tab strip already names the mode, so the prompt stays out of the way */
@@ -113,20 +119,20 @@ element alternate.urgent {
 }
 
 element selected.normal {
-    background-color: @surface;
-    text-color: @accent;
+    background-image: @grad-sel;
+    text-color: @ink;
 }
 
 element selected.active {
-    background-color: @tint;
-    text-color: @accent;
+    background-image: @grad-sel;
+    text-color: @ink;
     border: 1px;
-    border-color: @accent;
+    border-color: @ink;
 }
 
 element selected.urgent {
-    background-color: @surface;
-    text-color: @urgent;
+    background-color: @urgent;
+    text-color: @ink;
 }
 
 element-icon {

@@ -11,4 +11,13 @@
     urgent:  #d20f39;
     line:    #4c4f6933;
     tint:    #04a5e526;
+    /* Loud look. rofi cannot use a variable inside linear-gradient(), so each
+       gradient is one whole value. grad-border is the Hyprland window border
+       (mauve, blue, teal), grad-sel the selected row, grad-tab the active tab
+       (the Waybar network pill); ink is the text colour on them. */
+    grad-border: linear-gradient(to right, #8839ef, #1e66f5, #179299);
+    grad-sel:    linear-gradient(to right, #c4a4f2, #a9c3f8);
+    grad-tab:    linear-gradient(to right, #c4a4f2, #bac4f8);
+    ink:         #4c4f69;
+    underline:   #8839ef;
 }
