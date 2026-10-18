@@ -43,3 +43,11 @@
 @define-color pill_network_2 #bac4f8;
 @define-color pill_bluetooth_1 #e7bec1;
 @define-color pill_bluetooth_2 #edbde3;
+
+/* More gradient pairs for the quick-settings tiles and notification cards */
+@define-color pill_dnd_1 #e392a6;
+@define-color pill_dnd_2 #eba9b1;
+@define-color pill_caffeine_1 #e8c79a;
+@define-color pill_caffeine_2 #f5b693;
+@define-color pill_theme_1 #97b7f5;
+@define-color pill_theme_2 #bac4f8;

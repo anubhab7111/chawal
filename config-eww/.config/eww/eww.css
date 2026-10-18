@@ -214,11 +214,18 @@ window.background,
     background-color: rgba(0, 0, 0, 0.16);
 }
 
+/* The tri-colour border (same stops as the Hyprland window border): a
+   gradient box, 2px of it left showing around the card. */
+.qs-ring {
+    background-image: linear-gradient(135deg, @mauve 0%, @blue 50%, @teal 100%);
+    border-radius: 14px;
+    padding: 2px;
+}
+
 .qs-card {
     background: @base;
-    border-radius: 14px;
+    border-radius: 12px;
     padding: 14px;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
 }
 
 .qs-title {
@@ -252,10 +259,25 @@ window.background,
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16) inset;
 }
 
-/* on: the cyan used for volume fill, so "active" reads the same everywhere */
-.qs-tile.on {
-    background: @sky;
-}
+/* Each tile has the gradient of its Waybar pill. Off tiles keep a coloured
+   icon; on tiles fill with the gradient and take the pill text colour. */
+.qs-wifi.on     { background-image: linear-gradient(135deg, @pill_network_1 0%, @pill_network_2 100%); }
+.qs-bluetooth.on { background-image: linear-gradient(135deg, @pill_bluetooth_1 0%, @pill_bluetooth_2 100%); }
+.qs-dnd.on       { background-image: linear-gradient(135deg, @pill_dnd_1 0%, @pill_dnd_2 100%); }
+.qs-night.on     { background-image: linear-gradient(135deg, @pill_backlight_1 0%, @pill_backlight_2 100%); }
+.qs-caffeine.on  { background-image: linear-gradient(135deg, @pill_caffeine_1 0%, @pill_caffeine_2 100%); }
+.qs-game.on      { background-image: linear-gradient(135deg, @pill_battery_1 0%, @pill_battery_2 100%); }
+.qs-power.on     { background-image: linear-gradient(135deg, @pill_pulseaudio_1 0%, @pill_pulseaudio_2 100%); }
+.qs-theme.on     { background-image: linear-gradient(135deg, @pill_theme_1 0%, @pill_theme_2 100%); }
+
+.qs-wifi.off .qs-tile-icon      { color: @mauve; }
+.qs-bluetooth.off .qs-tile-icon { color: @pink; }
+.qs-dnd.off .qs-tile-icon       { color: @red; }
+.qs-night.off .qs-tile-icon     { color: @peach; }
+.qs-caffeine.off .qs-tile-icon  { color: @yellow; }
+.qs-game.off .qs-tile-icon      { color: @green; }
+.qs-power.off .qs-tile-icon     { color: @teal; }
+.qs-theme.off .qs-tile-icon     { color: @blue; }
 
 .qs-tile.disabled {
     opacity: 0.45;
@@ -281,11 +303,11 @@ window.background,
 
 .qs-tile.on .qs-tile-icon,
 .qs-tile.on .qs-tile-name {
-    color: @base;
+    color: @pill_fg;
 }
 
 .qs-tile.on .qs-tile-sub {
-    color: @surface1;
+    color: alpha(@pill_fg, 0.7);
 }
 
 /* ---- microphone gauge: the volume construction again, @mauve fill ---- */
