@@ -1,0 +1,7 @@
+;; One eww daemon for the right-edge gauges (volume, brightness).
+;; Widgets live in widgets/*.yuck; scripts/edge-ctl opens and closes them.
+;;
+;; The daemon is started at login (`eww daemon`, see hypr autostart) and
+;; reloaded by rice-theme after a theme switch. No window is mapped while the
+;; gauges are idle.
+(include "widgets/edge.yuck")

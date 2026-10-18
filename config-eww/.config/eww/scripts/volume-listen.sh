@@ -5,10 +5,19 @@
 # change); this loop *eases* the number eww sees toward it, so the gauge fill
 # glides instead of jumping. Small moves (<= 3%, e.g. dragging the slider)
 # snap straight through so the fill never lags behind the pointer.
+#
+# Idle cost: while the gauge is hidden (no $RUN/volume.visible) this sleeps
+# indefinitely; edge-ctl wakes it with SIGUSR1 right after creating that file.
+# The sink-event sampler below keeps the state file current either way.
+RUN="${EDGE_RUN:-${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice/edge}" # EDGE_RUN: tests
+VIS="$RUN/volume.visible"
+mkdir -p "$RUN"
+printf '%s' "$$" >"$RUN/volume.listener"
+trap ':' USR1 # only here to interrupt the sleep below
 state="$(mktemp)"
 bg=""
 cleanup() {
-    rm -f "$state"
+    rm -f "$state" "$RUN/volume.listener"
     # Only our own sampler (and its pactl child) -- never the process group,
     # which would take the eww daemon down with it.
     [ -n "$bg" ] && { pkill -P "$bg" 2>/dev/null; kill "$bg" 2>/dev/null; }
@@ -55,5 +64,11 @@ while :; do
         printf '{"volume": %s, "muted": %s}\n' "$out" "$muted"
         last="$cur"
     fi
-    if (( shown == goal )); then tick 0.08; else tick 0.02; fi
+    if (( shown != goal )); then
+        tick 0.02
+    elif [ -e "$VIS" ]; then
+        tick 0.08
+    else
+        tick 3600
+    fi
 done

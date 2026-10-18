@@ -1,0 +1,283 @@
+#!/usr/bin/env bash
+# edge-ctl: lifecycle of the right-edge gauges (volume, brightness).
+#
+#   edge-ctl edge             the pointer touched the right screen edge (called by
+#                             hypr pointer.lua): open the gauge whose rectangle it is at
+#   edge-ctl hover GAUGE      open GAUGE and keep it while the pointer is near
+#   edge-ctl osd GAUGE        show it for ~1.5 s, extended by each call (key-press indicator)
+#   edge-ctl enter GAUGE      eww: pointer entered the panel (cancels a pending close)
+#   edge-ctl leave GAUGE      eww: pointer left the panel (starts a short grace)
+#   edge-ctl close [GAUGE]    close now (default: both)
+#   edge-ctl status           print each gauge's state
+#
+# GAUGE is volume or brightness. Each has a state: closed -> (hover|osd) ->
+# closing -> closed. Every command runs under one flock, and every timer
+# carries the token that was current when it was armed; any state change bumps
+# the token, so a stale timer finds a different token and does nothing.
+#
+# Why a state machine: the window is the only thing that can block clicks, so
+# it must be gone when the gauge is. A close is two steps (slide the revealer
+# out, wait out the transition, then close the window) and the second step
+# happens UNCONDITIONALLY unless the token changed meanwhile (the pointer
+# came back, or an osd arrived), so the window can never be left mapped and
+# invisible over the screen edge.
+#
+# Geometry comes from hyprctl at open time (the monitor under the pointer,
+# minus the bar's reserved area), so nothing assumes a 1920x1080 screen.
+
+set -u
+
+CFG=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)
+RUN="${EDGE_RUN:-${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice/edge}" # EDGE_RUN: tests
+mkdir -p "$RUN"
+exec 8>"$RUN/lock"
+
+GAP=10           # px between the screen edge and the gauge
+WIDTH=90         # gauge width
+HEIGHT=260       # gauge height
+SLIDE=${EDGE_SLIDE:-0.30}     # s: revealer transition (220 ms) plus margin
+GRACE=${EDGE_GRACE:-1.2}      # s: a hover that never reaches the panel closes after this
+LEAVE=${EDGE_LEAVE:-0.25}     # s: debounce after the pointer leaves the panel
+OSD_MS=${EDGE_OSD_MS:-1500}   # ms: key-press indicator lifetime
+
+# failures go to the log (eww open fails quietly otherwise): ~/.cache/rice/edge-ctl.log
+LOGF="${XDG_CACHE_HOME:-$HOME/.cache}/rice/edge-ctl.log"
+mkdir -p "$(dirname "$LOGF")"
+eww_() {
+    local out
+    out=$(eww --config "$CFG" "$@" 2>&1) ||
+        case $out in *"no such window was open"*) ;; *) # closing a closed window is fine
+            printf '%s eww %s: %s\n' "$(date +%T)" "$*" "$out" >>"$LOGF" ;;
+        esac
+}
+ms() { local t=$EPOCHREALTIME; printf '%s' $((${t/./} / 1000)); }
+
+state() { local f="$RUN/$1.state"; [ -f "$f" ] && cat "$f" || printf closed; }
+set_state() { printf '%s' "$2" >"$RUN/$1.state"; }
+token() { local f="$RUN/$1.token"; [ -f "$f" ] && cat "$f" || printf 0; }
+bump() { printf '%s' $(($(token "$1") + 1)) >"$RUN/$1.token"; }
+
+# --- geometry -----------------------------------------------------------------
+
+# Sets MON (eww's monitor index = Hyprland's monitor id) MX MY MW MH RT RB: the monitor under the pointer (else the focused one).
+monitor_under_pointer() {
+    local cx cy line
+    read -r cx cy < <(hyprctl cursorpos | tr -d ',')
+    CX=${cx:-0} CY=${cy:-0}
+    line=$(hyprctl monitors -j | jq -r --argjson cx "$CX" --argjson cy "$CY" '
+        map(. + {s: (.scale // 1)}) as $m
+        | ($m | map(select(.x <= $cx and $cx < .x + (.width / .s) and .y <= $cy and $cy < .y + (.height / .s)))
+           + ($m | map(select(.focused))) + $m)[0]
+        | [.id, .x, .y, (.width / .s | floor), (.height / .s | floor), (.reserved[1] // 0), (.reserved[3] // 0)] | @tsv')
+    IFS=$'\t' read -r MON MX MY MW MH RT RB <<<"$line"
+}
+
+# gauge_rect GAUGE: sets ANCHOR POS and X0 Y0 X1 Y1 (global coords, gap included)
+gauge_rect() {
+    local ut=$((MY + RT)) uh=$((MH - RT - RB))
+    X1=$((MX + MW))
+    X0=$((X1 - GAP - WIDTH))
+    case $1 in
+    volume)
+        ANCHOR="right center" POS="${GAP}x0"
+        Y0=$((ut + (uh - HEIGHT) / 2))
+        ;;
+    brightness)
+        ANCHOR="right top" POS="${GAP}x100"
+        Y0=$((ut + 100))
+        ;;
+    esac
+    Y1=$((Y0 + HEIGHT))
+}
+
+pointer_inside() { # GAUGE: is the pointer within the gauge's rectangle?
+    monitor_under_pointer
+    gauge_rect "$1"
+    [ "$CX" -ge "$X0" ] && [ "$CX" -lt "$X1" ] && [ "$CY" -ge "$Y0" ] && [ "$CY" -lt "$Y1" ]
+}
+
+# --- actions (caller holds the lock) -----------------------------------------------
+
+wake_listener() { # the gauge's value script sleeps while hidden; nudge it
+    local pid
+    pid=$(cat "$RUN/$1.listener" 2>/dev/null) || return 0
+    # the file can outlive its process (eww kills listeners without letting
+    # them clean up), and the pid may have been reused: check what it is
+    if [ -n "$pid" ] && tr '\0' ' ' <"/proc/$pid/cmdline" 2>/dev/null | grep -q "$1-listen"; then
+        kill -USR1 "$pid" 2>/dev/null
+    fi
+    return 0
+}
+
+open_panel() { # closed -> window mapped and revealed
+    local g=$1
+    monitor_under_pointer
+    gauge_rect "$g"
+    : >"$RUN/$g.visible"
+    wake_listener "$g"
+    eww_ open "$g-panel" --screen "$MON" --anchor "$ANCHOR" --pos "$POS" --size "${WIDTH}x${HEIGHT}"
+    sleep 0.04 # let the window map collapsed so the revealer animates the slide-in
+    eww_ update "${g}_open=true"
+}
+
+later() { # DELAY ARGS...: run edge-ctl ARGS after DELAY, detached, without our lock
+    local delay=$1
+    shift
+    setsid "$0" _later "$delay" "$@" 8>&- >/dev/null 2>&1 &
+}
+
+begin_close() { # slide out now, close the window after the transition
+    local g=$1
+    set_state "$g" closing
+    bump "$g"
+    eww_ update "${g}_open=false"
+    later "$SLIDE" _finish "$g" "$(token "$g")"
+}
+
+cmd_hover() {
+    local g=$1
+    case $(state "$g") in
+    closed) open_panel "$g" ;;
+    closing) eww_ update "${g}_open=true" ;; # still mapped, sliding out: slide back in
+    esac
+    set_state "$g" hover
+    bump "$g"
+    later "$GRACE" _expire "$g" "$(token "$g")"
+}
+
+cmd_enter() {
+    local g=$1
+    case $(state "$g") in
+    closing) eww_ update "${g}_open=true" ;;
+    esac
+    case $(state "$g") in
+    osd | closing | hover)
+        set_state "$g" hover
+        bump "$g"
+        ;;
+    esac
+}
+
+cmd_leave() {
+    local g=$1
+    [ "$(state "$g")" = hover ] && later "$LEAVE" _expire "$g" "$(token "$g")"
+    return 0
+}
+
+cmd_osd() {
+    local g=$1 pid
+    printf '%s' $(($(ms) + OSD_MS)) >"$RUN/$g.deadline"
+    case $(state "$g") in
+    closed)
+        open_panel "$g"
+        set_state "$g" osd
+        bump "$g"
+        ;;
+    closing)
+        eww_ update "${g}_open=true"
+        set_state "$g" osd
+        bump "$g"
+        ;;
+    esac # hover or osd: the deadline is already extended; hover keeps priority
+    pid=$(cat "$RUN/$g.timer" 2>/dev/null)
+    if [ -z "$pid" ] || ! kill -0 "$pid" 2>/dev/null; then
+        setsid "$0" _osdtimer "$g" 8>&- >/dev/null 2>&1 &
+        printf '%s' $! >"$RUN/$g.timer"
+    fi
+}
+
+cmd_edge() {
+    local g
+    monitor_under_pointer
+    for g in volume brightness; do
+        gauge_rect "$g"
+        if [ "$CY" -ge "$Y0" ] && [ "$CY" -lt "$Y1" ]; then
+            cmd_hover "$g"
+            return 0
+        fi
+    done
+}
+
+# --- timers (each takes the lock only when it fires) ---------------------------------
+
+cmd_expire() { # GAUGE TOKEN: a hover/leave timer fired
+    local g=$1 tok=$2
+    [ "$(token "$g")" = "$tok" ] || return 0
+    [ "$(state "$g")" = hover ] || return 0
+    if pointer_inside "$g"; then
+        later "$LEAVE" _expire "$g" "$tok" # still near: look again shortly
+        return 0
+    fi
+    begin_close "$g"
+}
+
+cmd_finish() { # GAUGE TOKEN: the slide-out is over
+    local g=$1 tok=$2
+    [ "$(token "$g")" = "$tok" ] || return 0
+    [ "$(state "$g")" = closing ] || return 0
+    eww_ close "$g-panel"
+    set_state "$g" closed
+    rm -f "$RUN/$g.visible"
+}
+
+cmd_osdtimer() { # GAUGE: one per gauge; sleeps until the (movable) deadline
+    local g=$1 left
+    while :; do
+        flock 8
+        left=$(($(cat "$RUN/$g.deadline" 2>/dev/null || echo 0) - $(ms)))
+        if [ "$left" -le 0 ]; then
+            [ "$(state "$g")" = osd ] && begin_close "$g"
+            rm -f "$RUN/$g.timer"
+            return 0
+        fi
+        flock -u 8
+        sleep "$(printf '0.%03d' $((left > 999 ? 999 : left)))"
+    done
+}
+
+cmd_close() {
+    local g
+    for g in ${1:-volume brightness}; do
+        [ "$(state "$g")" = closed ] && continue
+        begin_close "$g"
+    done
+}
+
+# --- dispatch -------------------------------------------------------------------------
+
+cmd=${1:-}
+case $cmd in
+_later) # detached timer: sleep, then re-enter as the real command
+    sleep "$2"
+    shift 2
+    exec "$0" "$@"
+    ;;
+esac
+
+case $cmd in
+status)
+    flock 8
+    for g in volume brightness; do printf '%s: %s (token %s)\n' "$g" "$(state "$g")" "$(token "$g")"; done
+    ;;
+edge | hover | osd | enter | leave | close | _expire | _finish | _osdtimer)
+    case $cmd in
+    _osdtimer) ;; # takes the lock itself, in a loop
+    *) flock 8 ;;
+    esac
+    case $cmd in
+    edge) cmd_edge ;;
+    hover) cmd_hover "${2:?gauge}" ;;
+    osd) cmd_osd "${2:?gauge}" ;;
+    enter) cmd_enter "${2:?gauge}" ;;
+    leave) cmd_leave "${2:?gauge}" ;;
+    close) cmd_close "${2:-}" ;;
+    _expire) cmd_expire "$2" "$3" ;;
+    _finish) cmd_finish "$2" "$3" ;;
+    _osdtimer) cmd_osdtimer "$2" ;;
+    esac
+    ;;
+*)
+    sed -n '3,12s/^# \{0,1\}//p' "$0" >&2
+    exit 2
+    ;;
+esac
