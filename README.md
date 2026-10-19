@@ -203,6 +203,16 @@ the count does not fill its rows). There is no Hibernate button: this machine ha
 no resume set up (no `resume` initramfs hook, no `resume=`), so hibernating just
 powers off and the session is lost. Exit Session runs `hl.dsp.exit()`; the old
 `hyprctl dispatch exit` is a Lua error on this Hyprland.
+
+Suspend needs two system settings that are not in these dotfiles (this HP laptop
+with an NVIDIA GPU): `sudo systemctl enable nvidia-suspend nvidia-resume
+nvidia-hibernate` (the driver keeps video memory across sleep, which those units
+save and restore), and the embedded controller must not wake the machine, as it
+fires about 80 events a second and woke suspend at once. That is
+`echo 'w /sys/module/acpi/parameters/ec_no_wakeup - - - - Y' | sudo tee
+/etc/tmpfiles.d/ec-no-wakeup.conf`. If the screen stays frozen after a resume,
+power-cycling it from another tty brings it back: `hyprctl dispatch
+'hl.dsp.dpms({ action = "disable" })'`, then the same with `"enable"`.
 The old rofi `rice-power` script is still in `config-rice` but nothing calls it.
 Optional dependency: `cliphist` + `wl-clipboard` (Clip). Switches live in the
 quick-settings panel (`SUPER+N`) and the sliders in the right-edge gauges, not
