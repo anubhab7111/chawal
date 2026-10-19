@@ -5,14 +5,8 @@
     "keybind" : "l"
 }
 {
-    "label" : "hibernate",
-    "action" : "systemctl hibernate || loginctl hibernate",
-    "text" : "Hibernate",
-    "keybind" : "h"
-}
-{
     "label" : "logout",
-    "action" : "hyprctl dispatch exit",
+    "action" : "hyprctl dispatch 'hl.dsp.exit()'",
     "text" : "Exit Session",
     "keybind" : "e"
 }

@@ -17,8 +17,10 @@ local exec = hl.dsp.exec_cmd
 bind(mainMod .. " + L", exec("loginctl lock-session"))
 bind(mainMod .. " + F1", function() rice.gamemode.toggle() end)          -- Game mode (modes.lua)
 -- Power grid. wlogout's own config (layout, style.css and icons) is the
--- config-wlogout package, stowed to ~/.config/wlogout.
-bind(mainMod .. " + escape", exec("wlogout"))
+-- config-wlogout package, stowed to ~/.config/wlogout. Five buttons in one
+-- row (-b 5); with the default 3 per row wlogout draws a blank sixth tile.
+-- The margins keep the tiles square. The Waybar power button uses the same flags.
+bind(mainMod .. " + escape", exec("wlogout -b 5 -T 400 -B 400"))
 
 -- Applications
 bind(mainMod .. " + Q", exec(terminal))
