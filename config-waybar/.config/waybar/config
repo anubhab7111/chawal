@@ -104,7 +104,7 @@
   "custom/power-menu": {
     "format": "⏻",
     "tooltip": false,
-    "on-click": "wlogout -b 5 -T 400 -B 400"
+    "on-click": "wlogout -b 5 -L 380 -R 380 -T 410 -B 410"
   },
   "custom/recording": {
     "exec": "~/.config/rice/bin/rice-record status",

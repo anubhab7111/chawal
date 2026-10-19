@@ -16,11 +16,12 @@ local exec = hl.dsp.exec_cmd
 -- Lock through logind so hypridle's lock_cmd (single hyprlock instance) runs
 bind(mainMod .. " + L", exec("loginctl lock-session"))
 bind(mainMod .. " + F1", function() rice.gamemode.toggle() end)          -- Game mode (modes.lua)
--- Power grid. wlogout's own config (layout, style.css and icons) is the
--- config-wlogout package, stowed to ~/.config/wlogout. Five buttons in one
--- row (-b 5); with the default 3 per row wlogout draws a blank sixth tile.
--- The margins keep the tiles square. The Waybar power button uses the same flags.
-bind(mainMod .. " + escape", exec("wlogout -b 5 -T 400 -B 400"))
+-- Power grid. wlogout's own config (layout and style.css) is the config-wlogout
+-- package, stowed to ~/.config/wlogout; its colours and icons follow the theme.
+-- Five buttons in one row (-b 5; with the default 3 per row wlogout draws a
+-- blank sixth tile), and the margins make the panel hug the tiles. The Waybar
+-- power button uses the same flags.
+bind(mainMod .. " + escape", exec("wlogout -b 5 -L 380 -R 380 -T 410 -B 410"))
 
 -- Applications
 bind(mainMod .. " + Q", exec(terminal))
