@@ -27,7 +27,8 @@ on() {
     # shellcheck disable=SC2016
     setsid -f sh -c 'echo $$ > "$1"; exec systemd-inhibit --what=idle --who=rice-caffeine \
         --why="Caffeine is on" --mode=block sleep infinity' sh "$PIDFILE" </dev/null >/dev/null 2>&1
-    for _ in 1 2 3 4 5 6 7 8 9 10; do running && return 0; sleep 0.1; done
+    # the inhibitor is up within about 30 ms: look every 10 ms (up to 1 s), not every 100
+    for _ in $(seq 100); do running && return 0; sleep 0.01; done
     echo "rice-caffeine: inhibitor did not start" >&2
     return 1
 }
