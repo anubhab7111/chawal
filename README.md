@@ -197,7 +197,12 @@ and the Waybar Wi-Fi and Bluetooth pills open their tabs. The wallpaper grid
 `~/Pictures/Wallpapers` (gifs and videos included), and `h` flips it to `.hidden`
 inside that dir and back (a fresh launch always starts on the visible walls); the power menu
 is no longer rofi at all — `SUPER+Esc` and the Waybar power button run
-`wlogout`, from the `config-wlogout` package (`layout`, `style.css`, `icons/`).
+`wlogout -b 5 -T 400 -B 400`, from the `config-wlogout` package (`layout`,
+`style.css`, `icons/`): five buttons in one row (wlogout draws a blank tile when
+the count does not fill its rows). There is no Hibernate button: this machine has
+no resume set up (no `resume` initramfs hook, no `resume=`), so hibernating just
+powers off and the session is lost. Exit Session runs `hl.dsp.exit()`; the old
+`hyprctl dispatch exit` is a Lua error on this Hyprland.
 The old rofi `rice-power` script is still in `config-rice` but nothing calls it.
 Optional dependency: `cliphist` + `wl-clipboard` (Clip). Switches live in the
 quick-settings panel (`SUPER+N`) and the sliders in the right-edge gauges, not
