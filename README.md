@@ -83,7 +83,7 @@ directly under `$HOME`.
 - `config-waybar` — bar
 - `config-swaync` — notifications and the control centre
 - `config-rofi` — launcher and the control hub theme (`config-wofi` is a leftover, unused)
-- `config-wlogout` — the power grid (`layout`, `style.css`, `icons/`)
+- `config-wlogout` — the power grid (`layout`, `style.css`; its icons are per theme)
 - `config-eww` — quick-settings panel and the right-edge gauges
 - `config-rice` — the `rice-*` scripts (`~/.config/rice/bin`)
 - `config-theming` — the themes (`themes/mocha`, `themes/latte`) and the `current` slot
@@ -101,8 +101,7 @@ directly under `$HOME`.
 A few files contain an absolute `/home/ushtro/` (eww and Qt cannot expand `~`
 in these places): `config-eww/.config/eww/eww.css`,
 `config-qt6ct/.config/qt6ct/qt6ct.conf`, the wallpaper lines in
-`config-theming/.config/theming/themes/*/wallpaper.conf`, the icon `url()`s in
-`config-wlogout/.config/wlogout/style.css`, and the GTK
+`config-theming/.config/theming/themes/*/wallpaper.conf`, and the GTK
 bookmarks and `~/.gtkrc-2.0`. On another user name, replace that prefix
 (`grep -rl /home/ushtro config-* home-*`).
 
@@ -118,7 +117,10 @@ stowed packages.
   `alacritty-colors.toml`, `btop.theme`, `cava.theme`, `tmux-colors.conf`,
   `obsidian-colors.css`, `qt6ct-colors.conf`, `kde-colors.colors`, plus
   `wallpaper.conf`, `gtk-icon-theme`, `gtk-theme`, `color-scheme`,
-  `kvantum-theme`.
+  `kvantum-theme`, and `wlogout-icons/` (the power-grid icons, drawn from each
+  theme's palette by `tools/gen-wlogout-icons.py`; re-run it after a palette
+  edit). wlogout reads the colours and icons straight from
+  `~/.config/theming/current`, so it needs no slot link of its own.
 - `~/.local/state/rice/theme` holds the active name; `~/.local/state/rice/current`
   links to its directory, and `~/.config/theming/current` links to that.
 - `rice-theme bootstrap` points the slots at `current`: `waybar/colors.css`,
@@ -197,9 +199,14 @@ and the Waybar Wi-Fi and Bluetooth pills open their tabs. The wallpaper grid
 `~/Pictures/Wallpapers` (gifs and videos included), and `h` flips it to `.hidden`
 inside that dir and back (a fresh launch always starts on the visible walls); the power menu
 is no longer rofi at all — `SUPER+Esc` and the Waybar power button run
-`wlogout -b 5 -T 400 -B 400`, from the `config-wlogout` package (`layout`,
-`style.css`, `icons/`): five buttons in one row (wlogout draws a blank tile when
-the count does not fill its rows). There is no Hibernate button: this machine has
+`wlogout -b 5 -L 380 -R 380 -T 410 -B 410`, from the `config-wlogout` package
+(`layout`, `style.css`): five buttons in one row (wlogout draws a blank tile when
+the count does not fill its rows) and margins that make the ring panel hug the
+tiles. Each tile is glass with a coloured icon and fills with its Waybar pill
+gradient on focus or hover (Lock green, Exit Session mauve, Shut Down red,
+Suspend yellow, Restart blue), inside the Hyprland mauve/blue/teal ring; colours
+and icons follow the theme. The layer rule in `rules.lua` uses wlogout's real
+namespace, `logout_dialog`, for the blur, dim and pop-in. There is no Hibernate button: this machine has
 no resume set up (no `resume` initramfs hook, no `resume=`), so hibernating just
 powers off and the session is lost. Exit Session runs `hl.dsp.exit()`; the old
 `hyprctl dispatch exit` is a Lua error on this Hyprland.

@@ -96,8 +96,9 @@ layer("wofi", { dim_around = true })
 layer("rofi", { blur = true, ignore_alpha = 0.5, animation = "popin 80%", dim_around = true })
 
 -- Power grid: same treatment as rofi (blur behind the translucent window,
--- popin, dim the desktop behind it)
-layer("wlogout", { blur = true, ignore_alpha = 0.5, animation = "popin 80%", dim_around = true })
+-- popin, dim the desktop behind it). wlogout's layer namespace is
+-- "logout_dialog", not "wlogout", so a rule on "wlogout" never matched.
+layer("logout_dialog", { blur = true, ignore_alpha = 0.5, animation = "popin 80%", dim_around = true })
 
 layer("swaync-notification-window", { blur = true })
 layer("swaync-notification-window", { animation = "slide right" })
@@ -116,7 +117,6 @@ layer("qs-scrim", { animation = "fade" })
 
 layer("gtk-layer-shell", { blur = true })
 layer("selection", { no_anim = true })
-layer("logout_dialog", { blur = true })
 
 -- Special animations
 rule(class([[^(thunar)$]]), { animation = "slide" })

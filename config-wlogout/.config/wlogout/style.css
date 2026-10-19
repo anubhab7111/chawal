@@ -1,157 +1,78 @@
-/* ================================
-   GLOBAL STYLES
-   ================================ */
+/* wlogout (SUPER+Esc and the Waybar power button), in the style of the rest of
+   the rice. A glass tile per action that fills with its Waybar pill gradient on
+   focus or hover, inside the Hyprland mauve/blue/teal ring (the same ring as
+   rofi, quick settings and the notification centre).
+
+   Colours and icons come from the active theme, so Mocha and Latte both work:
+   ~/.config/theming/current/waybar-colors.css and .../wlogout-icons (the icons
+   are drawn by tools/gen-wlogout-icons.py).
+
+   Launch it as: wlogout -b 5 -L 380 -R 380 -T 410 -B 410
+   One row of five; the margins make the panel hug the tiles. With the default
+   three per row, five buttons leave a blank sixth tile. */
+@import url("../theming/current/waybar-colors.css");
+
 * {
+  font-family: "JetBrainsMono Nerd Font", monospace;
+  font-weight: 800;
   background-image: none;
   box-shadow: none;
-  font-family: "JetBrainsMono Nerd Font", monospace;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ================================
-   WINDOW BACKGROUND
-   ================================ */
+/* the scrim; Hyprland blurs and dims what is behind it (rules.lua) */
 window {
-  background-color: rgba(30, 30, 46, 0.75);
-  /* background-image: url("/tmp/shot_blurred.png"); */
-  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: alpha(@crust, 0.55);
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* ================================
-   BUTTON BASE STYLES
-   ================================ */
-button {
-  border-radius: 16px;
-  border-style: solid;
-  border-width: 2.5px;
-  border-color: rgba(137, 180, 250, 0.3);
-  background-color: rgba(49, 50, 68, 0.95);
-  color: #cdd6f4;
-  text-decoration-color: #cdd6f4;
+/* the panel: a glass fill inside the ring */
+grid {
+  background-color: transparent;
+  background-image:
+    linear-gradient(alpha(@base, 0.94), alpha(@base, 0.94)),
+    linear-gradient(135deg, @mauve 0%, @blue 50%, @teal 100%);
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
   background-repeat: no-repeat;
-  background-position: center 20%;
-  padding-top: 120px;
-  background-size: 35%;
-  margin: 30px;
-  padding: 20px;
-  min-width: 120px;
-  min-height: 120px;
-  font-weight: 600;
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(137, 180, 250, 0.1) inset;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
-/* ================================
-   BUTTON HOVER & ACTIVE STATES
-   ================================ */
-button:focus,
-button:active {
-  background-color: rgba(69, 71, 90, 0.95);
-  border-color: #89b4fa;
+/* a tile at rest: glass, like an off quick-settings tile */
+button {
+  background-color: @surface0;
+  background-repeat: no-repeat, no-repeat;
+  background-position: center 34%, center;
+  background-size: 38%, 100% 100%;
+  border: none;
+  border-radius: 14px;
+  margin: 16px;
+  min-width: 150px;
+  color: @text;
+  font-size: 15px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+/* resting icons: a coloured glyph per action */
+#lock     { background-image: url("../theming/current/wlogout-icons/lock.svg"); }
+#logout   { background-image: url("../theming/current/wlogout-icons/logout.svg"); }
+#shutdown { background-image: url("../theming/current/wlogout-icons/shutdown.svg"); }
+#suspend  { background-image: url("../theming/current/wlogout-icons/suspend.svg"); }
+#reboot   { background-image: url("../theming/current/wlogout-icons/reboot.svg"); }
+
+/* focus or hover: the tile grows a little and fills with the gradient of its
+   Waybar pill; the icon and text turn to the pill text colour */
+button:hover,
+button:focus {
   outline-style: none;
-  box-shadow:
-    0 6px 20px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(137, 180, 250, 0.2) inset,
-    0 0 20px rgba(137, 180, 250, 0.15);
+  color: @pill_fg;
+  margin: 8px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
 }
 
-button:hover {
-  background-color: rgba(69, 71, 90, 0.95);
-  border-color: #89b4fa;
-  outline-style: none;
-  box-shadow:
-    0 6px 20px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(137, 180, 250, 0.2) inset,
-    0 0 20px rgba(137, 180, 250, 0.15);
-}
-
-#suspend {
-  border-color: rgba(238, 212, 159, 0.4);
-}
-#suspend:hover,
-#suspend:focus {
-  border-color: #eed49f;
-  box-shadow: 0 0 20px rgba(238, 212, 159, 0.25);
-}
-
-#shutdown {
-  border-color: rgba(238, 153, 160, 0.4);
-}
-#shutdown:hover,
-#shutdown:focus {
-  border-color: #ee99a0;
-  box-shadow: 0 0 20px rgba(238, 153, 160, 0.25);
-}
-
-#reboot {
-  border-color: rgba(138, 173, 244, 0.4);
-}
-#reboot:hover,
-#reboot:focus {
-  border-color: #8aadf4;
-  box-shadow: 0 0 20px rgba(138, 173, 244, 0.25);
-}
-
-#logout {
-  border-color: rgba(198, 160, 246, 0.4);
-}
-#logout:hover,
-#logout:focus {
-  border-color: #c6a0f6;
-  box-shadow: 0 0 20px rgba(198, 160, 246, 0.25);
-}
-
-#lock {
-  border-color: rgba(245, 169, 127, 0.4);
-}
-#lock:hover,
-#lock:focus {
-  border-color: #f5a97f;
-  box-shadow: 0 0 20px rgba(245, 169, 127, 0.25);
-}
-
-#hibernate {
-  border-color: rgba(166, 218, 149, 0.4);
-}
-#hibernate:hover,
-#hibernate:focus {
-  border-color: #a6da95;
-  box-shadow: 0 0 20px rgba(166, 218, 149, 0.25);
-}
-
-/* ================================
-   BUTTON ICONS
-   ================================ */
-#lock {
-  background-image: url("/home/ushtro/.config/wlogout/icons/lock.svg");
-}
-
-#logout {
-  background-image: url("/home/ushtro/.config/wlogout/icons/logout.svg");
-}
-
-#suspend {
-  background-image: url("/home/ushtro/.config/wlogout/icons/suspend.svg");
-}
-
-#hibernate {
-  background-image: url("/home/ushtro/.config/wlogout/icons/hibernate.svg");
-}
-
-#shutdown {
-  background-image: url("/home/ushtro/.config/wlogout/icons/shutdown.svg");
-}
-
-#reboot {
-  background-image: url("/home/ushtro/.config/wlogout/icons/reboot.svg");
-}
+#lock:hover,     #lock:focus     { background-image: url("../theming/current/wlogout-icons/lock-focus.svg"),     linear-gradient(135deg, @pill_battery_1,  @pill_battery_2); }
+#logout:hover,   #logout:focus   { background-image: url("../theming/current/wlogout-icons/logout-focus.svg"),   linear-gradient(135deg, @pill_network_1,  @pill_network_2); }
+#shutdown:hover, #shutdown:focus { background-image: url("../theming/current/wlogout-icons/shutdown-focus.svg"), linear-gradient(135deg, @pill_dnd_1,      @pill_dnd_2); }
+#suspend:hover,  #suspend:focus  { background-image: url("../theming/current/wlogout-icons/suspend-focus.svg"),  linear-gradient(135deg, @pill_caffeine_1, @pill_caffeine_2); }
+#reboot:hover,   #reboot:focus   { background-image: url("../theming/current/wlogout-icons/reboot-focus.svg"),   linear-gradient(135deg, @pill_theme_1,    @pill_theme_2); }
