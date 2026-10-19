@@ -148,7 +148,7 @@ stowed packages.
 | `SUPER+A` | pwvucontrol (audio) |
 | `SUPER+SPACE` | rofi control hub (apps, windows, Wi-Fi, Bluetooth, clipboard) |
 | `SUPER+SHIFT+V` | hub on the Clip tab |
-| `SUPER+W` | wallpaper grid (picks are remembered per theme and output) |
+| `SUPER+W` | wallpaper grid (picks are remembered per theme and output; `h` toggles the hidden walls) |
 | `SUPER+N` | quick-settings panel (also the top-right corner) |
 | `SUPER+Esc` | power grid (wlogout; also the Waybar power button) |
 | `SUPER+L` | lock |
@@ -193,7 +193,9 @@ a rofi script mode (each also works on its own: `rice-net`, `rice-windows`, …)
 
 Direct jumps: `SUPER+SHIFT+V` clipboard, the top-left hot corner opens Windows,
 and the Waybar Wi-Fi and Bluetooth pills open their tabs. The wallpaper grid
-(`rice-wall`, `SUPER+W`) is a separate rofi menu, not a hub tab; the power menu
+(`rice-wall`, `SUPER+W`) is a separate rofi menu, not a hub tab: it grids
+`~/Pictures/Wallpapers` (gifs and videos included), and `h` flips it to `.hidden`
+inside that dir and back (a fresh launch always starts on the visible walls); the power menu
 is no longer rofi at all — `SUPER+Esc` and the Waybar power button run
 `wlogout`, from the `config-wlogout` package (`layout`, `style.css`, `icons/`).
 The old rofi `rice-power` script is still in `config-rice` but nothing calls it.
