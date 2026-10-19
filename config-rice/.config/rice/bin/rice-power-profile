@@ -1,19 +1,41 @@
 #!/usr/bin/env bash
-# rice-power-profile: TLP power profile, through tlp-pd (tlpctl).
+# rice-power-profile: TLP power profile, through tlp-pd.
 #
 #   rice-power-profile get          print power-saver, balanced or performance
 #   rice-power-profile cycle        power-saver -> balanced -> performance -> ...
 #   rice-power-profile set PROFILE  switch to PROFILE
 #
+# tlp-pd speaks the power-profiles-daemon D-Bus API, so the profile is read and
+# written with busctl (about 10 ms). tlpctl does the same through a Python
+# script that takes 120-170 ms to start; it stays as the fallback.
 # The profile only changes TLP's runtime settings; /etc/tlp.conf is not touched.
 
 set -u
 
-get() { timeout 3 tlpctl get 2>/dev/null | tr -d '[:space:]'; }
+PP=(net.hadess.PowerProfiles /net/hadess/PowerProfiles net.hadess.PowerProfiles)
+
+get() {
+    local out p
+    if out=$(timeout 2 busctl --system get-property "${PP[@]}" ActiveProfile 2>/dev/null); then
+        # busctl prints: s "performance"
+        p=${out#s \"}
+        p=${p%\"}
+        if [ -n "$p" ] && [ "$p" != "$out" ]; then
+            printf '%s' "$p"
+            return 0
+        fi
+    fi
+    timeout 3 tlpctl get 2>/dev/null | tr -d '[:space:]'
+}
+
+put() { # PROFILE
+    timeout 3 busctl --system set-property "${PP[@]}" ActiveProfile s "$1" >/dev/null 2>&1 ||
+        timeout 5 tlpctl set "$1" >/dev/null 2>&1
+}
 
 case ${1:-} in
 get) p=$(get) && [ -n "$p" ] && printf '%s\n' "$p" ;;
-set) timeout 5 tlpctl set "${2:?usage: rice-power-profile set PROFILE}" >/dev/null 2>&1 ;;
+set) put "${2:?usage: rice-power-profile set PROFILE}" ;;
 cycle)
     case $(get) in
     power-saver) next=balanced ;;
@@ -21,7 +43,7 @@ cycle)
     performance) next=power-saver ;;
     *) exit 1 ;;
     esac
-    timeout 5 tlpctl set "$next" >/dev/null 2>&1
+    put "$next"
     ;;
 *)
     sed -n '3,7s/^# \{0,1\}//p' "$0" >&2

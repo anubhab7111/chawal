@@ -1,8 +1,22 @@
 #!/usr/bin/env bash
-# qs-flip ID: a tile was clicked. Flip that switch, then refresh the tiles at
-# once instead of waiting for the 2 s poll.
+# qs-flip ID: a tile was clicked.
+#
+#   1. qs-opt: the tile flips on screen at once. It used to wait for the change
+#      and then for every tile's state to be read again, 250-600 ms.
+#   2. The change itself (rice-toggle flip), one at a time per tile, so two
+#      quick clicks are applied in order.
+#   3. Refresh from the real state. The pending entry from step 1 ends when the
+#      two agree (see qs-rows), so the real state always has the last word.
 BIN="${RICE_BIN:-$HOME/.config/rice/bin}"
 CFG=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)
+RUN="${QS_RUN:-${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice/qs}" # QS_RUN: tests
+EWW=${EWW:-eww}                                                  # EWW: tests
+ID=${1:?usage: qs-flip ID}
 
-"$BIN/rice-toggle" flip "${1:?usage: qs-flip ID}"
-eww --config "$CFG" update "qs_rows=$("$CFG/scripts/qs-rows")" >/dev/null 2>&1
+"$CFG/scripts/qs-opt" "$ID"
+
+mkdir -p "$RUN"
+exec 9>"$RUN/flip-$ID.lock"
+flock 9
+"$BIN/rice-toggle" flip "$ID"
+"$EWW" --config "$CFG" update "qs_rows=$("$CFG/scripts/qs-rows")" >/dev/null 2>&1

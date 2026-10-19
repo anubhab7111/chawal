@@ -33,10 +33,47 @@ TILES=(
     $'theme|\U000F0B2F|Theme'
 )
 
+# Wi-Fi and Bluetooth are read and written straight over D-Bus (2-8 ms), not
+# through nmcli (25-30 ms) and bluetoothctl (a process start each); the old
+# commands stay as the fallback when the service does not answer.
+sysbool() { # service path interface property: 0 = true, 1 = false, 2 = no answer
+    local out
+    out=$(timeout 2 busctl --system get-property "$@" 2>/dev/null) || return 2
+    case $out in
+    "b true") return 0 ;;
+    "b false") return 1 ;;
+    *) return 2 ;;
+    esac
+}
+sysset() { # service path interface property true|false
+    timeout 3 busctl --system set-property "$1" "$2" "$3" "$4" b "$5" >/dev/null 2>&1
+}
+NM=(org.freedesktop.NetworkManager /org/freedesktop/NetworkManager org.freedesktop.NetworkManager WirelessEnabled)
+BT=(org.bluez /org/bluez/hci0 org.bluez.Adapter1 Powered)
+
+wifi_ssid() { # the network we are on (iw reads it from the driver in 5 ms; nmcli needs 22 ms)
+    local ifc s=""
+    if command -v iw >/dev/null 2>&1; then
+        ifc=$(iw dev 2>/dev/null | awk '$1 == "Interface" { print $2; exit }')
+        [ -n "$ifc" ] && s=$(iw dev "$ifc" link 2>/dev/null | sed -n 's/^[[:space:]]*SSID: //p')
+    fi
+    [ -n "$s" ] || s=$(nmcli -t -f ACTIVE,SSID device wifi list --rescan no 2>/dev/null | awk -F: '$1 == "yes" { print $2; exit }')
+    printf '%s' "$s"
+}
+
 on() { # id: succeed when the switch is on
+    local rc
     case $1 in
-    wifi) [ "$(nmcli radio wifi 2>/dev/null)" = enabled ] ;;
-    bluetooth) timeout 2 bluetoothctl show 2>/dev/null | grep -q 'Powered: yes' ;;
+    wifi)
+        sysbool "${NM[@]}"; rc=$?
+        [ $rc -lt 2 ] && return $rc
+        [ "$(nmcli radio wifi 2>/dev/null)" = enabled ]
+        ;;
+    bluetooth)
+        sysbool "${BT[@]}"; rc=$?
+        [ $rc -lt 2 ] && return $rc
+        timeout 2 bluetoothctl show 2>/dev/null | grep -q 'Powered: yes'
+        ;;
     dnd) [ "$("$BIN/rice-dnd" status 2>/dev/null)" = on ] ;;
     night) [ -f "$RUN/nightlight" ] ;;
     caffeine) "$BIN/rice-caffeine" status 2>/dev/null | grep -q '"alt":"on"' ;;
@@ -55,7 +92,7 @@ sub() { # id on?: the small line under the label
     wifi)
         if [ "$2" = 1 ]; then
             local s
-            s=$(nmcli -t -f ACTIVE,SSID device wifi list --rescan no 2>/dev/null | awk -F: '$1 == "yes" { print $2; exit }')
+            s=$(wifi_ssid)
             printf '%s' "${s:-On}"
         else printf Off; fi
         ;;
@@ -90,21 +127,28 @@ lines() {
     rm -rf "$dir"
 }
 
-json() {
-    lines | jq -R -s -c '
-        split("\n")[:-1] | map(split("\t"))
+tiles='split("\n")[:-1] | map(split("\t"))
         | map({id: .[0], icon: .[1], label: .[2], on: (.[3] == "1"), enabled: (.[4] == "1"), sub: .[5]})'
-}
+
+json() { lines | jq -R -s -c "$tiles"; }
+
+# two tiles per row, in the one jq call (it used to be two, one per pipe stage)
+rows() { lines | jq -R -s -c "$tiles"' | . as $t | [range(0; length; 2) | $t[.:.+2]]'; }
 
 flip() {
+    local v
     {
         case $1 in
-        wifi) if on wifi; then nmcli radio wifi off; else nmcli radio wifi on; fi ;;
+        wifi)
+            if on wifi; then v=false; else v=true; fi
+            sysset "${NM[@]}" "$v" || nmcli radio wifi "$([ "$v" = true ] && echo on || echo off)"
+            ;;
         bluetooth)
-            if on bluetooth; then timeout 5 bluetoothctl power off; else
+            if on bluetooth; then v=false; else
+                v=true
                 rfkill unblock bluetooth 2>/dev/null || true
-                timeout 5 bluetoothctl power on
             fi
+            sysset "${BT[@]}" "$v" || timeout 5 bluetoothctl power "$([ "$v" = true ] && echo on || echo off)"
             ;;
         dnd) "$BIN/rice-dnd" toggle ;;
         night) "$BIN/rice-nightlight" toggle ;;
@@ -118,7 +162,7 @@ flip() {
 
 case ${1:-} in
 json) json ;;
-rows) json | jq -c '. as $t | [range(0; length; 2) | $t[.:.+2]]' ;;
+rows) rows ;;
 flip) flip "${2:?usage: rice-toggle flip ID}" ;;
 state) if on "${2:?usage: rice-toggle state ID}"; then echo on; else echo off; fi ;;
 *)

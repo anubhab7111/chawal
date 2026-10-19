@@ -60,7 +60,7 @@ Names are Arch packages; `(AUR)` ones come from the AUR (for example with
 | Launchers, wallpaper | `rofi` `awww` (wallpaper daemon; plays gifs) `mpvpaper` (video wallpapers) `cliphist` `wl-clipboard` `imv` |
 | Terminal, shell | `alacritty` `tmux` `yazi` `btop` `cava` `fastfetch` `starship` `neovim` |
 | Audio, media | `pamixer` `playerctl` `pwvucontrol` (AUR) `brightnessctl` |
-| Network, Bluetooth | `networkmanager` `network-manager-applet` `bluez` `bluez-utils` `blueman` |
+| Network, Bluetooth | `networkmanager` `network-manager-applet` `iw` (the Wi-Fi name in the quick settings) `bluez` `bluez-utils` `blueman` |
 | Capture | `grim` `slurp` `wf-recorder` |
 | Power, night light | `wlogout` `tlp` `tlp-pd` (profiles; enable `tlp.service`) `batsignal` `darkman` |
 | Theming | `qt6ct` `kvantum` `kvantum-theme-catppuccin-git` (AUR) `catppuccin-gtk-theme-mocha` and `catppuccin-gtk-theme-latte` (AUR) `bibata-cursor-theme` (AUR) `nwg-look` `ttf-jetbrains-mono-nerd` |
@@ -249,6 +249,17 @@ click outside the card or press `Esc` to close. It is eww:
 switches behind `rice-toggle`. No eww window exists while it is closed. `Esc`
 is a Hyprland bind that exists only while the panel is open
 (`config-hypr/.config/hypr/modules/qs.lua`).
+
+A click shows at once. `scripts/qs-flip` first flips the tile on screen
+(`scripts/qs-opt`, about 20 ms) and keeps what was asked for in
+`$XDG_RUNTIME_DIR/rice/qs/pend/`, then makes the real change, then re-reads the
+state; `scripts/qs-rows` (also the 2 s poll) lays the pending clicks over the real
+state until the two agree, so the real state always has the last word and a
+change that never happens shows its real state again after a few seconds. The
+state checks and the Wi-Fi, Bluetooth and power-profile writes go over D-Bus
+(`busctl`) instead of `nmcli`, `bluetoothctl` and `tlpctl`, which is why a full
+read of all tiles takes about 20 ms instead of about 250; the old commands are
+the fallback. The Wi-Fi name comes from `iw` when it is installed.
 
 All notifications are listed right under the panel (scrollable, with a Clear
 button): swaync's control centre, opened and closed together with the panel by
