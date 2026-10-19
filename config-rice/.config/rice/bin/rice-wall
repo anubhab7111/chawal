@@ -2,10 +2,12 @@
 # rice-wall: wallpaper picker (SUPER+W) and the one place a wallpaper is shown.
 #
 #   rice-wall            rofi grid of the wallpapers in RICE_WALLS (a ":" list;
-#                        default ~/Pictures/wallpapers/walls-catppuccin-mocha and
-#                        ~/Pictures/Wallpapers). The pick goes on the focused
-#                        output and is remembered for the theme. Animated ones
-#                        (gif, mp4, webm, mkv, mov) are marked with a play sign.
+#                        default ~/Pictures/Wallpapers). The pick goes on the
+#                        focused output and is remembered for the theme.
+#                        Animated ones (gif, mp4, webm, mkv, mov) are marked
+#                        with a play sign. In the grid, h flips to each dir's
+#                        .hidden subdir and h again flips back; every launch
+#                        starts on the visible walls.
 #   rice-wall set OUTPUT FILE    show FILE and remember it
 #   rice-wall show OUTPUT FILE   show FILE without remembering it (rice-theme)
 #   rice-wall sync               freeze or resume animated wallpapers (see below)
@@ -24,19 +26,25 @@
 
 set -euo pipefail
 
-WALLS="${RICE_WALLS:-$HOME/Pictures/wallpapers/walls-catppuccin-mocha:$HOME/Pictures/Wallpapers}"
+WALLS="${RICE_WALLS:-$HOME/Pictures/Wallpapers}"
 CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/rice/walls"
 STATE="${XDG_STATE_HOME:-$HOME/.local/state}/rice"
 RUN="${RICE_RUN:-${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice}" # game mode's flag lives here too
 BIN="${RICE_BIN:-$HOME/.config/rice/bin}"
 
-images() {
-    local dir dirs=()
+# Wallpaper files: the visible ones in each RICE_WALLS dir, or with "hidden"
+# the ones in each dir's .hidden subdir (they only show while browsing those)
+images() { # [hidden]
+    local dir dirs=() find_args=(-name '.*' -prune -o)
     local IFS=:
-    for dir in $WALLS; do [ -d "$dir" ] && dirs+=("$dir"); done
+    for dir in $WALLS; do
+        if [ "${1:-}" = hidden ]; then dir=$dir/.hidden; fi
+        [ -d "$dir" ] && dirs+=("$dir")
+    done
     ((${#dirs[@]})) || return 0
-    # -name '.*' -prune: skip hidden files and folders (~/Pictures/Wallpapers/.hidden)
-    find -L "${dirs[@]}" -name '.*' -prune -o -type f \( \
+    # visible mode: -name '.*' -prune skips hidden files and folders
+    [ "${1:-}" = hidden ] && find_args=()
+    find -L "${dirs[@]}" "${find_args[@]}" -type f \( \
         -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \
         -o -iname '*.gif' -o -iname '*.mp4' -o -iname '*.webm' -o -iname '*.mkv' \
         -o -iname '*.mov' \) -print | sort
@@ -54,7 +62,7 @@ kind_of() {
 # one flat cache file per image: the path with / turned into %
 thumb_of() { local p=${1//\//%}; printf '%s/%s.png' "$CACHE" "$p"; }
 
-thumbs() {
+thumbs() { # [hidden]
     mkdir -p "$CACHE"
     exec 9>"$CACHE/.lock"
     flock -n 9 || exit 0 # another run is already at it
@@ -79,7 +87,7 @@ thumbs() {
         else
             rm -f "$tmp"
         fi
-    done < <(images)
+    done < <(images "${1:-}")
 }
 
 # Full-size first frame of a gif or video, for the frozen state and as the base
@@ -195,31 +203,56 @@ set_wall() { # output file
 }
 
 pick() {
-    local output files=() f t idx label
+    local mode="" output files=() f t idx label ret mesg hint
     output=$(hyprctl -j monitors | jq -r '.[] | select(.focused) | .name')
     [ -n "$output" ] || { echo "rice-wall: no focused output" >&2; exit 1; }
 
-    mapfile -t files < <(images)
-    ((${#files[@]})) || { echo "rice-wall: no images in $WALLS" >&2; exit 1; }
+    # h (kb-custom-1) reopens the grid on the other set, so the loop below is
+    # what makes it a toggle; a plain Enter/Escape leaves it.
+    while :; do
+        mapfile -t files < <(images "$mode")
 
-    # thumbnails build in the background (own session, so it outlives this
-    # script and whatever launched it); until then rofi scales the original
-    setsid -f nice -n 19 "$0" thumbs >/dev/null 2>&1 </dev/null
+        # thumbnails build in the background (own session, so it outlives this
+        # script and whatever launched it); until then rofi scales the original
+        setsid -f nice -n 19 "$0" thumbs "$mode" >/dev/null 2>&1 </dev/null
 
-    idx=$(for f in "${files[@]}"; do
-        t=$(thumb_of "$f")
-        [ -s "$t" ] || { [ "$(kind_of "$f")" = video ] && t=video-x-generic || t=$f; }
-        label=${f##*/}
-        [ "$(kind_of "$f")" = still ] || label="▶ $label"
-        printf '%s\0icon\x1f%s\n' "$label" "$t"
-    done | rofi -dmenu -i -no-custom -show-icons -format i -p "Wallpaper  $output" \
-        -theme-str 'window { width: 1120px; }
-            listview { columns: 4; lines: 3; spacing: 10px; }
-            element { orientation: vertical; padding: 10px; spacing: 6px; }
-            element-icon { size: 216px; }
-            element-text { horizontal-align: 0.5; }') || exit 0
+        # footer: which output and which walls the grid is showing
+        if [ "$mode" = hidden ]; then hint="visible walls"; else hint="hidden walls"; fi
+        mesg="$output  ·  ${mode:-visible} walls in ${WALLS//$HOME/~}"
 
-    set_wall "$output" "${files[$idx]}"
+        ret=0
+        idx=$({ if ((${#files[@]})); then
+                    for f in "${files[@]}"; do
+                        t=$(thumb_of "$f")
+                        [ -s "$t" ] || { [ "$(kind_of "$f")" = video ] && t=video-x-generic || t=$f; }
+                        label=${f##*/}
+                        [ "$(kind_of "$f")" = still ] || label="▶ $label"
+                        printf '%s\0icon\x1f%s\n' "$label" "$t"
+                    done
+                else
+                    # -no-custom quits at once on an empty list, so keep the
+                    # window open (h still toggles) with a row that does nothing
+                    printf 'no wallpapers here  (h: %s)\n' "$hint"
+                fi
+            } | rofi -dmenu -i -no-custom -show-icons -format i -p "Wallpaper  $output" \
+                -mesg "$mesg" -kb-custom-1 h \
+                -theme-str 'window { width: 1120px; }
+                    listview { columns: 4; lines: 3; spacing: 10px; }
+                    element { orientation: vertical; padding: 10px; spacing: 6px; }
+                    element-icon { size: 216px; }
+                    element-text { horizontal-align: 0.5; }') || ret=$?
+
+        case $ret in
+        0) # picked a row (the placeholder row does nothing)
+            if ((${#files[@]})); then
+                set_wall "$output" "${files[$idx]}"
+            fi
+            return 0 ;;
+        10) # h: flip between the visible walls and the .hidden ones
+            if [ "$mode" = hidden ]; then mode=""; else mode=hidden; fi ;;
+        *) return 0 ;; # cancelled
+        esac
+    done
 }
 
 case ${1:-} in
@@ -227,7 +260,7 @@ case ${1:-} in
 set) set_wall "${2:?usage: rice-wall set OUTPUT FILE}" "${3:?usage: rice-wall set OUTPUT FILE}" ;;
 show) show "${2:?usage: rice-wall show OUTPUT FILE}" "${3:?usage: rice-wall show OUTPUT FILE}" ;;
 sync) sync_all ;;
-thumbs) thumbs ;;
+thumbs) thumbs "${2:-}" ;;
 *)
     sed -n '3,12s/^# \{0,1\}//p' "$0" >&2
     exit 2
