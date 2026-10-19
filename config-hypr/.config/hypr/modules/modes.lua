@@ -80,16 +80,26 @@ function rice.apply_modes()
     hl.config(nested(values))
 end
 
+-- true when the mode changed
 function rice.set_mode(name, on)
     on = on and true or false
-    if (rice.modes[name] or false) == on then return end
+    if (rice.modes[name] or false) == on then return false end
     rice.modes[name] = on
     rice.apply_modes()
+    return true
 end
 
-local function check_power()
+-- Animated wallpapers freeze on battery and in game mode. rice-wall sync does
+-- the work (and decides from the adapter and the game flag itself), so this
+-- only says "something changed". Not called while the config loads: rice-theme
+-- apply sets the wallpaper in the right state at start.
+local function wall_sync()
+    hl.exec_cmd("~/.config/rice/bin/rice-wall sync")
+end
+
+local function check_power(sync)
     local online = rice.adapter and read_line(rice.adapter)
-    rice.set_mode("battery", online == "0")
+    if rice.set_mode("battery", online == "0") and sync then wall_sync() end
 end
 
 check_power()
@@ -102,7 +112,7 @@ local function start_power_watch()
     if #hl.get_monitors() == 0 then return end
     check_power()
     if not rice.power_timer then
-        rice.power_timer = hl.timer(check_power, { timeout = 5000, type = "repeat" })
+        rice.power_timer = hl.timer(function() check_power(true) end, { timeout = 5000, type = "repeat" })
     end
 end
 hl.on("hyprland.start", start_power_watch)
@@ -126,7 +136,7 @@ function rice.gamemode.toggle()
     end
     rice.set_mode("game", on)
     hl.exec_cmd(bin .. "rice-dnd " .. (on and "hold" or "release") .. " gamemode; "
-        .. bin .. "rice-sync gamemode")
+        .. bin .. "rice-sync gamemode; " .. bin .. "rice-wall sync")
 end
 
 -- re-enter game mode after a reload (the flag outlives the Lua state; it is

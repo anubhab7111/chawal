@@ -17,6 +17,7 @@ set -euo pipefail
 THEMES="$HOME/.config/theming/themes"
 STATE="${XDG_STATE_HOME:-$HOME/.local/state}/rice"
 CURRENT="$HOME/.config/theming/current"
+BIN="${RICE_BIN:-$HOME/.config/rice/bin}" # RICE_BIN lets a checkout be tried before it is stowed
 DEFAULT=mocha
 
 die() { echo "rice-theme: $*" >&2; exit 1; }
@@ -156,10 +157,15 @@ reload_wallpaper() {
     for f in "$picks"/*; do
         [ -f "$f" ] && wall[${f##*/}]=$(head -n1 "$f")
     done
-    # "*" first, so per-output entries land on top of it
+    # rice-wall show does the work, so gifs and videos play (and freeze on
+    # battery) the same way a pick does. "*" first, so per-output entries land
+    # on top of it.
     if [ -n "${wall["*"]:-}" ]; then
         if [ -f "${wall["*"]}" ]; then
-            awww img "${wall["*"]}" >/dev/null 2>&1 || true
+            # one call per output ("*" means all of them)
+            for output in $(awww query | sed -n 's/^: \([^:]*\):.*/\1/p'); do
+                "$BIN/rice-wall" show "$output" "${wall["*"]}" || true
+            done
         else
             echo "rice-theme: wallpaper not found, skipping: ${wall["*"]}" >&2
         fi
@@ -171,7 +177,7 @@ reload_wallpaper() {
             echo "rice-theme: wallpaper not found, skipping: $path" >&2
             continue
         fi
-        awww img "$path" -o "$output" >/dev/null 2>&1 &
+        "$BIN/rice-wall" show "$output" "$path" &
     done
     wait
 }
