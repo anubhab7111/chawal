@@ -1,26 +1,54 @@
 #!/usr/bin/env bash
-# rice-wall: wallpaper picker (SUPER+W).
+# rice-wall: wallpaper picker (SUPER+W) and the one place a wallpaper is shown.
 #
-#   rice-wall            rofi grid of the Catppuccin Mocha wallpapers in
-#                        ~/Pictures/wallpapers/walls-catppuccin-mocha (RICE_WALLS overrides); the
-#                        pick goes on the focused output and is remembered for the theme
-#   rice-wall set OUTPUT FILE   apply and remember without the picker
-#   rice-wall thumbs     build missing thumbnails (the picker starts this in
-#                        the background)
+#   rice-wall            rofi grid of the wallpapers in RICE_WALLS (a ":" list;
+#                        default ~/Pictures/wallpapers/walls-catppuccin-mocha and
+#                        ~/Pictures/Wallpapers). The pick goes on the focused
+#                        output and is remembered for the theme. Animated ones
+#                        (gif, mp4, webm, mkv, mov) are marked with a play sign.
+#   rice-wall set OUTPUT FILE    show FILE and remember it
+#   rice-wall show OUTPUT FILE   show FILE without remembering it (rice-theme)
+#   rice-wall sync               freeze or resume animated wallpapers (see below)
+#   rice-wall thumbs             build missing thumbnails (the picker starts this
+#                                in the background)
+#
+# A still or a gif goes to awww (a gif plays inside awww-daemon). A video plays
+# in mpvpaper, one process per output, over a still of its first frame. Both
+# cost CPU and memory all the time, so while on battery or in game mode the
+# wallpaper freezes to its first frame (a still, no mpvpaper); rice-wall sync
+# (run by the Hyprland modes) swaps it back on AC. touch
+# ~/.local/state/rice/wall-always-animate to never freeze.
 #
 # Picks live in ~/.local/state/rice/wallpaper/<theme>/<output>; rice-theme
 # apply prefers them over the theme's wallpaper.conf.
 
 set -euo pipefail
 
-WALLS="${RICE_WALLS:-$HOME/Pictures/wallpapers/walls-catppuccin-mocha}"
+WALLS="${RICE_WALLS:-$HOME/Pictures/wallpapers/walls-catppuccin-mocha:$HOME/Pictures/Wallpapers}"
 CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/rice/walls"
 STATE="${XDG_STATE_HOME:-$HOME/.local/state}/rice"
-RICE_THEME="$HOME/.config/rice/bin/rice-theme"
+RUN="${RICE_RUN:-${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice}" # game mode's flag lives here too
+BIN="${RICE_BIN:-$HOME/.config/rice/bin}"
 
 images() {
-    find -L "$WALLS" -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' \
-        -o -iname '*.webp' -o -iname '*.gif' \) | sort
+    local dir dirs=()
+    local IFS=:
+    for dir in $WALLS; do [ -d "$dir" ] && dirs+=("$dir"); done
+    ((${#dirs[@]})) || return 0
+    # -name '.*' -prune: skip hidden files and folders (~/Pictures/Wallpapers/.hidden)
+    find -L "${dirs[@]}" -name '.*' -prune -o -type f \( \
+        -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \
+        -o -iname '*.gif' -o -iname '*.mp4' -o -iname '*.webm' -o -iname '*.mkv' \
+        -o -iname '*.mov' \) -print | sort
+}
+
+# still, gif or video
+kind_of() {
+    case ${1,,} in
+    *.gif) echo gif ;;
+    *.mp4 | *.webm | *.mkv | *.mov) echo video ;;
+    *) echo still ;;
+    esac
 }
 
 # one flat cache file per image: the path with / turned into %
@@ -30,7 +58,7 @@ thumbs() {
     mkdir -p "$CACHE"
     exec 9>"$CACHE/.lock"
     flock -n 9 || exit 0 # another run is already at it
-    local f t tmp
+    local f t tmp ok
     while IFS= read -r f; do
         t=$(thumb_of "$f")
         [ -s "$t" ] && continue
@@ -38,7 +66,15 @@ thumbs() {
         # write to a %-free temp name and move it into place. [0]: first
         # frame only (gifs). One bad image must not stop the rest.
         tmp=$(mktemp -p "$CACHE" .thumb-XXXXXX.png)
-        if magick "${f}[0]" -thumbnail 384x216^ -gravity center -extent 384x216 "$tmp" 2>/dev/null; then
+        ok=0
+        if [ "$(kind_of "$f")" = video ]; then
+            ffmpeg -v error -y -i "$f" -frames:v 1 \
+                -vf 'scale=384:216:force_original_aspect_ratio=increase,crop=384:216' \
+                "$tmp" 2>/dev/null && ok=1
+        else
+            magick "${f}[0]" -thumbnail 384x216^ -gravity center -extent 384x216 "$tmp" 2>/dev/null && ok=1
+        fi
+        if [ "$ok" = 1 ]; then
             mv -f "$tmp" "$t" || rm -f "$tmp"
         else
             rm -f "$tmp"
@@ -46,17 +82,120 @@ thumbs() {
     done < <(images)
 }
 
+# Full-size first frame of a gif or video, for the frozen state and as the base
+# a video plays over. Keyed by path and mtime, so a replaced file is redone.
+poster_of() {
+    local f=$1 key out
+    key=${f//\//%}.$(stat -c %Y "$f")
+    out="$CACHE/posters/$key.png"
+    if [ ! -s "$out" ]; then
+        mkdir -p "$CACHE/posters"
+        if ffmpeg -v error -y -i "$f" -frames:v 1 "$out.part.png" 2>/dev/null; then
+            mv -f "$out.part.png" "$out"
+        else
+            rm -f "$out.part.png"
+            return 1
+        fi
+    fi
+    printf '%s\n' "$out"
+}
+
+# True on battery or in game mode, unless the user opted out.
+frozen() {
+    local a adapters=()
+    [ -e "$STATE/wall-always-animate" ] && return 1
+    [ -e "$RUN/gamemode" ] && return 0
+    if [ -n "${RICE_ADAPTER:-}" ]; then
+        adapters=("$RICE_ADAPTER")
+    else
+        for a in ADP1 ADP0 AC ACAD; do adapters+=("/sys/class/power_supply/$a/online"); done
+    fi
+    for a in "${adapters[@]}"; do
+        [ -r "$a" ] && { [ "$(head -n1 "$a")" = 0 ]; return; }
+    done
+    return 1 # no adapter (a desktop) is never "battery"
+}
+
+# one mpvpaper per output; its pid is kept so only ours is ever stopped
+stop_video() {
+    local pidfile="$RUN/wall/$1.pid" pid
+    [ -f "$pidfile" ] || return 0
+    pid=$(head -n1 "$pidfile")
+    if [ -n "$pid" ] && [ "$(cat "/proc/$pid/comm" 2>/dev/null)" = mpvpaper ]; then
+        kill "$pid" 2>/dev/null || true
+    fi
+    rm -f "$pidfile"
+}
+
+start_video() { # output file
+    stop_video "$1"
+    # loop forever, no sound, fill the screen (crop), pause while a window is fullscreen
+    setsid mpvpaper -p -a full -o "no-audio loop hwdec=auto panscan=1.0" "$1" "$2" \
+        >/dev/null 2>&1 </dev/null &
+    printf '%s\n' "$!" > "$RUN/wall/$1.pid"
+}
+
+# Put FILE on OUTPUT. An animated file is recorded in $RUN/wall/OUTPUT so sync
+# can freeze and resume it; a still clears that record.
+show() { # output file
+    local output=$1 file=$2 poster
+    [ -f "$file" ] || { echo "rice-wall: no such file: $file" >&2; return 1; }
+    mkdir -p "$RUN/wall"
+    # remember which state this was shown in, so sync only acts on a change
+    if frozen; then echo 1 > "$RUN/wall/.frozen"; else echo 0 > "$RUN/wall/.frozen"; fi
+    case $(kind_of "$file") in
+    still)
+        awww img "$file" -o "$output" >/dev/null 2>&1 || true
+        stop_video "$output"
+        rm -f "$RUN/wall/$output"
+        ;;
+    gif)
+        printf '%s\n' "$file" > "$RUN/wall/$output"
+        if frozen; then
+            poster=$(poster_of "$file") && awww img "$poster" -o "$output" >/dev/null 2>&1 || true
+        else
+            awww img "$file" -o "$output" >/dev/null 2>&1 || true
+        fi
+        stop_video "$output"
+        ;;
+    video)
+        printf '%s\n' "$file" > "$RUN/wall/$output"
+        # awww holds the first frame: it is what shows while mpvpaper starts and
+        # what stays when it is stopped
+        if poster=$(poster_of "$file"); then
+            awww img "$poster" -o "$output" >/dev/null 2>&1 || true
+        fi
+        if frozen; then stop_video "$output"; else start_video "$output" "$file"; fi
+        ;;
+    esac
+}
+
+# Re-show every animated wallpaper when freezing turns on or off
+sync_all() {
+    local now=0 prev rec
+    frozen && now=1
+    prev=$(cat "$RUN/wall/.frozen" 2>/dev/null || echo "")
+    [ "$now" = "$prev" ] && return 0
+    mkdir -p "$RUN/wall"
+    printf '%s\n' "$now" > "$RUN/wall/.frozen"
+    for rec in "$RUN"/wall/*; do
+        [ -f "$rec" ] || continue
+        case $rec in *.pid) continue ;; esac
+        show "${rec##*/}" "$(head -n1 "$rec")" || true
+    done
+}
+
 set_wall() { # output file
     local output=$1 file=$2 theme
     [ -f "$file" ] || { echo "rice-wall: no such file: $file" >&2; exit 1; }
-    theme=$("$RICE_THEME" get)
+    theme=$("$BIN/rice-theme" get)
     mkdir -p "$STATE/wallpaper/$theme"
     printf '%s\n' "$file" > "$STATE/wallpaper/$theme/$output"
-    awww img "$file" -o "$output" >/dev/null 2>&1
+    show "$output" "$file"
 }
 
 pick() {
-    local output files=() f t idx
+    local output files=() f t idx label
     output=$(hyprctl -j monitors | jq -r '.[] | select(.focused) | .name')
     [ -n "$output" ] || { echo "rice-wall: no focused output" >&2; exit 1; }
 
@@ -69,8 +208,10 @@ pick() {
 
     idx=$(for f in "${files[@]}"; do
         t=$(thumb_of "$f")
-        [ -s "$t" ] || t=$f
-        printf '%s\0icon\x1f%s\n' "${f##*/}" "$t"
+        [ -s "$t" ] || { [ "$(kind_of "$f")" = video ] && t=video-x-generic || t=$f; }
+        label=${f##*/}
+        [ "$(kind_of "$f")" = still ] || label="▶ $label"
+        printf '%s\0icon\x1f%s\n' "$label" "$t"
     done | rofi -dmenu -i -no-custom -show-icons -format i -p "Wallpaper  $output" \
         -theme-str 'window { width: 1120px; }
             listview { columns: 4; lines: 3; spacing: 10px; }
@@ -84,9 +225,11 @@ pick() {
 case ${1:-} in
 "") pick ;;
 set) set_wall "${2:?usage: rice-wall set OUTPUT FILE}" "${3:?usage: rice-wall set OUTPUT FILE}" ;;
+show) show "${2:?usage: rice-wall show OUTPUT FILE}" "${3:?usage: rice-wall show OUTPUT FILE}" ;;
+sync) sync_all ;;
 thumbs) thumbs ;;
 *)
-    sed -n '3,9s/^# \{0,1\}//p' "$0" >&2
+    sed -n '3,12s/^# \{0,1\}//p' "$0" >&2
     exit 2
     ;;
 esac

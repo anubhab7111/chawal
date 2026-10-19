@@ -57,7 +57,7 @@ Names are Arch packages; `(AUR)` ones come from the AUR (for example with
 |---|---|
 | Compositor | `hyprland` `hyprlock` `hypridle` `hyprsunset` `hyprshot` `hyprpicker` `xdg-desktop-portal-hyprland` `polkit-kde-agent` |
 | Bar, widgets | `waybar-git` (AUR; the 0.15.0 release sends legacy dispatches that the Lua parser rejects) `eww` (AUR) `swaync` |
-| Launchers, wallpaper | `rofi` `awww` (wallpaper daemon) `cliphist` `wl-clipboard` `imv` |
+| Launchers, wallpaper | `rofi` `awww` (wallpaper daemon; plays gifs) `mpvpaper` (video wallpapers) `cliphist` `wl-clipboard` `imv` |
 | Terminal, shell | `alacritty` `tmux` `yazi` `btop` `cava` `fastfetch` `starship` `neovim` |
 | Audio, media | `pamixer` `playerctl` `pwvucontrol` (AUR) `brightnessctl` |
 | Network, Bluetooth | `networkmanager` `network-manager-applet` `bluez` `bluez-utils` `blueman` |
