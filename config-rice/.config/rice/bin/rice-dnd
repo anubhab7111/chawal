@@ -39,7 +39,9 @@ for_() { # SECONDS
     cancel_timer
     printf '%s\n' "$(( $(date +%s) + secs ))" >"$RUN/dnd-until"
     on
-    systemd-run --user --quiet --collect --unit=rice-dnd-timer --on-active="$secs" "$SELF" expire
+    # AccuracySec: systemd's default of 1 min lets a timer fire up to a minute late
+    systemd-run --user --quiet --collect --unit=rice-dnd-timer --timer-property=AccuracySec=1s \
+        --on-active="$secs" "$SELF" expire
 }
 
 until_() { # when a pending timer ends, HH:MM local time
