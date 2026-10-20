@@ -19,19 +19,12 @@
     background: transparent;
 }
 
-/* Loud look. A popup is the glass fill over the tri-colour ring (same stops as
-   the Hyprland border) that shows through the 2px transparent border;
-   critical swaps the ring for solid red. */
+/* Flat glass: a translucent fill with a thin light edge (no gradient: one under
+   the fill would show through it); critical gets a solid red edge. */
 .notification {
-    background-color: transparent;
-    background-image:
-        linear-gradient(@glass_pop, @glass_pop),
-        linear-gradient(135deg, @mauve, @blue, @teal);
-    background-repeat: no-repeat;
-    background-origin: padding-box, border-box;
-    background-clip: padding-box, border-box;
+    background-color: @glass_pop;
     color: @text;
-    border: 2px solid transparent;
+    border: 1px solid alpha(@text, 0.18);
     border-radius: 14px;
     margin: 6px 12px;
     padding: 0;
@@ -39,9 +32,7 @@
 }
 
 .notification.critical {
-    background-image:
-        linear-gradient(@glass_pop, @glass_pop),
-        linear-gradient(@red, @red);
+    border: 2px solid @red;
 }
 
 .notification-content {
@@ -97,18 +88,13 @@
 }
 
 /* ---- control center (the list under the quick-settings card) ---- */
-/* The glass fill over the same tri-colour ring as the panel, in one box. */
+/* The same flat glass as the quick-settings card above it. */
 .control-center {
-    background-color: transparent;
-    background-image:
-        linear-gradient(@glass, @glass),
-        linear-gradient(135deg, @mauve, @blue, @teal);
-    background-origin: padding-box, border-box;
-    background-clip: padding-box, border-box;
+    background-color: @glass;
     color: @text;
-    border: 2px solid transparent;
+    border: 1px solid alpha(@text, 0.18);
     border-radius: 14px;
-    padding: 8px 10px 10px 10px;
+    padding: 9px 11px 11px 11px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
