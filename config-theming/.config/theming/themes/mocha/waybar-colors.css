@@ -51,3 +51,8 @@
 @define-color pill_caffeine_2 #fab387;
 @define-color pill_theme_1 #89b4fa;
 @define-color pill_theme_2 #b4befe;
+
+/* Glass fills for the quick settings and notification panels (about 60% opaque) */
+@define-color glass       alpha(@base, 0.60);
+@define-color glass_tile  alpha(@surface0, 0.55);
+@define-color glass_pop   alpha(@base, 0.60);

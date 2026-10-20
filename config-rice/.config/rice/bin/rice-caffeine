@@ -2,15 +2,20 @@
 # rice-caffeine: keep the session awake (the quick-settings Caffeine tile).
 #
 #   rice-caffeine toggle|on|off
-#   rice-caffeine status      JSON state
+#   rice-caffeine for SECONDS  keep it awake for SECONDS, then off by itself
+#   rice-caffeine until        when such a timed holder ends, HH:MM (else nothing)
+#   rice-caffeine status       JSON state
 #
 # "On" is a `systemd-inhibit --what=idle` holder, which hypridle honours, so
-# no dim, lock, screen-off or suspend fires. Autostart runs `off` at login.
+# no dim, lock, screen-off or suspend fires. A timed holder runs `sleep SECONDS`
+# instead of `sleep infinity`; its end time is kept in $RUN/caffeine-until.
+# Autostart runs `off` at login.
 
 set -euo pipefail
 
 RUN="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice"
 PIDFILE="$RUN/caffeine.pid"
+UNTIL="$RUN/caffeine-until"
 
 running() {
     local pid
@@ -20,13 +25,13 @@ running() {
     [ -n "$pid" ] && grep -q "systemd-inhibit" "/proc/$pid/cmdline" 2>/dev/null
 }
 
-on() {
-    running && return 0
+start() { # WHAT: what the holder sleeps (a number of seconds, or infinity)
+    local what=$1
     mkdir -p "$RUN"
     # $$ is the child shell's pid, which exec hands to systemd-inhibit
     # shellcheck disable=SC2016
     setsid -f sh -c 'echo $$ > "$1"; exec systemd-inhibit --what=idle --who=rice-caffeine \
-        --why="Caffeine is on" --mode=block sleep infinity' sh "$PIDFILE" </dev/null >/dev/null 2>&1
+        --why="Caffeine is on" --mode=block sleep "$2"' sh "$PIDFILE" "$what" </dev/null >/dev/null 2>&1
     # the inhibitor is up within about 30 ms: look every 10 ms (up to 1 s), not every 100
     for _ in $(seq 100); do running && return 0; sleep 0.01; done
     echo "rice-caffeine: inhibitor did not start" >&2
@@ -35,12 +40,38 @@ on() {
 
 off() {
     if running; then kill "$(cat "$PIDFILE")" 2>/dev/null || true; fi
-    rm -f "$PIDFILE"
+    rm -f "$PIDFILE" "$UNTIL"
+}
+
+on() { # until switched off
+    off # a second on (or a for) replaces the holder rather than stacking one
+    start infinity
+}
+
+for_() { # SECONDS
+    local secs=${1:?usage: rice-caffeine for SECONDS}
+    off
+    printf '%s\n' "$(( $(date +%s) + secs ))" >"$UNTIL"
+    start "$secs"
+}
+
+until_() { # when a timed holder ends, HH:MM local time
+    local u=""
+    if [ -f "$UNTIL" ]; then
+        u=$(cat "$UNTIL" 2>/dev/null) || u=""
+    fi
+    if [ -n "$u" ] && running && [ "$u" -gt "$(date +%s)" ]; then
+        date -d "@$u" +%H:%M
+    else
+        rm -f "$UNTIL" # a holder that ended (or none at all) leaves nothing
+    fi
 }
 
 case ${1:-} in
 on) on ;;
 off) off ;;
+for) for_ "${2:?usage: rice-caffeine for SECONDS}" ;;
+until) until_ ;;
 toggle)
     if running; then off; else on; fi
     ;;
@@ -52,7 +83,7 @@ status)
     fi
     ;;
 *)
-    sed -n '3,6s/^# \{0,1\}//p' "$0" >&2
+    sed -n '3,7s/^# \{0,1\}//p' "$0" >&2
     exit 2
     ;;
 esac

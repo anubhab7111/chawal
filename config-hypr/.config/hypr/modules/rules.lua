@@ -112,7 +112,9 @@ layer("swaync-control-center", { animation = "slide top" })
 layer("volume-panel", { animation = "slide right" })
 
 -- Quick-settings panel (slides down from the top edge) and its click-outside scrim (fades).
-layer("qs-panel", { animation = "slide top" })
+-- The card is translucent (@glass, rules.lua) so it is blurred; ignore_alpha keeps the
+-- fully transparent rounded corners and window margins out of the blur.
+layer("qs-panel", { blur = true, ignore_alpha = 0.3, animation = "slide top" })
 layer("qs-scrim", { animation = "fade" })
 
 layer("gtk-layer-shell", { blur = true })

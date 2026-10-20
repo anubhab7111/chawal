@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # qs-opt ID: show a click on tile ID at once, before the change has happened.
 #
-# Flips the tile in the rows that are on screen (the cached $RUN/rows.json, see
-# qs-rows), records the state the click asked for in $RUN/pend/ID, and pushes
-# the rows to eww: a few milliseconds, whatever the change itself costs.
-# qs-flip runs this first. The entry ends when the real state agrees or after
-# a while (QS_PEND_MS overrides: tests); a Wi-Fi radio or the theme take longer
-# than a switch.
+# Works out the state the click asks for from the panel state on screen (the
+# cached $RUN/state.json, see qs-state), then qs_pend records it in $RUN/pend/ID
+# and pushes the flipped state to eww: a few milliseconds, whatever the change
+# itself costs. qs-flip runs this first. The entry ends when the real state
+# agrees or after a while (QS_PEND_MS overrides: tests); a Wi-Fi radio or the
+# theme take longer than a switch.
 
 set -u
 
@@ -14,10 +14,9 @@ CFG=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)
 RUN="${QS_RUN:-${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice/qs}" # QS_RUN: tests
 EWW=${EWW:-eww}                                                  # EWW: tests
 ID=${1:?usage: qs-opt ID}
-mkdir -p "$RUN/pend"
 
-cur=$(cat "$RUN/rows.json" 2>/dev/null)
-[ -n "$cur" ] || cur=$("$CFG/scripts/qs-rows") || exit 1 # a click before any poll
+cur=$(cat "$RUN/state.json" 2>/dev/null)
+[ -n "$cur" ] || cur=$("$CFG/scripts/qs-state") || exit 1 # a click before any poll
 
 case $ID in
 theme) ttl=20000 ;;
@@ -25,25 +24,28 @@ wifi) ttl=8000 ;;
 *) ttl=4000 ;;
 esac
 ttl=${QS_PEND_MS:-$ttl}
-now=$(date +%s%3N)
 
-# line 1: the pending entry; line 2: the rows with the tile flipped
-out=$(jq -c --arg id "$ID" --argjson now "$now" --argjson ttl "$ttl" '
-    ([.[][] | select(.id == $id)][0]) as $t
-    | if $t == null or ($t.enabled | not) then empty else
-        ((if $id == "power" then
-            ({"power-saver": "balanced", "balanced": "performance", "performance": "power-saver"}[$t.sub] // $t.sub) as $next
-            | {on: ($next != "balanced"), sub: $next}
-          elif $id == "theme" then {on: ($t.on | not), sub: (if $t.on then "Mocha" else "Latte" end)}
-          else {on: ($t.on | not), sub: (if $t.on then "Off" else "On" end)} end)
-         + {exp: ($now + $ttl)}) as $p
-        | $p, map(map(if .id == $id then . + {on: $p.on, sub: $p.sub} else . end))
-      end' <<<"$cur")
-[ -n "$out" ] || exit 0
+# the value the click asks for: "true|false SUB", or nothing for a disabled tile.
+# power cycles its profile and counts as on when it is not balanced; theme flips
+# Mocha <-> Latte.
+want=$(jq -r --arg id "$ID" '
+    def cur:
+        if $id == "power" then {on: (.power.profile != "balanced"),
+                                enabled: .power.enabled, sub: .power.profile}
+        elif $id == "theme" then {on: (.theme == "latte"), enabled: true,
+                                  sub: (if .theme == "latte" then "Latte" else "Mocha" end)}
+        else ([.rows[][] | select(.id == $id)][0]) end;
+    cur as $t
+    | if $t == null or ($t.enabled | not) then empty
+      elif $id == "power" then
+        ({"power-saver": "balanced", "balanced": "performance", "performance": "power-saver"}[$t.sub] // $t.sub) as $n
+        | "\($n != "balanced") \($n)"
+      elif $id == "theme" then "\($t.on | not) \(if $t.on then "Mocha" else "Latte" end)"
+      else "\($t.on | not) \(if $t.on then "Off" else "On" end)" end' <<<"$cur")
+[ -n "$want" ] || exit 0
+on=${want%% *}
+sub=${want#* }
 
-pend=${out%%$'\n'*}
-rows=${out#*$'\n'}
-printf '%s\n' "$pend" >"$RUN/pend/$ID"
-printf '%s\n' "$rows" >"$RUN/rows.json.$$" && mv -f "$RUN/rows.json.$$" "$RUN/rows.json"
-"$EWW" --config "$CFG" update "qs_rows=$rows" >/dev/null 2>&1
-exit 0
+# shellcheck disable=SC1091  # resolved through $CFG at run time
+. "$CFG/scripts/qs-lib.sh"
+qs_pend "$ID" "$on" "$sub" "$ttl"

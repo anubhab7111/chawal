@@ -6,7 +6,7 @@
   "control-center-layer": "overlay",
   "layer-shell": true,
   "cssPriority": "user",
-  "control-center-margin-top": 338,
+  "control-center-margin-top": 408,
   "control-center-margin-bottom": 8,
   "control-center-margin-right": 8,
   "control-center-width": 346,

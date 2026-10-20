@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# qs-set KIND VALUE: a segmented-control click in the quick-settings panel
+# (the power profile and the theme are picked directly, not cycled).
+#
+#   1. qs_pend: the pick shows on screen at once.
+#   2. The real change, one at a time per kind (flock), so two quick clicks are
+#      applied in order: rice-power-profile set, or rice-theme apply (skipped
+#      when that theme is already active).
+#   3. Refresh from the real state: the real state has the last word (qs-state).
+#
+#   qs-set power saver|balanced|performance
+#   qs-set theme mocha|latte
+
+set -u
+
+BIN="${RICE_BIN:-$HOME/.config/rice/bin}"                       # RICE_BIN: tests
+CFG=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)
+RUN="${QS_RUN:-${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice/qs}" # QS_RUN: tests
+EWW=${EWW:-eww}                                                 # EWW: tests
+
+usage() { sed -n '11,12s/^# \{0,1\}//p' "$0" >&2; exit 2; }
+
+kind=${1:-}
+value=${2:-}
+case $kind in
+power)
+    case $value in
+    saver) profile=power-saver ;;
+    balanced | performance) profile=$value ;;
+    *) usage ;;
+    esac
+    ttl=4000
+    sub=$profile
+    if [ "$profile" = balanced ]; then on=false; else on=true; fi
+    ;;
+theme)
+    case $value in
+    latte) on=true sub=Latte ;;
+    mocha) on=false sub=Mocha ;;
+    *) usage ;;
+    esac
+    ttl=20000
+    ;;
+*) usage ;;
+esac
+
+# shellcheck disable=SC1091  # resolved through $CFG at run time
+. "$CFG/scripts/qs-lib.sh"
+qs_pend "$kind" "$on" "$sub" "$ttl"
+
+# the change itself, one at a time per kind so the last click wins
+mkdir -p "$RUN"
+exec 9>"$RUN/flip-$kind.lock"
+flock 9
+
+case $kind in
+power) "$BIN/rice-power-profile" set "$profile" ;;
+theme)
+    # applying the active theme reloads every app (gsettings, kdeglobals,
+    # Kvantum) for nothing, so skip it when it is already the one
+    [ "$("$BIN/rice-theme" get 2>/dev/null)" = "$value" ] || "$BIN/rice-theme" apply "$value"
+    ;;
+esac
+
+"$EWW" --config "$CFG" update "qs_state=$("$CFG/scripts/qs-state")" >/dev/null 2>&1

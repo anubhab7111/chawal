@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# qs-more ID: a tile in the quick-settings panel was right-clicked.
+#
+#   wifi       open the Wi-Fi list in the rofi hub, panel closed
+#   bluetooth  the Bluetooth list there
+#   dnd        show or hide the timers strip for Do not disturb
+#   caffeine   the same for Caffeine
+#
+# Any other tile: nothing.
+
+set -u
+
+BIN="${RICE_BIN:-$HOME/.config/rice/bin}"    # RICE_BIN: tests
+CFG=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)
+EWW=${EWW:-eww}                              # EWW: tests
+
+case ${1:-} in
+wifi | bluetooth)
+    # the network and Bluetooth lists live only in the rofi hub ("one place per
+    # control"), so close the panel first and open the hub detached
+    "$CFG/scripts/qs-ctl" close >/dev/null 2>&1 || true
+    tab=net
+    [ "$1" = bluetooth ] && tab=bt
+    setsid -f "$BIN/rice-hub" "$tab" </dev/null >/dev/null 2>&1
+    ;;
+dnd | caffeine)
+    # a right click on these two opens (or closes) their timers strip
+    sel=$("$EWW" --config "$CFG" get qs_sel 2>/dev/null)
+    if [ "$sel" = "$1" ]; then sel=""; else sel=$1; fi
+    "$EWW" --config "$CFG" update "qs_sel=$sel" >/dev/null 2>&1
+    ;;
+esac
