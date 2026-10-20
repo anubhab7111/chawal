@@ -40,5 +40,8 @@
       "clear-all-button": true,
       "button-text": "Clear"
     }
-  }
+  },
+  "relative-timestamps": true,
+  "text-empty": "All caught up",
+  "notification-2fa-action": true
 }
