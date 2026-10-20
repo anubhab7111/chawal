@@ -111,7 +111,7 @@ ok "DND is on"                        eq "$(cat "$STUB_DND")" on
 ok "the expiry is written"            le "$u" "$(( $(date +%s) + 61 ))"
 ok "the expiry is about now + 60 s"   ge "$u" "$(( $(date +%s) + 59 ))"
 ok "exactly one systemd-run"          eq "$(grep -c '^systemd-run' "$STUB_LOG")" 1
-ok "the timer runs this script expire" has "--user --quiet --collect --unit=rice-dnd-timer --on-active=60 $BIN/rice-dnd expire" "$STUB_LOG"
+ok "the timer runs this script expire" has "--user --quiet --collect --unit=rice-dnd-timer --timer-property=AccuracySec=1s --on-active=60 $BIN/rice-dnd expire" "$STUB_LOG"
 ok "until prints the expiry as HH:MM" eq "$("$BIN/rice-dnd" until)" "$(minute "$u")"
 : >"$STUB_LOG"
 "$BIN/rice-dnd" for 120
