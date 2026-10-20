@@ -300,9 +300,10 @@ closed together with the panel by `qs-ctl` and positioned just below it
 panel height + margins; change it if the panel's height changes). Times read as
 "1 min ago" (`relative-timestamps`), a message that carries a verification code
 gets a COPY action for the code (`notification-2fa-action`), and an empty list
-says "All caught up" (`text-empty`). The list and the pop-up toasts are the same
-glass as the quick-settings card (`@glass`, `@glass_tile` and `@glass_pop`, one
-`@define-color` each in both theme palettes), and Hyprland blurs them
+says "All caught up" (`text-empty`). The list and the pop-up toasts are glass like
+the quick-settings card but more opaque (about 82%: `@glass_nc`, `@glass_nc_tile` and
+`@glass_pop`, one `@define-color` each in both theme palettes; the blur strength is
+Hyprland's global `decoration.blur` in `look.lua`), and Hyprland blurs them
 (`swaync-control-center` and `swaync-notification-window` in `rules.lua`, with
 `ignore_alpha` so the transparent margins are not blurred). The Clear button and
 the notification actions stay gradient pills, and a critical notification keeps

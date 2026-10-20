@@ -90,7 +90,7 @@
 /* ---- control center (the list under the quick-settings card) ---- */
 /* The same flat glass as the quick-settings card above it. */
 .control-center {
-    background-color: @glass;
+    background-color: @glass_nc;
     color: @text;
     border: 1px solid alpha(@text, 0.18);
     border-radius: 14px;
@@ -170,7 +170,7 @@
 .control-center .notification-row .notification {
     margin: 0px;
     background-image: none;
-    background-color: @glass_tile;
+    background-color: @glass_nc_tile;
     border: 2px solid transparent;
     border-radius: 12px;
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset;

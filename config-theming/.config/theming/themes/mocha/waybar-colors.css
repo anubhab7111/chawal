@@ -55,4 +55,7 @@
 /* Glass fills for the quick settings and notification panels (about 60% opaque) */
 @define-color glass       alpha(@base, 0.60);
 @define-color glass_tile  alpha(@surface0, 0.55);
-@define-color glass_pop   alpha(@base, 0.60);
+@define-color glass_pop   alpha(@base, 0.82);
+/* the notification list is more opaque than the quick-settings card: its cards need a calmer ground */
+@define-color glass_nc      alpha(@base, 0.82);
+@define-color glass_nc_tile alpha(@surface0, 0.70);
