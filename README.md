@@ -272,8 +272,11 @@ name comes from `iw` when it is installed.
 
 The card is translucent glass: `@glass` for the card and `@glass_tile` for the
 tiles, chips and segmented controls (about 60% opaque, one `@define-color` each
-in both theme palettes under `config-theming`), drawn over the same tri-colour
-gradient as the window border. Hyprland blurs the panel
+in both theme palettes under `config-theming`), with a thin light edge and no
+gradient behind the fill (a gradient there would show through the glass). The
+notification list below it is exactly as wide (`control-center-width` in
+`config-swaync/.config/swaync/config.json` is 336 because swaync draws its box 24
+px wider than that number). Hyprland blurs the panel
 (`config-hypr/.config/hypr/modules/rules.lua`, `qs-panel` with `ignore_alpha`),
 and the transparent margins are left out of the blur. One place sets the level
 for this panel and for the notification one.
@@ -303,7 +306,7 @@ glass as the quick-settings card (`@glass`, `@glass_tile` and `@glass_pop`, one
 (`swaync-control-center` and `swaync-notification-window` in `rules.lua`, with
 `ignore_alpha` so the transparent margins are not blurred). The Clear button and
 the notification actions stay gradient pills, and a critical notification keeps
-its red ring. After a config change run `swaync-client -R`, after a stylesheet
+its red edge. After a config change run `swaync-client -R`, after a stylesheet
 change `swaync-client -rs` (and `hyprctl reload` for the layer rules).
 
 Do not disturb, night light and caffeine are only here: Waybar has no bell,

@@ -217,14 +217,12 @@ window.background,
 }
 
 .qs-card {
-    background-color: transparent;
-    background-image: linear-gradient(@glass, @glass), linear-gradient(135deg, @mauve 0%, @blue 50%, @teal 100%);
-    background-origin: padding-box, border-box;
-    background-clip: padding-box, border-box;
-    background-repeat: no-repeat;
-    border: 2px solid transparent;
+    /* flat glass: a translucent fill (Hyprland blurs what is behind it) and a thin
+       light edge, no gradient (a gradient layer under the fill shows through it) */
+    background-color: @glass;
+    border: 1px solid alpha(@text, 0.18);
     border-radius: 14px;
-    padding: 12px;
+    padding: 13px;
 }
 
 .qs-title {
