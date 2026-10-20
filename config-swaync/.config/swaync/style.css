@@ -25,7 +25,7 @@
 .notification {
     background-color: transparent;
     background-image:
-        linear-gradient(alpha(@base, 0.92), alpha(@base, 0.92)),
+        linear-gradient(@glass_pop, @glass_pop),
         linear-gradient(135deg, @mauve, @blue, @teal);
     background-repeat: no-repeat;
     background-origin: padding-box, border-box;
@@ -40,7 +40,7 @@
 
 .notification.critical {
     background-image:
-        linear-gradient(alpha(@base, 0.92), alpha(@base, 0.92)),
+        linear-gradient(@glass_pop, @glass_pop),
         linear-gradient(@red, @red);
 }
 
@@ -51,7 +51,7 @@
 }
 
 .summary {
-    font-weight: 700;
+    font-weight: 800;
     color: @text;
 }
 
@@ -81,7 +81,7 @@
 .notification-action {
     background-image: linear-gradient(135deg, @pill_network_1, @pill_network_2);
     color: @pill_fg;
-    font-weight: 700;
+    font-weight: 800;
     border-radius: 10px;
     margin: 4px;
 }
@@ -96,18 +96,19 @@
     border-radius: 10px;
 }
 
-/* ---- control center ---- */
+/* ---- control center (the list under the quick-settings card) ---- */
+/* The glass fill over the same tri-colour ring as the panel, in one box. */
 .control-center {
     background-color: transparent;
     background-image:
-        linear-gradient(alpha(@base, 0.92), alpha(@base, 0.92)),
+        linear-gradient(@glass, @glass),
         linear-gradient(135deg, @mauve, @blue, @teal);
     background-origin: padding-box, border-box;
     background-clip: padding-box, border-box;
     color: @text;
     border: 2px solid transparent;
     border-radius: 14px;
-    padding: 6px;
+    padding: 8px 10px 10px 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
@@ -126,31 +127,20 @@
     box-shadow: none;
 }
 
-/* Inside the panel the cards need no ring of their own: a plain fill, with a
-   red outline when critical */
-.control-center .notification-row .notification {
-    margin: 6px;
-    border: 2px solid transparent;
-    background-image:
-        linear-gradient(alpha(@surface0, 0.8), alpha(@surface0, 0.8));
-    background-origin: padding-box;
-    background-clip: padding-box;
-}
-
-.control-center .notification-row .notification.critical {
-    border-color: @red;
-}
-
 .widget-title {
-    margin: 8px 10px;
-    font-size: 15px;
-    font-weight: 700;
+    margin: 4px 4px 10px 4px;
+}
+
+.widget-title > label {
+    color: @text;
+    font-size: 14px;
+    font-weight: 800;
 }
 
 .widget-title > button {
     background-image: linear-gradient(135deg, @pill_network_1, @pill_network_2);
     color: @pill_fg;
-    font-weight: 700;
+    font-weight: 800;
     border-radius: 14px;
     padding: 2px 14px;
 }
@@ -159,6 +149,83 @@
     background-image: linear-gradient(135deg, @pill_theme_1, @pill_theme_2);
 }
 
-.control-center-list-placeholder {
+/* the default stylesheet gives every .widget 8px margin and 8px padding: that was the
+   16px gap that kept the cards narrow */
+.control-center .widget {
+    margin: 0px;
+    padding: 0px;
+}
+
+/* the cards use the panel's full width and the quick-settings tile look */
+.control-center scrolledwindow,
+.control-center .control-center-list {
+    margin: 0px;
+    padding: 0px;
+}
+
+.control-center row,
+.control-center .notification-row {
+    padding: 0px;
+    margin: 0px;
+    min-height: 0px;
+}
+
+.control-center .notification-row .notification-background {
+    margin: 0px;
+    padding: 3px 0px;
+}
+
+/* the reset above also stripped the header's spacing: put it back */
+.control-center .widget-title {
+    margin: 2px 4px 10px 4px;
+}
+
+/* Inside the panel the cards are glass tiles; critical keeps its red ring */
+.control-center .notification-row .notification {
+    margin: 0px;
+    background-image: none;
+    background-color: @glass_tile;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+.control-center .notification-row .notification.critical {
+    border-color: @red;
+}
+
+.control-center .notification-row .notification .notification-default-action:hover {
+    background-color: alpha(@text, 0.06);
+}
+
+.control-center .notification-row .notification .notification-content {
+    padding: 10px 12px;
+}
+
+.control-center .notification-row .notification .summary {
+    font-size: 13px;
+}
+
+.control-center .notification-row .notification .time {
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 10px;
+}
+
+.control-center .notification-row .notification .body {
+    font-size: 12px;
+}
+
+.control-center .notification-row .notification .image {
+    min-width: 40px;
+    min-height: 40px;
+    margin-right: 10px;
+    border-radius: 10px;
+}
+
+.control-center .control-center-list-placeholder {
     color: @overlay1;
+    font-size: 14px;
+    font-weight: 800;
+    opacity: 1;
 }
