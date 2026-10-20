@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# rice-net: Wi-Fi networks as a rofi mode (hub tab).
+# rice-net: Wi-Fi networks in a rofi window of their own (rice-hub net runs this).
 #
 #   rice-net           open rofi on the Wi-Fi tab alone
 #

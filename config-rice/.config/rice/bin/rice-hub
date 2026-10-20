@@ -1,17 +1,23 @@
 #!/usr/bin/env bash
 # rice-hub: the rofi control hub. One window, Tab / Shift+Tab flip between tabs.
 #
-#   rice-hub [TAB]    TAB is drun (default), windows, net, bt or clip
+#   rice-hub [TAB]    TAB is drun (default), windows or clip
 #                     ("window" still works as an alias for windows)
+#   rice-hub net      Wi-Fi: its own rofi window, not a hub tab (rice-net)
+#   rice-hub bt       Bluetooth: its own rofi window (rice-bt)
 #
-# Every tab but Apps is one of the rice-* scripts running as a rofi mode (they
+# Wi-Fi and Bluetooth are not tabs: each is a small window of its own (the
+# panel's right-click and the Waybar buttons open them), so the hub stays
+# Apps, Windows and Clipboard.
+#
+# The Windows and Clipboard tabs are rice-* scripts running as a rofi mode (they
 # detect ROFI_RETV and answer rofi instead of opening their own menu). Their
 # tab names are the prompt each prints itself (\0prompt "<glyph>  Name");
 # -display-* only names the builtin Apps tab (config.rasi).
 #
 # Hotkeys: Alt+1..5 are the per-row actions of the current tab, whatever it
-# calls them (windows: close / float / pin / bring here; net: forget / rescan;
-# clip: delete / wipe all). Ctrl+Delete and Ctrl+Shift+Delete stay as the clip aliases;
+# calls them (windows: close / float / pin / bring here; clip: delete / wipe
+# all). Ctrl+Delete and Ctrl+Shift+Delete stay as the clip aliases;
 # Control+Alt+d takes over word-delete.
 
 set -euo pipefail
@@ -19,6 +25,11 @@ set -euo pipefail
 BIN="${RICE_BIN:-$HOME/.config/rice/bin}" # RICE_BIN lets a checkout be tried before it is stowed
 tab=${1:-drun}
 [ "$tab" = window ] && tab=windows
+
+# Wi-Fi and Bluetooth get a window of their own: the same scripts, run on their own
+case $tab in
+net | bt) exec "$BIN/rice-$tab" ;;
+esac
 
 # Startup speed. Rofi runs every tab's script once at launch (it needs each
 # one's \0prompt for the tab label) and the window only appears after the last
@@ -28,7 +39,7 @@ tab=${1:-drun}
 RICE_PRE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice/hub-pre"
 rm -rf "$RICE_PRE"
 mkdir -p "$RICE_PRE"
-for t in windows net bt clip; do
+for t in windows clip; do
     (
         ROFI_RETV=0 "$BIN/rice-$t" >"$RICE_PRE/$t.tmp" 2>/dev/null </dev/null || true
         mv "$RICE_PRE/$t.tmp" "$RICE_PRE/$t.out"
@@ -37,7 +48,7 @@ done
 export RICE_PRE
 
 exec rofi -show "$tab" \
-    -modes "drun,windows:$BIN/rice-windows,net:$BIN/rice-net,bt:$BIN/rice-bt,clip:$BIN/rice-clip" \
+    -modes "drun,windows:$BIN/rice-windows,clip:$BIN/rice-clip" \
     -kb-remove-word-forward "Control+Alt+d" \
     -kb-custom-1 "Alt+1,Control+Delete" \
     -kb-custom-2 "Alt+2,Control+Shift+Delete" \
