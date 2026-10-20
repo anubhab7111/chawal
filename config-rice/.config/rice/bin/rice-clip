@@ -19,7 +19,7 @@ if [ -z "${ROFI_RETV:-}" ]; then
         -kb-remove-word-forward "Control+Alt+d" \
         -kb-custom-1 "Control+Delete" \
         -kb-custom-2 "Control+Shift+Delete" \
-        -theme-str 'element-icon { size: 48px; } window { width: 720px; }'
+        -theme-str 'element-icon { size: 48px; } element-text { markup: true; } window { width: 600px; }'
 fi
 
 # Hub launch: rice-hub already ran this tab (in parallel with the others) and
@@ -36,6 +36,13 @@ fi
 # cliphist reads entries in its list format ("id<TAB>preview")
 entry() { printf '%s\t' "$1"; }
 
+# rows are shown as pango markup (the hub theme dims a second line), so & < > must be escaped
+esc() { # text, result variable name
+    local s=${1//&/\&amp;}
+    s=${s//</\&lt;}
+    printf -v "$2" '%s' "${s//>/\&gt;}"
+}
+
 # list [message] [data]: print rofi's mode options, then one row per entry
 list() {
     printf '\0use-hot-keys\x1ftrue\n\0no-custom\x1ftrue\n'
@@ -44,10 +51,11 @@ list() {
     printf '\0data\x1f%s\n' "${2:-}"
 
     mkdir -p "$CACHE"
-    local id preview thumb
+    local id preview thumb shown
     local -A live=()
     while IFS=$'\t' read -r id preview; do
         live[$id]=1
+        esc "$preview" shown
         if [[ $preview == "[[ binary data "*" ]]" ]]; then
             thumb="$CACHE/$id.png"
             if [ ! -s "$thumb" ]; then
@@ -55,11 +63,11 @@ list() {
                     magick - -thumbnail 96x96 "$thumb" 2>/dev/null || rm -f "$thumb"
             fi
             if [ -s "$thumb" ]; then
-                printf '%s\0icon\x1f%s\x1finfo\x1f%s\n' "$preview" "$thumb" "$id"
+                printf '%s\0icon\x1f%s\x1finfo\x1f%s\n' "$shown" "$thumb" "$id"
                 continue
             fi
         fi
-        printf '%s\0info\x1f%s\n' "$preview" "$id"
+        printf '%s\0info\x1f%s\n' "$shown" "$id"
     done < <(cliphist list)
 
     # drop thumbnails of entries that are gone

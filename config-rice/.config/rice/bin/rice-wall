@@ -239,7 +239,7 @@ pick() {
                 -theme-str 'window { width: 1120px; }
                     listview { columns: 4; lines: 3; spacing: 10px; }
                     element { orientation: vertical; padding: 10px; spacing: 6px; }
-                    element-icon { size: 216px; }
+                    element-icon { size: 216px; padding: 0px; border-radius: 10px; background-color: transparent; }
                     element-text { horizontal-align: 0.5; }') || ret=$?
 
         case $ret in

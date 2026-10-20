@@ -55,4 +55,4 @@ exec rofi -show "$tab" \
     -kb-custom-3 "Alt+3" \
     -kb-custom-4 "Alt+4" \
     -kb-custom-5 "Alt+5" \
-    -theme-str 'window { width: 1500px; } element-icon { size: 32px; }'
+    -theme-str 'window { width: 900px; } element-text { markup: true; }'

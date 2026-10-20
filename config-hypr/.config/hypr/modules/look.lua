@@ -158,6 +158,10 @@ anim("fadeShadow", 3, "smoothIn")
 anim("fadeDim", 3, "smoothIn")
 anim("fadeLayers", 3, "easeOutExpo")
 
+-- Layers (rofi, notifications, panels): a springy pop-in, a quick close
+anim("layersIn", 4, "overshot")
+anim("layersOut", 2, "easeInOutCubic")
+
 -- Borders
 anim("border", 10, "default")
 anim("borderangle", 100, "linear", "loop")

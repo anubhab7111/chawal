@@ -32,7 +32,7 @@ if [ -z "${ROFI_RETV:-}" ]; then
     exec rofi -show net -modes "net:$0" \
         -kb-remove-word-forward "Control+Alt+d" \
         -kb-custom-1 "Alt+1" -kb-custom-2 "Alt+2" \
-        -theme-str 'window { width: 720px; } mainbox { children: [ inputbar, message, listview ]; }'
+        -theme-str 'window { width: 600px; } element-icon { size: 0px; padding: 0px; background-color: transparent; } mainbox { children: [ inputbar, message, listview ]; }'
 fi
 
 # Hub launch: rice-hub already ran this tab (in parallel with the others) and

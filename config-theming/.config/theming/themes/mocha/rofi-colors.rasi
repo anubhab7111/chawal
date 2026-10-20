@@ -6,9 +6,13 @@
     bg-alt:  #181825;
     surface: #313244;
     fg:      #cdd6f4;
-    fg-dim:  #6c7086;
+    fg-dim:  #9399b2;
     accent:  #89dceb;
     urgent:  #f38ba8;
+    /* glass panel (about 75% opaque), card rows, round icon badges */
+    glass:   #1e1e2ebf;
+    card:    #cdd6f412;
+    badge:   #cdd6f41a;
     line:    #cdd6f433;
     tint:    #89dceb26;
     /* Loud look. rofi cannot use a variable inside linear-gradient(), so each
