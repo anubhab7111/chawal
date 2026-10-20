@@ -14,6 +14,7 @@ and Latte, one Waybar, one eww daemon, swaync notifications, a rofi control hub.
 - [Themes (Mocha / Latte)](#themes-mocha--latte)
 - [Right-edge gauges](#right-edge-gauges)
 - [Troubleshooting and rollback](#troubleshooting-and-rollback)
+- [Video](#video)
 
 ## Install
 
@@ -393,3 +394,18 @@ closes them; no window exists while a gauge is hidden.
   re-login.
 - Your old `~/.config` files that `stow.sh` replaced are under
   `~/.dotfiles-backup/<timestamp>/`.
+
+## Video
+
+[![chawal: a 24-second tour](assets/chawal-preview.webp)](assets/chawal.mp4)
+
+A 24-second tour with sound: [`assets/chawal.mp4`](assets/chawal.mp4). The
+animation above is the same cut without the audio.
+- Three terminals tile in: Neovim on `look.lua`, fastfetch and yazi.
+- The rofi hub opens and searches.
+- The top-right corner opens the quick-settings panel, whose Theme control turns everything from Mocha to Latte.
+- It ends on the wlogout power grid.
+
+The clips are real screen recordings (`wf-recorder`). The Wi-Fi name and the
+battery level are stand-ins painted in afterwards. The fastfetch user line comes
+from a temporary fastfetch config used for the recording.
