@@ -148,7 +148,7 @@ stowed packages.
 | `SUPER+Q` / `E` / `B` / `SHIFT+B` | alacritty / Thunar / Firefox / Chromium |
 | `SUPER+SHIFT+C` / `Z` / `O` / `SHIFT+A` | VSCodium / WhatsApp (zapzap) / Obsidian / Claude desktop |
 | `SUPER+A` | pwvucontrol (audio) |
-| `SUPER+SPACE` | rofi control hub (apps, windows, Wi-Fi, Bluetooth, clipboard) |
+| `SUPER+SPACE` | rofi control hub (apps, windows, clipboard) |
 | `SUPER+SHIFT+V` | hub on the Clip tab |
 | `SUPER+W` | wallpaper grid (picks are remembered per theme and output; `h` toggles the hidden walls) |
 | `SUPER+N` | quick-settings panel (also the top-right corner) |
@@ -179,22 +179,31 @@ top-right the quick-settings panel; the right edge slides out the gauges.
 
 ## Rofi control hub
 
-`SUPER+SPACE` opens one rofi window with five tabs. `Tab` / `Shift+Tab`
+`SUPER+SPACE` opens one rofi window with three tabs. `Tab` / `Shift+Tab`
 (or `Ctrl+Tab`) flip between them; `Alt+1` … `Alt+5` are the per-row actions
 of whichever tab is showing. The scripts live in `config-rice/.config/rice/bin`;
-`rice-hub` is the launcher and every other tab is a `rice-*` script running as
-a rofi script mode (each also works on its own: `rice-net`, `rice-windows`, …).
+`rice-hub` is the launcher and the Windows and Clip tabs are `rice-*` scripts
+running as a rofi script mode (each also works on its own: `rice-windows`, …).
 
 | Tab | Script | Enter | Alt+1 … Alt+5 |
 |---|---|---|---|
 | Apps | rofi `drun` | launch | |
 | Windows | `rice-windows` | focus | close · float · pin · bring here |
-| Wi-Fi | `rice-net` | connect / disconnect | forget · rescan |
-| BT | `rice-bt` | connect / disconnect | power · unpair |
 | Clip | `rice-clip` | copy entry back | delete · wipe all (also Ctrl+Delete, Ctrl+Shift+Delete) |
 
+Wi-Fi and Bluetooth are not tabs: each is a small rofi window of its own, so
+they never mix with apps, windows or the clipboard.
+
+| Window | Script | Enter | Alt+1 … Alt+2 |
+|---|---|---|---|
+| Wi-Fi | `rice-net` | connect / disconnect | forget · rescan |
+| Bluetooth | `rice-bt` | connect / disconnect | power · unpair |
+
+`rice-hub net` and `rice-hub bt` open them (so do the Waybar Wi-Fi and Bluetooth
+pills and the right-click on the quick-settings tiles).
+
 Direct jumps: `SUPER+SHIFT+V` clipboard, the top-left hot corner opens Windows,
-and the Waybar Wi-Fi and Bluetooth pills open their tabs. The wallpaper grid
+and the Waybar Wi-Fi and Bluetooth pills open their windows. The wallpaper grid
 (`rice-wall`, `SUPER+W`) is a separate rofi menu, not a hub tab: it grids
 `~/Pictures/Wallpapers` (gifs and videos included), and `h` flips it to `.hidden`
 inside that dir and back (a fresh launch always starts on the visible walls); the power menu
@@ -232,7 +241,7 @@ bar for status and thumbnails (Clip) instead.
 
 Startup speed: rofi runs every tab's script once at launch (it reads each tab's
 name from it) and only draws after the last one returns, so `rice-hub` runs the
-data tabs in parallel first and hands each script its finished output
+Windows and Clip tabs in parallel first and hands each script its finished output
 (`RICE_PRE`). Keep tab scripts cheap on `ROFI_RETV=0`: no `sleep`, no per-row
 forks, no `nmcli` rescans (use `--rescan no`).
 
@@ -251,8 +260,8 @@ close. It is eww: `config-eww/.config/eww/widgets/qs.yuck`, opened by
 while it is closed. `Esc` is a Hyprland bind that exists only while the panel is
 open (`config-hypr/.config/hypr/modules/qs.lua`).
 
-Right-click a tile: Wi-Fi and Bluetooth close the panel and open that list in the
-rofi hub (`rice-hub net` / `rice-hub bt`; those lists live only there, and a
+Right-click a tile: Wi-Fi and Bluetooth close the panel and open that list in its
+own rofi window (`rice-hub net` / `rice-hub bt`; those lists live only there, and a
 chevron marks the tiles that have it); do not disturb and Caffeine open the
 strip, which then shows their durations (30 min, 1 h, 2 h, until switched off),
 and the picked tile keeps a ring until the strip closes.

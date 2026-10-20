@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# rice-bt: Bluetooth devices as a rofi mode (hub tab).
+# rice-bt: Bluetooth devices in a rofi window of their own (rice-hub bt runs this).
 #
 #   rice-bt            open rofi on the Bluetooth tab alone
 #
