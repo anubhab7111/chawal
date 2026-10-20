@@ -10,7 +10,7 @@
     accent:  #89dceb;
     urgent:  #f38ba8;
     /* glass panel (about 75% opaque), card rows, round icon badges */
-    glass:   #1e1e2ebf;
+    glass:   #1e1e2e80;
     card:    #cdd6f412;
     badge:   #cdd6f41a;
     line:    #cdd6f433;

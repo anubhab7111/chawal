@@ -6,11 +6,11 @@
     bg-alt:  #e6e9ef;
     surface: #ccd0da;
     fg:      #4c4f69;
-    fg-dim:  #6c6f85;
+    fg-dim:  #5c5f77;
     accent:  #04a5e5;
     urgent:  #d20f39;
     /* glass panel (about 75% opaque), card rows, round icon badges */
-    glass:   #eff1f5bf;
+    glass:   #eff1f580;
     card:    #4c4f6912;
     badge:   #4c4f6917;
     line:    #4c4f6933;

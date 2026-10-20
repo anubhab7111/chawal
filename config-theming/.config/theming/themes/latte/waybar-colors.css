@@ -52,10 +52,10 @@
 @define-color pill_theme_1 #97b7f5;
 @define-color pill_theme_2 #bac4f8;
 
-/* Glass fills for the quick settings and notification panels (about 60% opaque) */
-@define-color glass       alpha(@base, 0.60);
-@define-color glass_tile  alpha(@surface0, 0.55);
-@define-color glass_pop   alpha(@base, 0.82);
-/* the notification list is more opaque than the quick-settings card: its cards need a calmer ground */
-@define-color glass_nc      alpha(@base, 0.82);
-@define-color glass_nc_tile alpha(@surface0, 0.70);
+/* Glass fills for the quick settings and notification panels (about 50% opaque, blurred by Hyprland; rofi uses the same look in rofi-colors.rasi) */
+@define-color glass       alpha(@base, 0.50);
+@define-color glass_tile  alpha(@surface0, 0.45);
+@define-color glass_pop   alpha(@base, 0.50);
+/* the notification list shares the card level; its tiles are a little lighter than the panel */
+@define-color glass_nc      alpha(@base, 0.50);
+@define-color glass_nc_tile alpha(@surface0, 0.45);

@@ -1,5 +1,5 @@
-/* Rice look for every rofi window: translucent glass panel (about 75% opaque,
-   blurred by Hyprland), the Hyprland tri-colour ring, search first, underline
+/* Rice look for every rofi window: translucent glass panel (about 50% opaque,
+   blurred by Hyprland, same fill and hairline border as the quick settings), search first, underline
    tabs, and each row a card with a round icon badge like the quick-settings
    tiles; the selected row is the gradient pill.
    colors.rasi is a slot (rice-theme) -> the active theme's rofi-colors.rasi,
@@ -18,17 +18,19 @@ window {
     width: 900px;
     location: center;
     anchor: center;
-    padding: 1px;
-    border-radius: 18px;
-    background-image: @grad-border;
+    /* the same glass as the quick-settings and notification panels: a flat
+       translucent fill and a thin hairline border (Hyprland blurs behind it) */
+    border: 1px;
+    border-color: @line;
+    border-radius: 14px;
+    background-color: @glass;
 }
 
 mainbox {
     children: [ inputbar, mode-switcher, message, listview ];
     spacing: 12px;
     padding: 16px;
-    border-radius: 17px;
-    background-color: @glass;
+    background-color: transparent;
 }
 
 inputbar {
