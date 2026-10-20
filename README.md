@@ -239,6 +239,19 @@ Look: the theme is `config-rofi/.config/rofi/themes/rice.rasi`, coloured from
 rofi has no live preview pane and no animation system; the tabs use the message
 bar for status and thumbnails (Clip) instead.
 
+The look is glass, about 75% opaque (the `glass` token in each theme's
+`rofi-colors.rasi`; Hyprland blurs behind it): search first, underline tabs, and
+every row a card with a round icon badge, the selected one the gradient pill. The
+hub is 900 px wide (the Wi-Fi, Bluetooth, Windows and Clip windows 600 px). App
+rows have two lines: the name and, dimmed, the `.desktop` comment
+(`drun-display-format` in `config.rasi`). Rows are pango markup in the hub, the
+Windows and the Clip windows, so `rice-windows` and `rice-clip` escape `& < >`
+(`tests/rofi-hub/escape-tests.sh`); Wi-Fi, Bluetooth and the power menu print plain
+rows and hide the badge with `element-icon { size: 0px; }` in their `-theme-str`.
+Motion is Hyprland's, not rofi's: the `rofi` layer rule pops in from 90% and the
+`layersIn` / `layersOut` curves in `look.lua` (an overshoot in, a quick ease out)
+apply to every layer (notifications and panels too).
+
 Startup speed: rofi runs every tab's script once at launch (it reads each tab's
 name from it) and only draws after the last one returns, so `rice-hub` runs the
 Windows and Clip tabs in parallel first and hands each script its finished output

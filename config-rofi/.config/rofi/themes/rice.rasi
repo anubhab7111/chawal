@@ -1,8 +1,11 @@
-/* Rice look for every rofi window: the Waybar glass -- translucent dark
-   panel, 14px corners, the Hyprland tri-colour border, gradient pills for the
-   active tab and the selected row.
+/* Rice look for every rofi window: translucent glass panel (about 75% opaque,
+   blurred by Hyprland), the Hyprland tri-colour ring, search first, underline
+   tabs, and each row a card with a round icon badge like the quick-settings
+   tiles; the selected row is the gradient pill.
    colors.rasi is a slot (rice-theme) -> the active theme's rofi-colors.rasi,
-   which defines bg, bg-alt, surface, fg, fg-dim, accent, urgent, line, tint. */
+   which defines glass, card, badge, fg, fg-dim, accent, urgent, line, tint and
+   the gradients. App rows are two lines (name, then description: config.rasi);
+   scripts that print plain rows hide the badge with element-icon { size: 0 }. */
 @import "~/.config/rofi/themes/colors.rasi"
 
 * {
@@ -12,97 +15,98 @@
 }
 
 window {
-    width: 640px;
+    width: 900px;
     location: center;
     anchor: center;
-    /* rofi cannot paint a gradient border (it renders black), so the window
-       is the gradient and shows through as a 2px ring around the mainbox */
-    padding: 2px;
-    border-radius: 14px;
+    padding: 1px;
+    border-radius: 18px;
     background-image: @grad-border;
 }
 
 mainbox {
-    children: [ mode-switcher, inputbar, message, listview ];
+    children: [ inputbar, mode-switcher, message, listview ];
     spacing: 12px;
-    padding: 14px;
-    border-radius: 12px;
-    background-color: @bg;
-}
-
-/* Tab strip: one pill per mode, the active one in cyan */
-mode-switcher {
-    spacing: 6px;
-}
-
-button {
-    padding: 6px 8px;
-    border-radius: 10px;
-    background-color: transparent;
-    text-color: @fg-dim;
-    horizontal-align: 0.5;
-    cursor: pointer;
-}
-
-button selected {
-    background-image: @grad-tab;
-    text-color: @ink;
-}
-
-button.selected,
-button selected.normal {
-    background-image: @grad-tab;
-    text-color: @ink;
+    padding: 16px;
+    border-radius: 17px;
+    background-color: @glass;
 }
 
 inputbar {
-    children: [ prompt, entry ];
-    spacing: 10px;
-    padding: 10px 14px;
-    border-radius: 10px;
-    background-color: @bg-alt;
+    children: [ textbox-search, entry ];
+    spacing: 12px;
+    padding: 12px 18px;
+    border-radius: 14px;
+    background-color: @card;
 }
 
-/* The tab strip already names the mode, so the prompt stays out of the way */
-prompt {
-    enabled: false;
+textbox-search {
+    expand: false;
+    str: "󰍉";
+    text-color: @underline;
 }
 
 entry {
-    placeholder: "  Search";
+    placeholder: "Type to search…";
     placeholder-color: @fg-dim;
     cursor: text;
 }
 
-/* Footer-style hint / status line (script modes fill it) */
+prompt {
+    enabled: false;
+}
+
+mode-switcher {
+    spacing: 18px;
+    padding: 0px 6px;
+}
+
+button {
+    padding: 4px 2px 6px 2px;
+    background-color: transparent;
+    text-color: @fg-dim;
+    horizontal-align: 0.5;
+    border: 0px 0px 2px 0px;
+    border-color: transparent;
+    cursor: pointer;
+}
+
+button selected {
+    text-color: @fg;
+    border-color: @underline;
+}
+
+button.selected,
+button selected.normal {
+    text-color: @fg;
+    border-color: @underline;
+}
+
 message {
     padding: 8px 14px;
-    border-radius: 10px;
-    background-color: @bg-alt;
+    border-radius: 12px;
+    background-color: @card;
 }
 
 textbox {
+    font: "JetBrainsMono Nerd Font 10";
     text-color: @fg-dim;
     markup: true;
 }
 
 listview {
-    lines: 8;
+    lines: 6;
     columns: 1;
-    fixed-height: false;
+    fixed-height: true;
     scrollbar: false;
-    spacing: 4px;
+    spacing: 6px;
 }
 
 element {
-    padding: 8px 12px;
-    spacing: 12px;
-    border-radius: 10px;
-}
-
-element normal.normal,
-element alternate.normal {
-    background-color: transparent;
+    padding: 8px 12px 8px 8px;
+    spacing: 14px;
+    border-radius: 14px;
+    background-color: @card;
+    cursor: pointer;
 }
 
 element normal.active,
@@ -124,8 +128,6 @@ element selected.normal {
 element selected.active {
     background-image: @grad-sel;
     text-color: @ink;
-    border: 1px;
-    border-color: @ink;
 }
 
 element selected.urgent {
@@ -134,10 +136,15 @@ element selected.urgent {
 }
 
 element-icon {
-    size: 24px;
+    size: 30px;
+    padding: 8px;
+    border-radius: 14px;
+    background-color: @badge;
+    vertical-align: 0.5;
 }
 
 element-text {
     text-color: inherit;
     vertical-align: 0.5;
+    markup: true;
 }

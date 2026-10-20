@@ -15,13 +15,13 @@
 
 set -euo pipefail
 
-HINT="Enter focus    Alt+1 close    Alt+2 float    Alt+3 pin    Alt+4 bring here"
+HINT="Enter focus  Alt+1 close  Alt+2 float  Alt+3 pin  Alt+4 bring here"
 
 if [ -z "${ROFI_RETV:-}" ]; then
     exec rofi -show windows -modes "windows:$0" \
         -kb-remove-word-forward "Control+Alt+d" \
         -kb-custom-1 "Alt+1" -kb-custom-2 "Alt+2" -kb-custom-3 "Alt+3" -kb-custom-4 "Alt+4" \
-        -theme-str 'window { width: 720px; } mainbox { children: [ inputbar, message, listview ]; }'
+        -theme-str 'window { width: 600px; } element-text { markup: true; } mainbox { children: [ inputbar, message, listview ]; }'
 fi
 
 # Hub launch: rice-hub already ran this tab (in parallel with the others) and
@@ -42,6 +42,13 @@ act() { # dispatcher-call with a %s for the window selector
     hyprctl dispatch "$(printf "$1" "$sel")" >/dev/null 2>&1 || true
 }
 
+# rows are shown as pango markup (the hub theme dims a second line), so & < > must be escaped
+esc() { # text, result variable name
+    local s=${1//&/\&amp;}
+    s=${s//</\&lt;}
+    printf -v "$2" '%s' "${s//>/\&gt;}"
+}
+
 list() {
     printf '\0prompt\x1f%s\n' $'\U000F0A31  Windows'
     printf '\0no-custom\x1ftrue\n\0use-hot-keys\x1ftrue\n\0keep-selection\x1ftrue\n'
@@ -60,6 +67,8 @@ list() {
             [ "$pinned" = true ] && flags+="  $pin_g"
             [ "$floating" = true ] && flags+="  $float_g"
             icon=${class,,}
+            esc "$class" class
+            esc "$title" title
             if [ "$focused" = true ]; then
                 printf '%-4s %s  ·  %s%s\0icon\x1f%s\x1finfo\x1f%s\x1factive\x1ftrue\n' \
                     "[$wsl]" "$class" "$title" "$flags" "$icon" "$addr"

@@ -19,7 +19,7 @@ poweroff=$'\U000F0425  Shut down'
 
 if [ -z "${ROFI_RETV:-}" ]; then
     exec rofi -show power -modes "power:$0" \
-        -theme-str 'window { width: 360px; } listview { lines: 5; } mainbox { children: [ inputbar, message, listview ]; }'
+        -theme-str 'window { width: 360px; } listview { lines: 5; } element-icon { size: 0px; padding: 0px; background-color: transparent; } mainbox { children: [ inputbar, message, listview ]; }'
 fi
 
 # run a command detached, with stdout off rofi's pipe, or rofi never closes
