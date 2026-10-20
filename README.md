@@ -240,26 +240,55 @@ To try an unstowed checkout: `RICE_BIN=$PWD/config-rice/.config/rice/bin ./confi
 
 ## Quick-settings panel
 
-`SUPER+N` or the top-right corner opens a card of toggle tiles (Wi-Fi,
-Bluetooth, do not disturb, night light, caffeine, game mode, the Mocha/Latte
-theme, and the power profile, which cycles TLP's power-saver / balanced /
-performance through `rice-power-profile` and `tlp-pd`). Click a tile to flip it;
-click outside the card or press `Esc` to close. It is eww:
-`config-eww/.config/eww/widgets/qs.yuck`, opened by `scripts/qs-ctl`, with the
-switches behind `rice-toggle`. No eww window exists while it is closed. `Esc`
-is a Hyprland bind that exists only while the panel is open
-(`config-hypr/.config/hypr/modules/qs.lua`).
+`SUPER+N` or the top-right corner opens a card in the top right: six toggle
+tiles (Wi-Fi, Bluetooth, do not disturb, night light, caffeine, game mode), the
+power profile and the theme as segmented controls (one click picks the value, no
+cycling: TLP's power-saver / balanced / performance through
+`rice-power-profile`, and Mocha or Latte through `rice-theme`), and a strip
+underneath. Click a tile to flip it; click outside the card or press `Esc` to
+close. It is eww: `config-eww/.config/eww/widgets/qs.yuck`, opened by
+`scripts/qs-ctl`, with the switches behind `rice-toggle`. No eww window exists
+while it is closed. `Esc` is a Hyprland bind that exists only while the panel is
+open (`config-hypr/.config/hypr/modules/qs.lua`).
+
+Right-click a tile: Wi-Fi and Bluetooth close the panel and open that list in the
+rofi hub (`rice-hub net` / `rice-hub bt`; those lists live only there, and a
+chevron marks the tiles that have it); do not disturb and Caffeine open the
+strip, which then shows their durations (30 min, 1 h, 2 h, until switched off),
+and the picked tile keeps a ring until the strip closes.
 
 A click shows at once. `scripts/qs-flip` first flips the tile on screen
 (`scripts/qs-opt`, about 20 ms) and keeps what was asked for in
 `$XDG_RUNTIME_DIR/rice/qs/pend/`, then makes the real change, then re-reads the
-state; `scripts/qs-rows` (also the 2 s poll) lays the pending clicks over the real
-state until the two agree, so the real state always has the last word and a
-change that never happens shows its real state again after a few seconds. The
-state checks and the Wi-Fi, Bluetooth and power-profile writes go over D-Bus
-(`busctl`) instead of `nmcli`, `bluetoothctl` and `tlpctl`, which is why a full
-read of all tiles takes about 20 ms instead of about 250; the old commands are
-the fallback. The Wi-Fi name comes from `iw` when it is installed.
+state; `scripts/qs-state` (also the 2 s poll) lays the pending clicks over the
+real state until the two agree, so the real state always has the last word and a
+change that never happens shows its real state again after a few seconds.
+`qs-state` returns one object — the three rows of toggle tiles, the power profile
+and the theme — and the panel binds to it (`qs_state`). The state checks and the
+Wi-Fi, Bluetooth and power-profile writes go over D-Bus (`busctl`) instead of
+`nmcli`, `bluetoothctl` and `tlpctl`, which is why a full read of all tiles takes
+about 20 ms instead of about 250; the old commands are the fallback. The Wi-Fi
+name comes from `iw` when it is installed.
+
+The card is translucent glass: `@glass` for the card and `@glass_tile` for the
+tiles, chips and segmented controls (about 60% opaque, one `@define-color` each
+in both theme palettes under `config-theming`), drawn over the same tri-colour
+gradient as the window border. Hyprland blurs the panel
+(`config-hypr/.config/hypr/modules/rules.lua`, `qs-panel` with `ignore_alpha`),
+and the transparent margins are left out of the blur. One place sets the level
+for this panel and for the notification one.
+
+Do not disturb and Caffeine can also run on a timer. `rice-dnd for 1800` turns
+DND on and schedules the end with a transient user timer (`systemd-run --user
+--unit=rice-dnd-timer`); `rice-dnd until` prints when it ends, and a plain
+`rice-dnd on` or `off` cancels it. `rice-caffeine for 1800` is the same, except
+its holder runs `sleep 1800` instead of `sleep infinity` so it ends by itself,
+and `rice-caffeine until` says when. The panel picks the power profile and the
+theme directly through `scripts/qs-set` (one `flock` per control: the pick shows
+on screen first and the real state has the last word), starts a DND or Caffeine
+timer through `scripts/qs-timer`, and opens the Wi-Fi or Bluetooth list in the
+rofi hub from a tile right-click through `scripts/qs-more` (`qs_sel` tells it
+which timers the strip is showing).
 
 All notifications are listed right under the panel (scrollable, with a Clear
 button): swaync's control centre, opened and closed together with the panel by

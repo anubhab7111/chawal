@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Stub of rice-toggle for tests. State in $STUB_STATE (a JSON array of tiles).
+#   ROWS_DELAY  seconds `rows` takes (the state checks)     default 0.15
+#   FLIP_DELAY  seconds `flip` takes (the real change)       default 0.5
+#   FLIP_FAIL   set: `flip` changes nothing
+set -u
+S=${STUB_STATE:?}
+case ${1:-} in
+rows)
+    sleep "${ROWS_DELAY:-0.15}"
+    jq -c '. as $t | [range(0; length; 2) | $t[.:.+2]]' "$S"
+    ;;
+flip)
+    id=${2:?}
+    echo "$(date +%s%N) flip-start $id" >>"$STUB_LOG"
+    sleep "${FLIP_DELAY:-0.5}"
+    if [ -z "${FLIP_FAIL:-}" ]; then
+        jq -c --arg id "$id" '
+            map(if .id == $id then
+                    if $id == "power" then
+                        ({"power-saver": "balanced", "balanced": "performance", "performance": "power-saver"}[.sub]) as $n
+                        | .sub = $n | .on = ($n != "balanced")
+                    elif $id == "theme" then .on = (.on | not) | .sub = (if .on then "Latte" else "Mocha" end)
+                    else .on = (.on | not) | .sub = (if .on then "On" else "Off" end) end
+                else . end)' "$S" >"$S.tmp" && mv -f "$S.tmp" "$S"
+    fi
+    echo "$(date +%s%N) flip-end $id" >>"$STUB_LOG"
+    ;;
+esac

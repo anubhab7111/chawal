@@ -6,7 +6,7 @@
 #   qs-ctl close       (scrim click, Esc, toggle)
 #   qs-ctl status      open | closed
 #
-# Open: fill the tiles first (so the first paint is not an empty card), map the
+# Open: fill the state first (so the first paint is not an empty card), map the
 # scrim, then the notification list (swaync's control centre), then the panel
 # above it, all on the focused monitor, and turn on the Escape bind
 # (rice.qs.escape_on, hypr modules/qs.lua: it exists only while the panel does).
@@ -20,6 +20,10 @@ CFG=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)
 RUN="${QS_RUN:-${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice/qs}" # QS_RUN: tests
 mkdir -p "$RUN"
 exec 8>"$RUN/lock"
+
+# the panel object qs-state returns, with nothing on it (first paint before the
+# poll: an empty card, never a stale one from the last time it was open)
+QS_STATE_EMPTY='{"rows":[],"power":{"enabled":false,"profile":""},"theme":"mocha"}'
 
 LOGF="${XDG_CACHE_HOME:-$HOME/.cache}/rice/qs-ctl.log"
 mkdir -p "$(dirname "$LOGF")"
@@ -53,10 +57,11 @@ focused_monitor() {
 
 cmd_open() {
     [ "$(state)" = open ] && return 0
-    local mon rows
+    local mon state
     mon=$(focused_monitor)
-    rows=$("$CFG/scripts/qs-rows" 2>/dev/null)
-    eww_ update "qs_rows=${rows:-[]}" qs_open=true
+    state=$("$CFG/scripts/qs-state" 2>/dev/null)
+    eww_ update "qs_state=${state:-$QS_STATE_EMPTY}" qs_open=true
+    eww_ update qs_sel= # the timers strip starts closed (a right-click opens it)
     # Stacking is map order, bottom to top: scrim, notification list, panel.
     # swaync's window is a transparent rectangle from the bar down to the bottom
     # of the list (its top margin is padding, not a layer margin) and takes
@@ -64,8 +69,7 @@ cmd_open() {
     # would be dead; the scrim must be below it or the list would be.
     eww_ open qs-scrim --screen "$mon"
     cc -op
-    local i
-    for i in 1 2 3 4 5 6 7 8 9 10 11 12; do # cc -op returns before the window is mapped
+    for _ in 1 2 3 4 5 6 7 8 9 10 11 12; do # cc -op returns before the window is mapped
         hyprctl layers 2>/dev/null | grep -q 'namespace: swaync-control-center' && break
         sleep 0.05
     done
@@ -81,6 +85,7 @@ cmd_close() {
     cc -cp
     eww_ close qs-panel qs-scrim
     eww_ update qs_open=false
+    eww_ update qs_sel= # reset the strip so the next open starts on the hint
 }
 
 case ${1:-} in

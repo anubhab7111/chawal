@@ -6,7 +6,7 @@
 #   2. The change itself (rice-toggle flip), one at a time per tile, so two
 #      quick clicks are applied in order.
 #   3. Refresh from the real state. The pending entry from step 1 ends when the
-#      two agree (see qs-rows), so the real state always has the last word.
+#      two agree (see qs-state), so the real state always has the last word.
 BIN="${RICE_BIN:-$HOME/.config/rice/bin}"
 CFG=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)
 RUN="${QS_RUN:-${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice/qs}" # QS_RUN: tests
@@ -19,4 +19,4 @@ mkdir -p "$RUN"
 exec 9>"$RUN/flip-$ID.lock"
 flock 9
 "$BIN/rice-toggle" flip "$ID"
-"$EWW" --config "$CFG" update "qs_rows=$("$CFG/scripts/qs-rows")" >/dev/null 2>&1
+"$EWW" --config "$CFG" update "qs_state=$("$CFG/scripts/qs-state")" >/dev/null 2>&1

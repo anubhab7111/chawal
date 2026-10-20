@@ -3,24 +3,73 @@
 # still land in the control center while it is on).
 #
 #   rice-dnd on|off|toggle|status
+#   rice-dnd for SECONDS   DND on now, then off again after SECONDS
+#   rice-dnd until         when a pending timer ends, as HH:MM (else nothing)
+#   rice-dnd expire        what that timer runs; not for direct use
 #   rice-dnd hold KEY      turn DND on for KEY (e.g. gamemode), remembering
 #                          whether it was already on
-#   rice-dnd release KEY   undo a hold: turn DND off only if the hold turned it on
+#   rice-dnd release KEY   undo a hold: turn DND off only if it turned it on
+#
+# A timed "for" end is a transient user timer (systemd-run) that comes back to
+# `expire`. Its end time lives in $RUN/dnd-until, so a plain on/off (or another
+# `for`) can replace the timer and `until` can say when it ends.
 
 set -euo pipefail
 
 RUN="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice"
+SELF=$(readlink -f "$0")
 
 # -sw: do not wait when swaync is not running yet (answers "false" / fails fast)
 is_on() { [ "$(swaync-client -D -sw 2>/dev/null)" = true ]; }
 on() { is_on || swaync-client -dn -sw >/dev/null; }
 off() { ! is_on || swaync-client -df -sw >/dev/null; }
 
+# the scheduled end, if any, is dropped by the next plain click too
+cancel_timer() {
+    systemctl --user stop rice-dnd-timer.timer rice-dnd-timer.service 2>/dev/null || true
+    rm -f "$RUN/dnd-until"
+}
+
+cmd_on() { cancel_timer; on; }
+cmd_off() { cancel_timer; off; }
+
+for_() { # SECONDS
+    local secs=${1:?usage: rice-dnd for SECONDS}
+    mkdir -p "$RUN"
+    cancel_timer
+    printf '%s\n' "$(( $(date +%s) + secs ))" >"$RUN/dnd-until"
+    on
+    systemd-run --user --quiet --collect --unit=rice-dnd-timer --on-active="$secs" "$SELF" expire
+}
+
+until_() { # when a pending timer ends, HH:MM local time
+    local u
+    [ -f "$RUN/dnd-until" ] || return 0
+    u=$(cat "$RUN/dnd-until" 2>/dev/null) || return 0
+    [ -n "$u" ] || return 0
+    date -d "@$u" +%H:%M
+}
+
+expire() { # what the timer runs
+    local u=""
+    if [ -f "$RUN/dnd-until" ]; then
+        u=$(cat "$RUN/dnd-until" 2>/dev/null) || u=""
+    fi
+    rm -f "$RUN/dnd-until" # always: a newer for, or a manual off, wins
+    [ -n "$u" ] || return 0
+    [ "$u" -le "$(date +%s)" ] || return 0
+    [ -f "$RUN/gamemode" ] && return 0 # game mode holds DND on
+    off
+}
+
 case ${1:-} in
-on) on ;;
-off) off ;;
-toggle) if is_on; then off; else on; fi ;;
+on) cmd_on ;;
+off) cmd_off ;;
+toggle) if is_on; then cmd_off; else cmd_on; fi ;;
 status) if is_on; then echo on; else echo off; fi ;;
+for) for_ "${2:?usage: rice-dnd for SECONDS}" ;;
+until) until_ ;;
+expire) expire ;;
 hold)
     key=${2:?usage: rice-dnd hold KEY}
     mkdir -p "$RUN"
@@ -36,7 +85,7 @@ release)
     fi
     ;;
 *)
-    sed -n '4,9s/^# \{0,1\}//p' "$0" >&2
+    sed -n '4,11s/^# \{0,1\}//p' "$0" >&2
     exit 2
     ;;
 esac

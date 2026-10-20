@@ -1,7 +1,7 @@
-;; Quick-settings panel: a card in the top-right corner with a grid of toggle
-;; tiles (Wi-Fi, Bluetooth, DND, night light, caffeine, game mode, power
-;; profile, theme). Sliders, the media card and the network lists come later
-;; (P30, P31).
+;; Quick-settings panel: a card in the top-right corner with six toggle tiles,
+;; the power profile and the theme as segmented controls (one click picks the
+;; value, no cycling), and a strip at the bottom whose hint or timers it shows.
+;; Sliders, the media card and the network lists live elsewhere.
 ;;
 ;; Two windows, both created only while the panel is open (scripts/qs-ctl):
 ;;   qs-scrim   transparent, covers the screen under the panel; a click on it
@@ -14,20 +14,24 @@
 ;; stays 1 px tall): the window always has its content size, and the
 ;; compositor's layer animation (rules.lua) slides it in.
 ;;
-;; The tile states come from `rice-toggle rows`, polled every 2 s while the
-;; panel is open (:run-while), pre-filled by qs-ctl on open and refreshed at
-;; once after a click (qs-flip). Nothing runs while it is closed.
+;; The state comes from `rice-toggle rows` through scripts/qs-state, polled every
+;; 2 s while the panel is open (:run-while), pre-filled by qs-ctl on open and
+;; refreshed at once after a click. The strip's stack is set by qs_sel (a tile
+;; right-click through scripts/qs-more picks the timers whose durations show);
+;; qs-ctl resets qs_sel on open and close, so the stack's selected child is never
+;; set while the window is being built (GTK drops it then).
 ;;
 ;; eww gives every window a CSS class equal to its name ("qs-scrim",
 ;; "qs-panel"); the widget classes are qs-dim / qs-card / qs-tile... so that
 ;; no card rule paints the window itself (see eww.css).
 
 (defvar qs_open false)
+(defvar qs_sel "") ;; "dnd" | "caffeine" | "": whose timers the strip shows
 
-(defpoll qs_rows :interval "2s"
-                 :initial "[]"
-                 :run-while qs_open
-  "scripts/qs-rows")
+(defpoll qs_state :interval "2s"
+                   :initial "{\"rows\":[],\"power\":{\"enabled\":false,\"profile\":\"\"},\"theme\":\"mocha\"}"
+                   :run-while qs_open
+  "scripts/qs-state")
 
 (defwindow qs-scrim
   :monitor 0
@@ -50,25 +54,77 @@
   :geometry (geometry :anchor "top right" :x "8px" :y "8px" :width "360px")
   (qs-card))
 
-;; qs-ring is the tri-colour border: a gradient box with 2 px padding around
-;; the card (GTK3 CSS cannot round a gradient border-image).
+;; One glass box: a two-layer background (fill over a gradient) in a 2 px
+;; transparent border, so the card can be translucent (a gradient ring box with
+;; an opaque card inside cannot: the gradient shows through the card).
 (defwidget qs-card []
-  (box :class "qs-ring" :orientation "v" :space-evenly false
-    (box :class "qs-card" :orientation "v" :space-evenly false
-      (label :class "qs-title" :halign "start" :text "Quick settings")
-      (for row in qs_rows
+  (box :class "qs-card" :orientation "v" :space-evenly false
+    (label :class "qs-title" :halign "start" :text "Quick settings")
+    ;; the rows get their own box: a `for` appends its children after the static
+    ;; siblings of the box it is in, so the segmented controls would otherwise
+    ;; render above the grid
+    (box :class "qs-rows" :orientation "v" :space-evenly false
+      (for row in {qs_state.rows}
         (box :class "qs-row" :orientation "h" :space-evenly true
           (for tile in row
-            (qs-tile :t tile)))))))
+            (qs-tile :t tile)))))
+    (box :class "qs-segs" :orientation "v" :space-evenly false
+      (box :class "qs-seg-row" :orientation "h" :space-evenly false
+        (label :class "qs-seg-name" :text "Power")
+        (box :class "qs-seg ${qs_state.power.enabled ? '' : 'disabled'}"
+             :orientation "h" :space-evenly true :hexpand true
+          (qs-seg-btn :text "Saver"
+                      :cmd {qs_state.power.enabled ? "scripts/qs-set power saver" : ""}
+                      :active {qs_state.power.profile == "power-saver"} :grad "qs-seg-power")
+          (qs-seg-btn :text "Balanced"
+                      :cmd {qs_state.power.enabled ? "scripts/qs-set power balanced" : ""}
+                      :active {qs_state.power.profile == "balanced"} :grad "qs-seg-power")
+          (qs-seg-btn :text "Performance"
+                      :cmd {qs_state.power.enabled ? "scripts/qs-set power performance" : ""}
+                      :active {qs_state.power.profile == "performance"} :grad "qs-seg-power")))
+      (box :class "qs-seg-row" :orientation "h" :space-evenly false
+        (label :class "qs-seg-name" :text "Theme")
+        (box :class "qs-seg" :orientation "h" :space-evenly true :hexpand true
+          (qs-seg-btn :text "Mocha" :cmd "scripts/qs-set theme mocha"
+                      :active {qs_state.theme == "mocha"} :grad "qs-seg-theme")
+          (qs-seg-btn :text "Latte" :cmd "scripts/qs-set theme latte"
+                      :active {qs_state.theme == "latte"} :grad "qs-seg-theme"))))
+    (qs-strip)))
+
+(defwidget qs-seg-btn [text cmd active grad]
+  (eventbox :cursor "pointer" :onclick cmd
+    (label :class "qs-seg-btn ${active ? 'active ' + grad : ''}" :text text)))
 
 (defwidget qs-tile [t]
   (eventbox :cursor {t.enabled ? "pointer" : "default"}
             :onclick {t.enabled ? "scripts/qs-flip ${t.id}" : ""}
-    (box :class "qs-tile qs-${t.id} ${t.on ? 'on' : 'off'}${t.enabled ? '' : ' disabled'}"
+            :onrightclick {t.more ? "scripts/qs-more ${t.id}" : ""}
+    (box :class "qs-tile qs-${t.id} ${t.on ? 'on' : 'off'}${t.enabled ? '' : ' disabled'}${qs_sel == t.id ? ' picked' : ''}"
          :orientation "h"
          :space-evenly false
-      (label :class "qs-tile-icon" :text {t.icon})
-      (box :class "qs-tile-text" :orientation "v" :valign "center" :halign "start"
+      (box :class "qs-badge" :valign "center" :halign "center"
+        (label :class "qs-tile-icon" :text {t.icon}))
+      (box :class "qs-tile-text" :orientation "v" :valign "center" :halign "fill"
            :hexpand true :space-evenly false
-        (label :class "qs-tile-name" :halign "start" :limit-width 14 :text {t.label})
-        (label :class "qs-tile-sub" :halign "start" :limit-width 14 :text {t.sub})))))
+        (label :class "qs-tile-name" :halign "start" :limit-width 15 :text {t.label})
+        (box :class "qs-sub-row" :orientation "h" :space-evenly false
+          (label :class "qs-tile-sub" :halign "start" :hexpand true :limit-width 12 :text {t.sub})
+          (label :class "qs-chev" :visible {t.more ?: false} :text "󰅂"))))))
+
+;; The strip: child 0 the hint, child 1 how long for the picked control. The
+;; stack's selection follows qs_sel (right-click on do not disturb or Caffeine).
+(defwidget qs-strip []
+  (box :class "qs-strip" :orientation "h" :space-evenly false
+    (stack :selected {(qs_sel == "dnd" || qs_sel == "caffeine") ? 1 : 0}
+           :transition "crossfade" :same-size true :hexpand true
+      (label :class "qs-hint" :halign "start" :text "Click to switch  ·  right-click for more")
+      (box :class "qs-opts" :orientation "h" :space-evenly false
+        (label :class "qs-opts-name" :text "For")
+        (eventbox :cursor "pointer" :onclick "scripts/qs-timer ${qs_sel} 1800"
+          (label :class "qs-chip" :text "30 min"))
+        (eventbox :cursor "pointer" :onclick "scripts/qs-timer ${qs_sel} 3600"
+          (label :class "qs-chip" :text "1 h"))
+        (eventbox :cursor "pointer" :onclick "scripts/qs-timer ${qs_sel} 7200"
+          (label :class "qs-chip" :text "2 h"))
+        (eventbox :cursor "pointer" :onclick "scripts/qs-timer ${qs_sel} 0"
+          (label :class "qs-chip" :text "Until off"))))))

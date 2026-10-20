@@ -11,7 +11,8 @@
 # performance; on = not balanced; disabled when tlp-pd doesn't answer). theme
 # is on while Latte is the active theme. Each tile is
 #   {"id","icon","label","sub","on","enabled"}
-# where sub is the small line under the label (the network name for Wi-Fi).
+# where sub is the small line under the label (the network name for Wi-Fi;
+# `Until HH:MM` while a Do-not-disturb or Caffeine timer runs).
 #
 # Backends: nmcli, bluetoothctl, rice-dnd, rice-nightlight, rice-caffeine, rice-power-profile and
 # rice-gamemode. RICE_BIN overrides where those live (tests).
@@ -88,12 +89,25 @@ on() { # id: succeed when the switch is on
 }
 
 sub() { # id on?: the small line under the label
+    local t
     case $1 in
     wifi)
         if [ "$2" = 1 ]; then
             local s
             s=$(wifi_ssid)
             printf '%s' "${s:-On}"
+        else printf Off; fi
+        ;;
+    dnd)
+        if [ "$2" = 1 ]; then
+            t=$("$BIN/rice-dnd" until 2>/dev/null)
+            if [ -n "$t" ]; then printf 'Until %s' "$t"; else printf On; fi
+        else printf Off; fi
+        ;;
+    caffeine)
+        if [ "$2" = 1 ]; then
+            t=$("$BIN/rice-caffeine" until 2>/dev/null)
+            if [ -n "$t" ]; then printf 'Until %s' "$t"; else printf On; fi
         else printf Off; fi
         ;;
     power) "$BIN/rice-power-profile" get 2>/dev/null || printf 'Unavailable' ;;

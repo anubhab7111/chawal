@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# The quick-settings panel's state, for eww (widgets/qs.yuck).
+#
+# Reads the tile rows (`rice-toggle rows`), lays the clicks that have not landed
+# yet over them (see qs-lib.sh and qs-opt), then derives the one object the panel
+# binds to:
+#
+#   {"rows":  [[tile, tile], [tile, tile], [tile, tile]],
+#    "power": {"enabled": true, "profile": "performance"},
+#    "theme": "mocha" | "latte"}
+#
+# rows is the six toggles, two per row (Wi-Fi, Bluetooth / do not disturb, night
+# light / Caffeine, game mode); a tile carries "more": true when a right-click
+# does something. power and theme are the segmented controls under the grid.
+#
+# A click flips its control on screen at once (qs-opt, qs-set, qs-timer) and
+# records the state it asked for in $RUN/pend/ID. Until the real state agrees,
+# or the entry runs out, the control keeps the clicked state. The overlay runs
+# BEFORE the derivation, so a pending click on a segment shows at once too. What
+# is returned is also kept in $RUN/state.json: it is what is on screen, and
+# qs-opt flips the next click from it.
+
+set -u
+
+BIN="${RICE_BIN:-$HOME/.config/rice/bin}"
+RUN="${QS_RUN:-${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice/qs}" # QS_RUN: tests
+mkdir -p "$RUN/pend"
+
+real=$("$BIN/rice-toggle" rows) || exit 1
+[ -n "$real" ] || exit 1
+
+out=$real
+shopt -s nullglob
+files=("$RUN"/pend/*)
+if ((${#files[@]})); then # (nothing pending is the usual case: no extra work then)
+    # the pending clicks as one JSON object keyed by tile id; read after the real
+    # state, so a click that came in meanwhile is seen. A half-written entry is skipped.
+    pend=$(for f in "${files[@]}"; do
+        printf '{"%s":%s}\n' "${f##*/}" "$(cat "$f" 2>/dev/null)"
+    done | jq -s -c 'add // {}' 2>/dev/null)
+    [ -n "$pend" ] || pend='{}'
+
+    now=$(date +%s%3N)
+    # line 1: the rows to show; the lines after it: pending entries that are over
+    # (the real state agrees, or they ran out)
+    res=$(jq -r --argjson pend "$pend" --argjson now "$now" '
+        [ .[] | [ .[] | . as $t | ($pend[$t.id]) as $p
+            | (if $p == null or ($t.enabled | not) then {t: $t, drop: false}
+               elif ($p.exp <= $now) or ($p.on == $t.on and ($t.id != "power" or $p.sub == $t.sub))
+               then {t: $t, drop: true}
+               else {t: ($t + {on: $p.on, sub: $p.sub}), drop: false} end)
+            + {id: $t.id} ] ]
+        | (map(map(.t)) | tojson), (.[][] | select(.drop) | .id)' <<<"$real") || exit 1
+
+    {
+        IFS= read -r out
+        while IFS= read -r id; do rm -f "$RUN/pend/$id"; done
+    } <<<"$res"
+    [ -n "$out" ] || exit 1
+fi
+
+# Derive the panel object from the (overlaid) rows. power and theme are tiles
+# like the others in the rows, but the panel shows them as segmented controls.
+state=$(jq -c '
+    . as $rows | ($rows | add) as $tiles
+    | {rows: ($rows[0:3]
+              | map(map(. + {more: (.id == "wifi" or .id == "bluetooth"
+                                   or .id == "dnd" or .id == "caffeine")}))),
+       power: ($tiles | map(select(.id == "power"))[0] | {enabled: .enabled, profile: .sub}),
+       theme: ($tiles | map(select(.id == "theme"))[0] | if .on then "latte" else "mocha" end)}' \
+    <<<"$out") || exit 1
+
+printf '%s\n' "$state" >"$RUN/state.json.$$" && mv -f "$RUN/state.json.$$" "$RUN/state.json"
+printf '%s\n' "$state"

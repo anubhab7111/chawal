@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# qs-timer ID SECONDS: a chip in the panel's timers strip was clicked.
+#
+#   1. qs_pend: the tile says Until HH:MM (or On for "until off") at once.
+#   2. The real timer, one at a time per id (flock): rice-dnd for or
+#      rice-caffeine for, or a plain on for "until off".
+#   3. Refresh, then close the strip (qs_sel=).
+#
+#   qs-timer dnd|caffeine SECONDS   (0 = until switched off)
+
+set -u
+
+BIN="${RICE_BIN:-$HOME/.config/rice/bin}"                       # RICE_BIN: tests
+CFG=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)
+RUN="${QS_RUN:-${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice/qs}" # QS_RUN: tests
+EWW=${EWW:-eww}                                                 # EWW: tests
+
+usage() { sed -n '9s/^# \{0,1\}//p' "$0" >&2; exit 2; }
+
+id=${1:-}
+secs=${2:-}
+case $id in dnd | caffeine) ;; *) usage ;; esac
+case $secs in '' | *[!0-9]*) usage ;; esac
+
+if [ "$secs" = 0 ]; then
+    sub=On # "until off": there is no end time to show
+else
+    sub="Until $(date -d "@$(( $(date +%s) + secs ))" +%H:%M)"
+fi
+
+# shellcheck disable=SC1091  # resolved through $CFG at run time
+. "$CFG/scripts/qs-lib.sh"
+qs_pend "$id" true "$sub" "${QS_PEND_MS:-4000}"
+
+# the timer itself, one at a time per id so two quick chips are applied in order
+mkdir -p "$RUN"
+exec 9>"$RUN/flip-$id.lock"
+flock 9
+
+if [ "$id" = dnd ]; then holder=rice-dnd; else holder=rice-caffeine; fi
+if [ "$secs" = 0 ]; then
+    "$BIN/$holder" on
+else
+    "$BIN/$holder" for "$secs"
+fi
+
+"$EWW" --config "$CFG" update "qs_state=$("$CFG/scripts/qs-state")" >/dev/null 2>&1
+"$EWW" --config "$CFG" update qs_sel= >/dev/null 2>&1

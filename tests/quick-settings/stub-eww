@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Stub of eww for tests.
+#   --config DIR update qs_state=... log it with a nanosecond timestamp ($STUB_EWW_LOG)
+#   --config DIR update qs_sel=...   remember the value ($STUB_SEL)
+#   --config DIR get qs_sel          print the remembered value
+# Every update argument is also logged to $STUB_EWW_ALL when that is set.
+if [ "${1:-}" = --config ]; then shift 2; fi
+case ${1:-} in
+get)
+    [ "${2:-}" = qs_sel ] && cat "${STUB_SEL:-/dev/null}" 2>/dev/null
+    ;;
+update)
+    shift
+    for a in "$@"; do
+        case $a in
+        qs_state=*) printf '%s update %s\n' "$(date +%s%N)" "${a#qs_state=}" >>"$STUB_EWW_LOG" ;;
+        qs_sel=*) printf '%s' "${a#qs_sel=}" >"${STUB_SEL:-/dev/null}" ;;
+        esac
+        [ -n "${STUB_EWW_ALL:-}" ] && printf '%s %s\n' "$(date +%s%N)" "$a" >>"$STUB_EWW_ALL"
+    done
+    ;;
+esac
+exit 0
