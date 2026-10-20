@@ -310,6 +310,13 @@ the notification actions stay gradient pills, and a critical notification keeps
 its red edge. After a config change run `swaync-client -R`, after a stylesheet
 change `swaync-client -rs` (and `hyprctl reload` for the layer rules).
 
+The blur needs `backdrop-filter: blur()` in `style.css` (on `.control-center` and
+`.notification`). swaync is GTK4, and GTK 4.24 tells Hyprland itself what to blur
+(the `ext-background-effect-v1` protocol); Hyprland 0.56 trusts that over the
+layer rule, so without a blur node in the widget tree swaync gets no blur at all
+(Hyprland issue 16508). Hyprland still does the real blur, with the size and
+passes from `look.lua`. The eww panels are GTK3 and only need the layer rule.
+
 Do not disturb, night light and caffeine are only here: Waybar has no bell,
 moon or caffeine button (night light still switches itself by the sun through
 darkman), and Waybar has no tray, so the nm-applet and blueman helpers (Wi-Fi
