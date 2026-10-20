@@ -239,7 +239,7 @@ Look: the theme is `config-rofi/.config/rofi/themes/rice.rasi`, coloured from
 rofi has no live preview pane and no animation system; the tabs use the message
 bar for status and thumbnails (Clip) instead.
 
-The look is glass, about 75% opaque (the `glass` token in each theme's
+The look is glass, about 50% opaque, the same flat fill and hairline edge as the quick-settings card (the `glass` token in each theme's
 `rofi-colors.rasi`; Hyprland blurs behind it): search first, underline tabs, and
 every row a card with a round icon badge, the selected one the gradient pill. The
 hub is 900 px wide (the Wi-Fi, Bluetooth, Windows and Clip windows 600 px). App
@@ -293,7 +293,7 @@ about 20 ms instead of about 250; the old commands are the fallback. The Wi-Fi
 name comes from `iw` when it is installed.
 
 The card is translucent glass: `@glass` for the card and `@glass_tile` for the
-tiles, chips and segmented controls (about 60% opaque, one `@define-color` each
+tiles, chips and segmented controls (about 50% opaque, one `@define-color` each
 in both theme palettes under `config-theming`), with a thin light edge and no
 gradient behind the fill (a gradient there would show through the glass). The
 notification list below it is exactly as wide (`control-center-width` in
@@ -323,7 +323,7 @@ panel height + margins; change it if the panel's height changes). Times read as
 "1 min ago" (`relative-timestamps`), a message that carries a verification code
 gets a COPY action for the code (`notification-2fa-action`), and an empty list
 says "All caught up" (`text-empty`). The list and the pop-up toasts are glass like
-the quick-settings card but more opaque (about 82%: `@glass_nc`, `@glass_nc_tile` and
+the quick-settings card (about 50%: `@glass_nc`, `@glass_nc_tile` and
 `@glass_pop`, one `@define-color` each in both theme palettes; the blur strength is
 Hyprland's global `decoration.blur` in `look.lua`), and Hyprland blurs them
 (`swaync-control-center` and `swaync-notification-window` in `rules.lua`, with

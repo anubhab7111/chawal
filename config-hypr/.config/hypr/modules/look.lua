@@ -39,8 +39,8 @@ hl.config({
 
         blur = {
             enabled = true,
-            -- a stronger frosted look for the glass panels (was size 10, 2 passes)
-            size = 12,
+            -- a stronger frosted look for the glass panels (was size 10, 2 passes; now 16, 3 passes)
+            size = 16,
             passes = 3,
             ignore_opacity = true,
             new_optimizations = true,
