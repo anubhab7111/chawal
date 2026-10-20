@@ -290,14 +290,26 @@ timer through `scripts/qs-timer`, and opens the Wi-Fi or Bluetooth list in the
 rofi hub from a tile right-click through `scripts/qs-more` (`qs_sel` tells it
 which timers the strip is showing).
 
-All notifications are listed right under the panel (scrollable, with a Clear
-button): swaync's control centre, opened and closed together with the panel by
-`qs-ctl` and positioned just below it (`control-center-margin-top` in
-`config-swaync/.config/swaync/config.json` = panel height + margins; change it if
-the panel's height changes). Do not disturb, night light and caffeine are only
-here: Waybar has no bell, moon or caffeine button (night light still switches
-itself by the sun through darkman), and Waybar has no tray, so the nm-applet and
-blueman helpers (Wi-Fi password and pairing prompts) run without an icon.
+All notifications are listed in one tidy list right under the panel (not grouped
+by app, scrollable, with a Clear button): swaync's control centre, opened and
+closed together with the panel by `qs-ctl` and positioned just below it
+(`control-center-margin-top` in `config-swaync/.config/swaync/config.json` =
+panel height + margins; change it if the panel's height changes). Times read as
+"1 min ago" (`relative-timestamps`), a message that carries a verification code
+gets a COPY action for the code (`notification-2fa-action`), and an empty list
+says "All caught up" (`text-empty`). The list and the pop-up toasts are the same
+glass as the quick-settings card (`@glass`, `@glass_tile` and `@glass_pop`, one
+`@define-color` each in both theme palettes), and Hyprland blurs them
+(`swaync-control-center` and `swaync-notification-window` in `rules.lua`, with
+`ignore_alpha` so the transparent margins are not blurred). The Clear button and
+the notification actions stay gradient pills, and a critical notification keeps
+its red ring. After a config change run `swaync-client -R`, after a stylesheet
+change `swaync-client -rs` (and `hyprctl reload` for the layer rules).
+
+Do not disturb, night light and caffeine are only here: Waybar has no bell,
+moon or caffeine button (night light still switches itself by the sun through
+darkman), and Waybar has no tray, so the nm-applet and blueman helpers (Wi-Fi
+password and pairing prompts) run without an icon.
 
 Battery warnings come from `rice-batsignal` (20% and 10%, through swaync). It
 does not start while the battery reads 0% and is not discharging, so a stuck
