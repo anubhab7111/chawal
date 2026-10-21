@@ -83,6 +83,7 @@ directly under `$HOME`.
 - `config-hypr` — Hyprland (Lua: `hyprland.lua` plus `modules/`), hyprlock, hypridle
 - `config-waybar` — bar
 - `config-swaync` — notifications and the control centre
+- `config-systemd` — a drop-in for `swaync.service` (the toast blur when D-Bus restarts swaync)
 - `config-rofi` — launcher and the control hub theme (`config-wofi` is a leftover, unused)
 - `config-wlogout` — the power grid (`layout`, `style.css`; its icons are per theme)
 - `config-eww` — quick-settings panel and the right-edge gauges
@@ -342,10 +343,13 @@ backdrop, so GTK's region for them is empty and they were never blurred. So
 `autostart.lua` starts swaync with
 `GDK_WAYLAND_DISABLE=ext_background_effect_manager_v1`: GTK does not use the
 protocol, and the layer rules blur the list and the toasts, the same way they
-blur the eww panels (GTK3). The `backdrop-filter` left on `.control-center` is a
-fallback for a swaync started without that variable (D-Bus activation, after a
-crash): then the list is still blurred, the toasts are not. To restart swaync by
-hand: `pkill -x swaync; hyprctl eval "hl.exec_cmd('GDK_WAYLAND_DISABLE=ext_background_effect_manager_v1 swaync')"`.
+blur the eww panels (GTK3). When swaync crashes, D-Bus starts it again through
+`swaync.service`, without autostart's environment, so `config-systemd` adds a
+drop-in (`swaync.service.d/blur.conf`) that sets the same variable there (after
+`./stow.sh`, run `systemctl --user daemon-reload` once). The `backdrop-filter`
+left on `.control-center` is a fallback for a swaync started any other way: then
+the list is still blurred, the toasts are not. To restart swaync by hand:
+`pkill -x swaync; hyprctl eval "hl.exec_cmd('GDK_WAYLAND_DISABLE=ext_background_effect_manager_v1 swaync')"`.
 
 Do not disturb, night light and caffeine are only here: Waybar has no bell,
 moon or caffeine button (night light still switches itself by the sun through

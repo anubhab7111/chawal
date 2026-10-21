@@ -26,7 +26,8 @@
    from backdrop-filter nodes, and Hyprland 0.56 trusts that over the rule. The
    toasts can't use it: swaync draws each one inside opacity wrappers (fade-in,
    swipe to dismiss), which hide the backdrop, so their region comes out empty.
-   autostart.lua starts swaync with GDK_WAYLAND_DISABLE=
+   autostart.lua (and, for D-Bus activation, the swaync.service drop-in in
+   config-systemd) starts swaync with GDK_WAYLAND_DISABLE=
    ext_background_effect_manager_v1, and the layer rules blur both windows. */
 .notification {
     background-color: @glass_pop;
@@ -97,9 +98,9 @@
 /* ---- control center (the list under the quick-settings card) ---- */
 /* The same flat glass as the quick-settings card above it. */
 .control-center {
-    /* Fallback for a swaync started without GDK_WAYLAND_DISABLE (by D-Bus
-       activation): then GTK's region is what Hyprland blurs, and this box is in
-       it. See .notification. */
+    /* Fallback for a swaync started without GDK_WAYLAND_DISABLE (by hand from
+       a terminal, say): then GTK's region is what Hyprland blurs, and this box
+       is in it. See .notification. */
     backdrop-filter: blur(20px);
     background-color: @glass_nc;
     color: @text;
