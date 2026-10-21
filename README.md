@@ -397,15 +397,17 @@ closes them; no window exists while a gauge is hidden.
 
 ## Video
 
-[![chawal: a 24-second tour](assets/chawal-preview.webp)](assets/chawal.mp4)
+[![chawal: a 31-second tour](assets/chawal-preview.webp)](assets/chawal.mp4)
 
-A 24-second tour with sound: [`assets/chawal.mp4`](assets/chawal.mp4). The
-animation above is the same cut without the audio.
+A 31-second tour with quiet UI sounds: [`assets/chawal.mp4`](assets/chawal.mp4).
+The animation above is the same cut without sound.
 - Three terminals tile in: Neovim on `look.lua`, fastfetch and yazi.
 - The rofi hub opens and searches.
-- The top-right corner opens the quick-settings panel, whose Theme control turns everything from Mocha to Latte.
-- It ends on the wlogout power grid.
+- The top-right corner opens the quick-settings panel, whose Theme control turns everything from Mocha to Latte, and back.
+- The wlogout grid opens, focus walks across its five tiles, and it closes.
+- hyprlock locks the screen and unlocks it again.
 
-The clips are real screen recordings (`wf-recorder`). The Wi-Fi name and the
-battery level are stand-ins painted in afterwards. The fastfetch user line comes
-from a temporary fastfetch config used for the recording.
+The clips are real screen recordings (`wf-recorder`), with no text added. The
+Wi-Fi name and the battery level (in the bar and on the lock screen) are
+stand-ins painted in afterwards. The fastfetch user line comes from a temporary
+fastfetch config used for the recording.
