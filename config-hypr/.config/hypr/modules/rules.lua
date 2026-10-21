@@ -102,6 +102,8 @@ layer("logout_dialog", { blur = true, ignore_alpha = 0.5, animation = "popin 80%
 
 -- The notification list and the toasts are translucent glass now; ignore_alpha blur
 -- only the filled part, not the fully transparent window margins around it.
+-- These rules reach swaync only because autostart.lua turns GTK's own blur
+-- protocol off for it (config-swaync style.css says why).
 layer("swaync-notification-window", { blur = true, ignore_alpha = 0.3, animation = "slide right" })
 layer("swaync-control-center", { blur = true, ignore_alpha = 0.3, animation = "slide top" })
 

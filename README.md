@@ -333,12 +333,19 @@ the notification actions stay gradient pills, and a critical notification keeps
 its red edge. After a config change run `swaync-client -R`, after a stylesheet
 change `swaync-client -rs` (and `hyprctl reload` for the layer rules).
 
-The blur needs `backdrop-filter: blur()` in `style.css` (on `.control-center` and
-`.notification`). swaync is GTK4, and GTK 4.24 tells Hyprland itself what to blur
-(the `ext-background-effect-v1` protocol); Hyprland 0.56 trusts that over the
-layer rule, so without a blur node in the widget tree swaync gets no blur at all
-(Hyprland issue 16508). Hyprland still does the real blur, with the size and
-passes from `look.lua`. The eww panels are GTK3 and only need the layer rule.
+swaync is GTK4, and GTK 4.24 tells Hyprland itself what to blur (the
+`ext-background-effect-v1` protocol, a region built from `backdrop-filter` nodes);
+Hyprland 0.56 trusts that over the layer rule (Hyprland issue 16508). That works
+for the control centre but not for the pop-up toasts: swaync draws each toast
+inside opacity wrappers (the fade-in and the swipe to dismiss), which hide the
+backdrop, so GTK's region for them is empty and they were never blurred. So
+`autostart.lua` starts swaync with
+`GDK_WAYLAND_DISABLE=ext_background_effect_manager_v1`: GTK does not use the
+protocol, and the layer rules blur the list and the toasts, the same way they
+blur the eww panels (GTK3). The `backdrop-filter` left on `.control-center` is a
+fallback for a swaync started without that variable (D-Bus activation, after a
+crash): then the list is still blurred, the toasts are not. To restart swaync by
+hand: `pkill -x swaync; hyprctl eval "hl.exec_cmd('GDK_WAYLAND_DISABLE=ext_background_effect_manager_v1 swaync')"`.
 
 Do not disturb, night light and caffeine are only here: Waybar has no bell,
 moon or caffeine button (night light still switches itself by the sun through

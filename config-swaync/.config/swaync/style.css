@@ -20,14 +20,15 @@
 }
 
 /* Flat glass: a translucent fill with a thin light edge (no gradient: one under
-   the fill would show through it); critical gets a solid red edge. */
+   the fill would show through it); critical gets a solid red edge.
+   Blur: Hyprland's layer rule (rules.lua). GTK 4.24 (swaync 0.12 is GTK4) would
+   otherwise send Hyprland its own blur region (ext-background-effect), built
+   from backdrop-filter nodes, and Hyprland 0.56 trusts that over the rule. The
+   toasts can't use it: swaync draws each one inside opacity wrappers (fade-in,
+   swipe to dismiss), which hide the backdrop, so their region comes out empty.
+   autostart.lua starts swaync with GDK_WAYLAND_DISABLE=
+   ext_background_effect_manager_v1, and the layer rules blur both windows. */
 .notification {
-    /* GTK 4.24 (swaync 0.12 is GTK4) tells Hyprland what to blur through the
-       ext-background-effect protocol, and Hyprland 0.56 then ignores its own
-       layerrule blur: no blur node in the widget tree = an empty blur region =
-       no blur. backdrop-filter draws that node; Hyprland does the real blur
-       (with its own size and passes) behind exactly this shape. */
-    backdrop-filter: blur(20px);
     background-color: @glass_pop;
     color: @text;
     border: 1px solid alpha(@text, 0.18);
@@ -96,7 +97,10 @@
 /* ---- control center (the list under the quick-settings card) ---- */
 /* The same flat glass as the quick-settings card above it. */
 .control-center {
-    backdrop-filter: blur(20px); /* see .notification: this is what makes Hyprland blur it */
+    /* Fallback for a swaync started without GDK_WAYLAND_DISABLE (by D-Bus
+       activation): then GTK's region is what Hyprland blurs, and this box is in
+       it. See .notification. */
+    backdrop-filter: blur(20px);
     background-color: @glass_nc;
     color: @text;
     border: 1px solid alpha(@text, 0.18);
@@ -176,7 +180,6 @@
 /* Inside the panel the cards are glass tiles; critical keeps its red ring */
 .control-center .notification-row .notification {
     margin: 0px;
-    backdrop-filter: none; /* the panel behind it is already the blurred glass */
     background-image: none;
     background-color: @glass_nc_tile;
     border: 2px solid transparent;

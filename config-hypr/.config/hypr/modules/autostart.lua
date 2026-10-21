@@ -40,7 +40,9 @@ local commands = {
 
     -- UI components (waybar and the eww edge widgets start with the theme above)
     "hypridle",
-    "swaync",
+    -- GTK's own blur protocol off, so the layer rules blur the toasts too
+    -- (config-swaync style.css says why)
+    "GDK_WAYLAND_DISABLE=ext_background_effect_manager_v1 swaync",
 
     -- Wi-Fi password and Bluetooth pairing agents (no tray icon: Waybar has no tray)
     "nm-applet --indicator & blueman-applet",
