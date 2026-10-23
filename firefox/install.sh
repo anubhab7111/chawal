@@ -15,4 +15,5 @@ chrome="$root/$profile/chrome"
 
 ln -sfn "$src/customChrome.css" "$chrome/customChrome.css"
 ln -sfn "$src/rice" "$chrome/rice"
+ln -sfn "$src/customContent.css" "$chrome/custom.css"
 echo "linked into $chrome; restart Firefox"

@@ -9,17 +9,21 @@
 
 #main-window:is([lwtheme], :not([lwtheme])) {
   /* nothing paints a solid frame behind the glass */
-  & #browser,
   & body,
   & #appcontent,
   & #tabbrowser-tabbox,
   & #sidebar-box,
-  & #sidebar-wrapper {
+  & #sidebar-wrapper,
+  & #sidebar-main,
+  & #sidebar {
     background: transparent !important;
   }
 
+  /* one glass layer each: the top bar, and #browser (the sidebar and the
+     frame around the page, so the rounded page corners sit on the same glass
+     as the bars instead of bare blur) */
   & #navigator-toolbox,
-  & #sidebar-main {
+  & #browser {
     background: var(--rice-glass) !important;
     border: none !important;
   }
