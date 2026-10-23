@@ -31,12 +31,12 @@
     --sidebar-background-color: transparent;
   }
 
-  /* expanded, the launcher floats over the page: it needs a near-opaque glass
-     or the page shows through the tab titles */
+  /* expanded, the launcher has the same background as the collapsed strip: the
+     one glass layer behind it (#browser), so the colour is identical in both
+     states */
   & #sidebar-container:is([sidebar-launcher-expanded], [sidebar-ongoing-animations]) {
-    background: var(--rice-pop) !important;
-    border-radius: var(--rice-radius) !important;
-    box-shadow: 0 8px 28px var(--rice-shadow) !important;
+    background: transparent !important;
+    box-shadow: none !important;
   }
 
   /* Firefox and FF Ultima both draw a square border / frame around the page
