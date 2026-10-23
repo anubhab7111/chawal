@@ -33,3 +33,21 @@
     background: var(--rice-card) !important;
   }
 }
+
+/* find bar: the "1 of 18" pill sits on the accent, so its text is the ink
+   colour (pale text on the pale pill was unreadable) */
+#main-window:is([lwtheme], :not([lwtheme])) {
+  & findbar {
+    background: var(--rice-pop) !important;
+    color: var(--rice-text) !important;
+  }
+  & .findbar-textbox {
+    background: var(--rice-card) !important;
+    border-radius: var(--rice-radius-btn) !important;
+    color: var(--rice-text) !important;
+  }
+  & findbar .found-matches,
+  & findbar .findbar-label.found-matches {
+    color: var(--rice-ink) !important;
+  }
+}
