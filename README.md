@@ -20,6 +20,7 @@ name, battery level and fastfetch user line are stand-ins.
 | Launcher and control hub | rofi: apps, windows, clipboard; Wi-Fi and Bluetooth windows |
 | Power menu | wlogout |
 | Terminal | Alacritty, tmux, starship |
+| Browser | Firefox with FF Ultima and a glass overlay (`firefox/`), the page colour (ATBC) only tints |
 | Theme | Catppuccin Mocha / Latte across Hyprland, the bar, panels, rofi, terminals, GTK, Qt and KDE |
 | Font | JetBrainsMono Nerd Font |
 
@@ -34,6 +35,7 @@ cd ~/dotfiles
 sudo pacman -S --needed stow          # then the packages below
 ./stow.sh                             # link every package into $HOME
 sudo ./system/install.sh              # dual-GPU udev rule; skip on other hardware
+./firefox/install.sh                  # Firefox rice; needs FF Ultima in the profile (docs/details.md)
 ~/.config/rice/bin/rice-theme bootstrap
 systemctl --user daemon-reload        # loads the swaync drop-in
 ```
