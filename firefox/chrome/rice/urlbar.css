@@ -51,7 +51,7 @@
   & .urlbarView-row {
     background: var(--rice-card) !important;
     border-radius: var(--rice-radius) !important;
-    margin-block: 1px !important;
+    margin-block: 3px !important;
     padding: 0 !important;
     font-size: 14px;
     color: var(--rice-text) !important;
