@@ -400,7 +400,7 @@ live through `prefers-color-scheme`, which `rice-theme` sets through gsettings.
 
 | Pref (about:config) | Effect |
 |---|---|
-| `rice.tint` unset | subtle: the URL field takes the page colour |
+| `rice.tint` = `subtle` (default) | the URL field takes the page colour |
 | `rice.tint` = `tinted` | the bars take it too |
 | `rice.tint` = `off` | no tint |
 | `rice.solid` = true | opaque bars, the escape hatch if a Firefox update breaks transparency |
