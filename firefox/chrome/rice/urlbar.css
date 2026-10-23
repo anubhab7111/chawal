@@ -29,10 +29,10 @@
   /* results: no panel of their own, only rows on the glass above */
   & #urlbar[open] .urlbarView {
     --urlbarView-row-gutter: 0px;
-    --urlbarview-row-min-height: 60px;
+    --urlbarview-row-min-height: 44px;
     --urlbarview-text-color-secondary: var(--rice-dim);
-    --urlbarView-icon-margin-start: 10px;
-    --urlbarView-icon-margin-end: 22px;
+    --urlbarView-icon-margin-start: 7px;
+    --urlbarView-icon-margin-end: 16px;
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
@@ -51,14 +51,15 @@
   & .urlbarView-row {
     background: var(--rice-card) !important;
     border-radius: var(--rice-radius) !important;
-    margin-block: 4px !important;
+    margin-block: 1px !important;
     padding: 0 !important;
-    font-size: 15px;
+    font-size: 14px;
     color: var(--rice-text) !important;
   }
   & .urlbarView-row-inner {
-    padding-inline: 12px !important;
-    min-height: 60px !important;
+    padding-inline: 10px !important;
+    padding-block: 4px !important;
+    min-height: 36px !important; /* + 2 x 4px padding = 44px: fits the 34px badge */
   }
 
   /* every row is two lines: the title, then the URL as the description (Firefox
@@ -111,8 +112,8 @@
     background: color-mix(in srgb, var(--rice-text) 12%, transparent) !important;
   }
 
-  /* a rounded-square badge on every row, like Rofi's element-icon: a 42px
-     square behind the 22px icon, drawn as a box of its own (a box-shadow is
+  /* a rounded-square badge on every row, like Rofi's element-icon: a 34px
+     square behind the 20px icon, drawn as a box of its own (a box-shadow is
      never painted under the element's own box, which left a hole behind
      transparent icons). Every icon type gets the same size, the history clock
      overlay is dropped. Rows without an icon (chips) get no badge */
@@ -122,23 +123,23 @@
   & .urlbarView-row-inner:has(> .urlbarView-favicon)::before {
     content: "";
     position: absolute;
-    inset-inline-start: 12px;
+    inset-inline-start: 10px;
     inset-block-start: 50%;
     translate: 0 -50%;
-    width: 42px;
-    height: 42px;
-    border-radius: 13px;
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
     background: var(--rice-badge);
   }
   & .urlbarView-favicon {
     position: relative;
     z-index: 1;
-    width: 22px !important;
-    height: 22px !important;
-    flex: 0 0 22px !important;
+    width: 20px !important;
+    height: 20px !important;
+    flex: 0 0 20px !important;
     border-radius: 3px !important;
     padding: 0 !important;
-    margin-inline: 10px 22px !important;
+    margin-inline: 7px 16px !important;
   }
   & .urlbarView-type-icon {
     display: none !important;
