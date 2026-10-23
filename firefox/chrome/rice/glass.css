@@ -64,3 +64,16 @@
     }
   }
 }
+
+/* no minimize / restore / close buttons (Hyprland handles the window) */
+#main-window {
+  & .titlebar-buttonbox-container,
+  & .titlebar-buttonbox,
+  & #window-controls,
+  & .titlebar-min,
+  & .titlebar-max,
+  & .titlebar-restore,
+  & .titlebar-close {
+    display: none !important;
+  }
+}
