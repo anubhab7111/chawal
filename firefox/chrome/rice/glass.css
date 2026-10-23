@@ -15,8 +15,20 @@
   & #sidebar-box,
   & #sidebar-wrapper,
   & #sidebar-main,
+  & #sidebar-container,
+  & sidebar-main,
   & #sidebar {
     background: transparent !important;
+  }
+
+  /* Firefox's own vertical tabs: the launcher paints the toolbox colour as a
+     gradient plus an opaque fallback, and the sidebar browser paints
+     --sidebar-background-color */
+  & #sidebar-container {
+    background-image: none !important;
+  }
+  & #browser {
+    --sidebar-background-color: transparent;
   }
 
   /* one glass layer each: the top bar, and #browser (the sidebar and the
