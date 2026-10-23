@@ -47,16 +47,17 @@
       color: var(--rice-ink) !important;
     }
   }
-  /* the icon sits in a round badge, like the Rofi rows. The badge is a
-     spread box-shadow on the icon itself (16px icon + 2 x 9px = 34px circle),
-     so it can never drift off the icon's centre; the margins make room */
+  /* the icon sits in a rounded-square badge, like the Rofi rows. The badge is
+     a spread box-shadow on the icon itself (16px icon + 2 x 9px = 34px square,
+     corner radius 3px + 9px = 12px), so it can never drift off the icon's
+     centre; the margins make room */
   & .urlbarView {
     --urlbarView-icon-margin-start: 9px;
     --urlbarView-icon-margin-end: 18px;
-    --urlbarView-icon-border-radius: 50%;
+    --urlbarView-icon-border-radius: 3px;
   }
   & .urlbarView-favicon {
-    border-radius: 50% !important;
+    border-radius: 3px !important;
     box-shadow: 0 0 0 9px var(--rice-badge) !important;
   }
 
