@@ -3,36 +3,25 @@
    unset = subtle (the URL field), "tinted" = bars too,
    "off" = no tint. */
 
+/* The URL field is painted by FF Ultima from --uc-urlbar-background (urlbar.css
+   makes it opaque while the bar is open). */
 #main-window:is([lwtheme], :not([lwtheme])) {
-  & #urlbar-background {
-    transition: background-color 300ms ease, border-color 300ms ease;
-    background-color: color-mix(in srgb, var(--rice-site) 14%, var(--rice-card)) !important;
-    border: 1px solid color-mix(in srgb, var(--rice-site) 60%, transparent) !important;
-  }
-  & #urlbar[open] > #urlbar-background {
-    background-color: var(--rice-pop) !important;
-    border-color: var(--rice-line) !important;
-  }
+  --uc-urlbar-background: color-mix(in srgb, var(--rice-site) 14%, var(--rice-card)) !important;
 }
 
 @media -moz-pref("rice.tint", "tinted") {
   #main-window:is([lwtheme], :not([lwtheme])) {
+    --uc-urlbar-background: color-mix(in srgb, var(--rice-site) 24%, var(--rice-card)) !important;
     & #navigator-toolbox,
     & #browser {
       transition: background-color 300ms ease;
       background: color-mix(in srgb, var(--rice-site) 14%, var(--rice-glass)) !important;
-    }
-    & #urlbar-background {
-      background-color: color-mix(in srgb, var(--rice-site) 24%, var(--rice-card)) !important;
     }
   }
 }
 
 @media -moz-pref("rice.tint", "off") {
   #main-window:is([lwtheme], :not([lwtheme])) {
-    & #urlbar-background {
-      background-color: var(--rice-card) !important;
-      border-color: var(--rice-line) !important;
-    }
+    --uc-urlbar-background: var(--rice-card) !important;
   }
 }
