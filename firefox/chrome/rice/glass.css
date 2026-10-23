@@ -99,3 +99,10 @@
     display: none !important;
   }
 }
+
+/* no "N Tabs Open" counter (FF Ultima's ultima.tabs.tabCounter), any layout */
+#tabbrowser-arrowscrollbox-periphery::after,
+#tabbrowser-arrowscrollbox[orient="horizontal"]::after {
+  content: none !important;
+  display: none !important;
+}
