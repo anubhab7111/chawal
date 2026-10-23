@@ -37,7 +37,8 @@
     --rice-line: rgba(205, 214, 244, 0.2);
     --rice-ink: #11111b;
     --rice-on-accent: #11111b; /* text on a solid mauve (selection) */
-    --rice-sel: linear-gradient(90deg, #cba6f7, #89b4fa);
+    --rice-sel: linear-gradient(90deg, #cba6f7, #89b4fa); /* active tab */
+    --rice-sel-url: linear-gradient(90deg, #89b4fa, #94e2d5); /* selected URL result: blue to teal */
     --rice-underline: #cba6f7;
     --rice-shadow: rgba(0, 0, 0, 0.45);
   }
@@ -62,6 +63,7 @@
     --rice-ink: #4c4f69;
     --rice-on-accent: #eff1f5;
     --rice-sel: linear-gradient(90deg, #c4a4f2, #a9c3f8);
+    --rice-sel-url: linear-gradient(90deg, #a9c3f8, #9fdcd6);
     --rice-underline: #8839ef;
     --rice-shadow: rgba(76, 79, 105, 0.3);
   }
