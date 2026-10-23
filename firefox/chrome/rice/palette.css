@@ -7,7 +7,7 @@
 :root,
 #main-window {
   --rice-glass-pct: 86%; /* glass opacity: higher = less see-through blur; Rofi uses 50% */
-  --rice-pop-pct: 92%;
+  --rice-pop-pct: 96%;
   --rice-radius: 14px;
   --rice-radius-btn: 10px;
   --rice-ease: cubic-bezier(0.13, 0.99, 0.29, 1.1);
