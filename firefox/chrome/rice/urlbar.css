@@ -47,19 +47,17 @@
       color: var(--rice-ink) !important;
     }
   }
-  /* the icon sits in a round badge, like the Rofi rows */
-  & .urlbarView-type-icon {
-    background: var(--rice-badge) !important;
-    border-radius: 50% !important;
-    width: 34px !important;
-    height: 34px !important;
-    display: grid !important;
-    place-items: center;
-    margin-inline-end: 10px !important;
+  /* the icon sits in a round badge, like the Rofi rows. The badge is a
+     spread box-shadow on the icon itself (16px icon + 2 x 9px = 34px circle),
+     so it can never drift off the icon's centre; the margins make room */
+  & .urlbarView {
+    --urlbarView-icon-margin-start: 9px;
+    --urlbarView-icon-margin-end: 18px;
+    --urlbarView-icon-border-radius: 50%;
   }
   & .urlbarView-favicon {
-    background: transparent !important;
-    padding: 0 !important;
+    border-radius: 50% !important;
+    box-shadow: 0 0 0 9px var(--rice-badge) !important;
   }
 
   /* group labels ("Firefox Suggest") float between the rows: Rofi has none */
