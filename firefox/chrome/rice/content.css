@@ -1,0 +1,31 @@
+/* chawal Firefox rice: internal pages (about:newtab, home, privatebrowsing).
+   Content pages have no [lwtheme], so ATBC's grey #2b2a33 would show; set the
+   rice base instead. No wallpaper: the desktop one shows through the glass. */
+
+:root {
+  --newtab-background-color: var(--rice-base) !important;
+  --newtab-background-color-secondary: var(--rice-card) !important;
+  --newtab-text-primary-color: var(--rice-text) !important;
+  --newtab-wallpaper-color: var(--rice-base) !important;
+  --uc-browser-color: var(--rice-base) !important;
+  --uc-text: var(--rice-text) !important;
+  --uc-layered-background: var(--rice-mantle) !important;
+  --uc-accent-color-1: var(--rice-mauve) !important;
+  --uc-accent-color-2: var(--rice-mauve) !important;
+  --uc-accent-color-3: var(--rice-blue) !important;
+}
+
+@-moz-document url-prefix("about:newtab"), url-prefix("about:home"), url-prefix("about:privatebrowsing") {
+  html,
+  body {
+    background: var(--rice-base) !important;
+  }
+  .wallpaper {
+    display: none !important;
+  }
+  .top-site-outer,
+  .card-outer {
+    background: var(--rice-card) !important;
+    border-radius: var(--rice-radius) !important;
+  }
+}

@@ -1,0 +1,56 @@
+/* chawal Firefox rice: vertical tabs as Rofi rows.
+   Round icon badge per tab, the selected tab is the mauve-blue gradient pill. */
+
+#main-window:is([lwtheme], :not([lwtheme])) {
+  & #tabbrowser-tabs[orient="vertical"] {
+    & .tabbrowser-tab {
+      --tab-min-height: 44px;
+    }
+
+    & .tab-background {
+      border-radius: var(--rice-radius) !important;
+      border: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
+      transition: background 200ms var(--rice-ease);
+    }
+    & .tabbrowser-tab:hover:not([selected]) .tab-background {
+      background: var(--rice-card) !important;
+    }
+    & .tabbrowser-tab[selected] .tab-background {
+      background: var(--rice-sel) !important;
+    }
+    & .tabbrowser-tab[selected] {
+      color: var(--rice-ink) !important;
+      --tab-label-color: var(--rice-ink);
+    }
+    & .tabbrowser-tab[selected] .tab-label {
+      color: var(--rice-ink) !important;
+    }
+
+    & .tab-icon-stack {
+      background: var(--rice-badge);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* container tabs keep their colour as a small left mark on the badge */
+    & .tabbrowser-tab[usercontextid] .tab-icon-stack {
+      border-inline-start: 2px solid var(--identity-icon-color, transparent);
+    }
+  }
+
+  & #tabs-newtab-button,
+  & #vertical-tabs-newtab-button {
+    border-radius: var(--rice-radius) !important;
+    border: 1px dashed var(--rice-line) !important;
+    color: var(--rice-dim) !important;
+  }
+
+  & #sidebar-main {
+    --toolbarbutton-icon-fill: var(--rice-dim) !important;
+  }
+}

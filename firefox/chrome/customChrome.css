@@ -1,4 +1,9 @@
 /* chawal Firefox rice: loaded last by FF Ultima's userChrome.css.
    Linked into <profile>/chrome by firefox/install.sh. */
 @import url(rice/palette.css);
+@import url(rice/bridge.css);
 @import url(rice/glass.css);
+@import url(rice/tint.css);
+@import url(rice/tabs.css);
+@import url(rice/urlbar.css);
+@import url(rice/menus.css);
