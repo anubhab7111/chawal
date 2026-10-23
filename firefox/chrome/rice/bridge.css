@@ -59,7 +59,7 @@
   --color-accent-primary: var(--rice-mauve) !important;
   --color-accent-primary-hover: var(--rice-lavender) !important;
   --lwt-toolbar-field-highlight: var(--rice-mauve) !important;
-  --lwt-toolbar-field-highlight-text: var(--rice-ink) !important;
+  --lwt-toolbar-field-highlight-text: var(--rice-on-accent) !important;
 
   /* ATBC sets this from its home colour (#2b2a33): a grey flash between loads */
   --tabpanel-background-color: var(--rice-base) !important;
