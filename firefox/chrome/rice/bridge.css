@@ -54,6 +54,13 @@
   --tab-background-color-selected: var(--rice-card) !important;
   --urlbarview-background-color-selected: var(--rice-card) !important;
   --chrome-content-separator-color: transparent !important;
+  /* focus rings and selections follow the rice accent, not the system one */
+  --focus-outline-color: var(--rice-mauve) !important;
+  --color-accent-primary: var(--rice-mauve) !important;
+  --color-accent-primary-hover: var(--rice-lavender) !important;
+  --lwt-toolbar-field-highlight: var(--rice-mauve) !important;
+  --lwt-toolbar-field-highlight-text: var(--rice-ink) !important;
+
   /* ATBC sets this from its home colour (#2b2a33): a grey flash between loads */
   --tabpanel-background-color: var(--rice-base) !important;
 }
