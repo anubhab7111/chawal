@@ -1,14 +1,16 @@
--- Window, layer and workspace rules. All rules are anonymous on purpose:
--- named rules are evaluated before anonymous ones, which would reorder them.
 local p = rice.palette
 
 local function rule(match, effects)
-    effects.match = match
-    hl.window_rule(effects)
+	effects.match = match
+	hl.window_rule(effects)
 end
 
-local function class(re) return { class = re } end
-local function title(re) return { title = re } end
+local function class(re)
+	return { class = re }
+end
+local function title(re)
+	return { title = re }
+end
 
 -- General
 rule(class([[.*]]), { suppress_event = "maximize" })
@@ -72,22 +74,17 @@ rule(class([[^(firefox)$]]), { opacity = "1.00 1.00 override" })
 rule(class([[^(steam_app_default)$]]), { opacity = "1.00 1.00 override" })
 rule(class([[^(µVision)$]]), { opacity = "1.00 1.00 override" })
 
--- Blur: every window that has any transparency gets the frosted-glass blur
--- (decoration.blur in look.lua); an opaque window is never blurred, so this
--- costs nothing for them. The one exception is gamescope (games).
 rule(class([[^(gamescope)$]]), { no_blur = true })
 
--- Idle inhibit
 rule(class([[^(mpv)$]]), { idle_inhibit = "focus" })
 rule(class([[^(vlc)$]]), { idle_inhibit = "focus" })
 rule(class([[^(firefox)$]]), { idle_inhibit = "fullscreen" })
 rule(class([[^(chromium)$]]), { idle_inhibit = "fullscreen" })
 rule(class([[^(steam_app_.*)$]]), { idle_inhibit = "always" })
 
--- Layer rules
 local function layer(namespace, effects)
-    effects.match = { namespace = namespace }
-    hl.layer_rule(effects)
+	effects.match = { namespace = namespace }
+	hl.layer_rule(effects)
 end
 
 layer("wofi", { animation = "popin 80%" })
@@ -95,27 +92,13 @@ layer("wofi", { dim_around = true })
 
 layer("rofi", { blur = true, ignore_alpha = 0.3, animation = "popin 90%", dim_around = true })
 
--- Power grid: same treatment as rofi (blur behind the translucent window,
--- popin, dim the desktop behind it). wlogout's layer namespace is
--- "logout_dialog", not "wlogout", so a rule on "wlogout" never matched.
 layer("logout_dialog", { blur = true, ignore_alpha = 0.5, animation = "popin 80%", dim_around = true })
 
--- The notification list and the toasts are translucent glass now; ignore_alpha blur
--- only the filled part, not the fully transparent window margins around it.
--- These rules reach swaync only because autostart.lua turns GTK's own blur
--- protocol off for it (config-swaync style.css says why).
 layer("swaync-notification-window", { blur = true, ignore_alpha = 0.3, animation = "slide right" })
 layer("swaync-control-center", { blur = true, ignore_alpha = 0.3, animation = "slide top" })
 
--- Volume edge-hover slider: no blur (its own namespace, so it doesn't inherit
--- the blanket gtk-layer-shell blur rule below; with ignore_opacity and
--- popups_ignorealpha on, that blur rendered through the widget's transparent
--- margins as a visible blurred box). It slides in from the right instead.
 layer("volume-panel", { animation = "slide right" })
 
--- Quick-settings panel (slides down from the top edge) and its click-outside scrim (fades).
--- The card is translucent (@glass, rules.lua) so it is blurred; ignore_alpha keeps the
--- fully transparent rounded corners and window margins out of the blur.
 layer("qs-panel", { blur = true, ignore_alpha = 0.3, animation = "slide top" })
 layer("qs-scrim", { animation = "fade" })
 
@@ -169,9 +152,9 @@ hl.workspace_rule({ workspace = "special:dropdown", on_created_empty = "alacritt
 
 -- Drop-down terminal (SUPER+grave): a wide strip under the bar, sliding in
 rule(class([[^(dropdown)$]]), {
-    float = true,
-    size = { "monitor_w*0.98", "monitor_h*0.45" },
-    move = { "monitor_w*0.01", "60" },
-    animation = "slide top",
-    opacity = "0.95 0.90 override",
+	float = true,
+	size = { "monitor_w*0.98", "monitor_h*0.45" },
+	move = { "monitor_w*0.01", "60" },
+	animation = "slide top",
+	opacity = "0.95 0.90 override",
 })

@@ -1,11 +1,8 @@
--- Keybinds. Ported from the hyprlang config in P5; P6 fixed the quirks
--- (duplicate brightness binds, SUPER+SHIFT+0 doing two things, instant exit).
-
-local terminal    = "alacritty"
+local terminal = "alacritty"
 local fileManager = "thunar"
-local menu        = "~/.config/rice/bin/rice-hub"
-local code        = "vscodium"
-local browser     = "firefox"
+local menu = "~/.config/rice/bin/rice-hub"
+local code = "vscodium"
+local browser = "firefox"
 
 local mainMod = "SUPER"
 
@@ -15,53 +12,51 @@ local exec = hl.dsp.exec_cmd
 -- System
 -- Lock through logind so hypridle's lock_cmd (single hyprlock instance) runs
 bind(mainMod .. " + L", exec("loginctl lock-session"))
-bind(mainMod .. " + F1", function() rice.gamemode.toggle() end)          -- Game mode (modes.lua)
--- Power grid. wlogout's own config (layout and style.css) is the config-wlogout
--- package, stowed to ~/.config/wlogout; its colours and icons follow the theme.
--- Five buttons in one row (-b 5; with the default 3 per row wlogout draws a
--- blank sixth tile), and the margins make the panel hug the tiles. The Waybar
--- power button uses the same flags.
+bind(mainMod .. " + F1", function()
+	rice.gamemode.toggle()
+end) -- Game mode (modes.lua)
+
 bind(mainMod .. " + escape", exec("wlogout -b 5 -L 380 -R 380 -T 410 -B 410"))
 
 -- Applications
 bind(mainMod .. " + Q", exec(terminal))
 bind(mainMod .. " + E", exec(fileManager))
-bind(mainMod .. " + SPACE", exec(menu))                                        -- Rofi hub (apps first; Tab flips tabs)
+bind(mainMod .. " + SPACE", exec(menu))
 bind(mainMod .. " + SHIFT + C", exec(code))
 bind(mainMod .. " + B", exec(browser))
 bind(mainMod .. " + SHIFT + B", exec("chromium"))
 bind(mainMod .. " + Z", exec("zapzap"))
-bind(mainMod .. " + A", exec("pwvucontrol"))                                   -- Audio control
-bind(mainMod .. " + SHIFT + A", exec("claude-desktop"))
+bind(mainMod .. " + SHIFT + M", exec("pwvucontrol"))
+bind(mainMod .. " + A", exec("claude-desktop"))
 bind(mainMod .. " + O", exec("obsidian"))
+bind("XF86Launch2", exec(menu))
+bind("XF86Calculator", exec("qalculate-gtk"))
 
 -- Window management
 bind(mainMod .. " + C", hl.dsp.window.close())
 bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
-bind(mainMod .. " + F", hl.dsp.window.fullscreen({ mode = "maximized" }))     -- keeps the bar
+bind(mainMod .. " + F", hl.dsp.window.fullscreen({ mode = "maximized" }))
 bind(mainMod .. " + SHIFT + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }))
-bind(mainMod .. " + P", hl.dsp.window.pseudo())                                -- Pseudotile (dwindle)
+bind(mainMod .. " + P", hl.dsp.window.pseudo())
 
 -- Focus and move with the arrow keys
 local dirs = { left = "l", right = "r", up = "u", down = "d" }
 for key, dir in pairs(dirs) do
-    bind(mainMod .. " + " .. key, hl.dsp.focus({ direction = dir }))
-    bind("SUPER + SHIFT + " .. key, hl.dsp.window.move({ direction = dir }))
+	bind(mainMod .. " + " .. key, hl.dsp.focus({ direction = dir }))
+	bind("SUPER + SHIFT + " .. key, hl.dsp.window.move({ direction = dir }))
 end
 
 -- Workspaces 1-10: switch, and move the active window
 for i = 1, 10 do
-    local key = tostring(i % 10)
-    bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = tostring(i) }))
-    bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = tostring(i) }))
+	local key = tostring(i % 10)
+	bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = tostring(i) }))
+	bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = tostring(i) }))
 end
 
 -- Special workspace (scratchpad)
 bind(mainMod .. " + S", hl.dsp.workspace.toggle_special("magic"))
 bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
-
--- Scratchpads: each starts its app the first time (workspace rules in rules.lua)
-bind(mainMod .. " + grave", hl.dsp.workspace.toggle_special("dropdown"))      -- drop-down terminal
+bind(mainMod .. " + grave", hl.dsp.workspace.toggle_special("dropdown")) -- drop-down terminal
 bind(mainMod .. " + T", hl.dsp.workspace.toggle_special("term"))
 bind(mainMod .. " + M", hl.dsp.workspace.toggle_special("music"))
 
@@ -75,15 +70,21 @@ bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 bind(mainMod .. " + R", hl.dsp.submap("resize"))
 
 hl.define_submap("resize", function()
-    local steps = {
-        left = { -20, 0 }, right = { 20, 0 }, up = { 0, -20 }, down = { 0, 20 },
-        h = { -20, 0 }, l = { 20, 0 }, k = { 0, -20 }, j = { 0, 20 },
-    }
-    for key, d in pairs(steps) do
-        bind(key, hl.dsp.window.resize({ x = d[1], y = d[2], relative = true }))
-    end
-    bind("escape", hl.dsp.submap("reset"))
-    bind("R", hl.dsp.submap("reset"))
+	local steps = {
+		left = { -20, 0 },
+		right = { 20, 0 },
+		up = { 0, -20 },
+		down = { 0, 20 },
+		h = { -20, 0 },
+		l = { 20, 0 },
+		k = { 0, -20 },
+		j = { 0, 20 },
+	}
+	for key, d in pairs(steps) do
+		bind(key, hl.dsp.window.resize({ x = d[1], y = d[2], relative = true }))
+	end
+	bind("escape", hl.dsp.submap("reset"))
+	bind("R", hl.dsp.submap("reset"))
 end)
 
 -- Volume: 5% steps capped at 100%, repeat while held, work on the lock
@@ -115,18 +116,18 @@ bind("CTRL + PRINT", exec("~/.config/rice/bin/rice-record toggle region"))
 bind("CTRL + SHIFT + PRINT", exec("~/.config/rice/bin/rice-record toggle screen"))
 
 -- Utilities
-bind("SUPER + SHIFT + V", exec("~/.config/rice/bin/rice-hub clip"))           -- Clipboard history (hub tab)
-bind("SUPER + W", exec("~/.config/rice/bin/rice-wall"))                         -- Wallpaper picker
-bind("SUPER + N", exec("~/.config/eww/scripts/qs-ctl toggle"))                  -- Quick settings (eww)
+bind("SUPER + SHIFT + V", exec("~/.config/rice/bin/rice-hub clip")) -- Clipboard history (hub tab)
+bind("SUPER + W", exec("~/.config/rice/bin/rice-wall")) -- Wallpaper picker
+bind("SUPER + N", exec("~/.config/eww/scripts/qs-ctl toggle")) -- Quick settings (eww)
 
 -- Zoom
 local function zoom_by(factor)
-    return function()
-        hl.config({ cursor = { zoom_factor = hl.get_config("cursor.zoom_factor") * factor } })
-    end
+	return function()
+		hl.config({ cursor = { zoom_factor = hl.get_config("cursor.zoom_factor") * factor } })
+	end
 end
 local function zoom_reset()
-    hl.config({ cursor = { zoom_factor = 1 } })
+	hl.config({ cursor = { zoom_factor = 1 } })
 end
 
 bind(mainMod .. " + equal", zoom_by(1.1))
