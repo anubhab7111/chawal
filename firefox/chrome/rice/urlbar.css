@@ -1,25 +1,43 @@
-/* chawal Firefox rice: the URL bar and its results as the Rofi panel.
-   Rows are cards, the selected row is the gradient pill, engine buttons are
-   underline tabs. */
+/* chawal Firefox rice: the URL bar and its results as the Rofi window.
+   One glass panel holds the input (a card, like Rofi's search box) and the
+   results: tall two-line rows (title, then the URL as the dim description), a
+   rounded-square icon badge on every row, the selected row as the gradient pill
+   and the engine buttons as underline tabs. Sizes mirror themes/rice.rasi. */
 
 #main-window:is([lwtheme], :not([lwtheme])) {
   & #urlbar-background {
     border-radius: var(--rice-radius) !important;
   }
+
+  /* open: ONE panel for input and results (Rofi's window) */
   & #urlbar[open] > #urlbar-background {
     box-shadow: 0 8px 28px var(--rice-shadow) !important;
     backdrop-filter: blur(24px);
   }
-  /* the results panel itself is the glass: without it the page shows through
-     the gaps between the rows */
-  & #urlbar[open] .urlbarView {
-    background: var(--rice-pop) !important;
-    backdrop-filter: blur(24px);
-    border: 1px solid var(--rice-line) !important;
+
+  /* the input is the card inside the panel (Rofi's inputbar) */
+  & #urlbar[open] #urlbar-input-container {
+    background: var(--rice-card) !important;
     border-radius: var(--rice-radius) !important;
-    box-shadow: 0 8px 28px var(--rice-shadow) !important;
-    margin-top: 6px !important;
-    padding: 6px 8px !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  & #urlbar-input {
+    color: var(--rice-text) !important;
+  }
+
+  /* results: no panel of their own, only rows on the glass above */
+  & #urlbar[open] .urlbarView {
+    --urlbarView-row-gutter: 0px;
+    --urlbarview-row-min-height: 60px;
+    --urlbarview-text-color-secondary: var(--rice-dim);
+    --urlbarView-icon-margin-start: 10px;
+    --urlbarView-icon-margin-end: 22px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 6px 10px 12px !important;
   }
   & #urlbar[open] .urlbarView-body-outer,
   & #urlbar[open] .urlbarView-body-inner,
@@ -33,9 +51,50 @@
   & .urlbarView-row {
     background: var(--rice-card) !important;
     border-radius: var(--rice-radius) !important;
-    margin-block: 3px !important;
+    margin-block: 4px !important;
+    padding: 0 !important;
+    font-size: 15px;
     color: var(--rice-text) !important;
   }
+  & .urlbarView-row-inner {
+    padding-inline: 12px !important;
+    min-height: 60px !important;
+  }
+
+  /* every row is two lines: the title, then the URL as the description (Firefox
+     only wraps it under the title when the window is narrow) */
+  & .urlbarView-row[has-url]:not([type="switchtab"], [type="remotetab"], [sponsored], [restyled-search]) > .urlbarView-row-inner > .urlbarView-row-body > .urlbarView-row-body-top {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "title title" "url explanation";
+    row-gap: 1px;
+    > .urlbarView-row-body-top-no-wrap {
+      grid-area: title;
+      max-width: 100%;
+      justify-self: start;
+      > .urlbarView-title-separator {
+        display: none;
+      }
+    }
+    > .urlbarView-url {
+      grid-area: url;
+    }
+    > .urlbarView-explanation {
+      grid-area: explanation;
+    }
+  }
+  & .urlbarView-title {
+    font-weight: 600;
+  }
+  & .urlbarView-url,
+  & .urlbarView-secondary,
+  & .urlbarView-action,
+  & .urlbarView-title-separator {
+    color: var(--rice-dim) !important;
+    font-size: 0.85em;
+  }
+
+  /* the selected row is the gradient pill */
   & .urlbarView-row[selected],
   & .urlbarView-row:hover[selected] {
     background: var(--rice-sel) !important;
@@ -43,32 +102,64 @@
     & .urlbarView-title,
     & .urlbarView-secondary,
     & .urlbarView-url,
-    & .urlbarView-action {
+    & .urlbarView-action,
+    & .urlbarView-title-separator {
       color: var(--rice-ink) !important;
     }
   }
-  /* the icon sits in a rounded-square badge, like the Rofi rows. The badge is
-     a spread box-shadow on the icon itself (16px icon + 2 x 9px = 34px square,
-     corner radius 3px + 9px = 12px), so it can never drift off the icon's
-     centre; the margins make room */
-  & .urlbarView {
-    --urlbarView-icon-margin-start: 9px;
-    --urlbarView-icon-margin-end: 18px;
-    --urlbarView-icon-border-radius: 3px;
+  & .urlbarView-row:hover:not([selected]) {
+    background: color-mix(in srgb, var(--rice-text) 12%, transparent) !important;
+  }
+
+  /* a rounded-square badge on every row, like Rofi's element-icon: a 42px
+     square behind the 22px icon, drawn as a box of its own (a box-shadow is
+     never painted under the element's own box, which left a hole behind
+     transparent icons). Every icon type gets the same size, the history clock
+     overlay is dropped. Rows without an icon (chips) get no badge */
+  & .urlbarView-row-inner {
+    position: relative;
+  }
+  & .urlbarView-row-inner:has(> .urlbarView-favicon)::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 12px;
+    inset-block-start: 50%;
+    translate: 0 -50%;
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    background: var(--rice-badge);
   }
   & .urlbarView-favicon {
+    position: relative;
+    z-index: 1;
+    width: 22px !important;
+    height: 22px !important;
+    flex: 0 0 22px !important;
     border-radius: 3px !important;
-    box-shadow: 0 0 0 9px var(--rice-badge) !important;
+    padding: 0 !important;
+    margin-inline: 10px 22px !important;
+  }
+  & .urlbarView-type-icon {
+    display: none !important;
   }
 
   /* group labels ("Firefox Suggest") float between the rows: Rofi has none */
   & .urlbarView-row[label]::before {
     display: none !important;
   }
-  & .urlbarView-row[label] {
-    margin-top: 3px !important;
-  }
 
+  /* engine buttons: underline tabs under a hairline */
+  & .search-one-offs {
+    background: transparent !important;
+    border-top: 1px solid var(--rice-line) !important;
+    padding: 8px 12px !important;
+    margin: 0 !important;
+  }
+  & .search-panel-one-offs-header-label,
+  & .search-panel-one-offs-header {
+    color: var(--rice-dim) !important;
+  }
   & .searchbar-engine-one-off-item,
   & .urlbarView-button {
     border-radius: 0 !important;
@@ -80,6 +171,7 @@
     color: var(--rice-text) !important;
     border-bottom-color: var(--rice-underline);
   }
+
   & #urlbar-search-button,
   & .urlbar-searchmode-label,
   & #identity-icon {
