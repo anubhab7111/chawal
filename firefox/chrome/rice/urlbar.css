@@ -110,11 +110,12 @@
     font-size: 0.85em;
   }
 
-  /* the selected row is the gradient pill */
+  /* the selected row is a gradient pill of its own (blue to teal), so it isn't
+     mistaken for the active tab's mauve-blue one */
   & .urlbarView-row[selected],
   & .urlbarView-row:hover[selected] {
     background-color: transparent !important;
-    background-image: var(--rice-sel) !important;
+    background-image: var(--rice-sel-url) !important;
     color: var(--rice-ink) !important;
     & .urlbarView-title,
     & .urlbarView-secondary,
