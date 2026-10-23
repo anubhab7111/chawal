@@ -17,7 +17,6 @@
    tab height); :root:root outweighs its density-specific rules */
 :root:root {
   --uc-navbar-height: 46px !important;
-  --tab-collapsed-background-width: 44px;
 }
 
 @media (prefers-color-scheme: dark) {
