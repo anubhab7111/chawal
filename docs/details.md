@@ -376,6 +376,40 @@ a `Rice` colour scheme there (`[General]`/`[UiSettings] ColorScheme`, the
 `[Colors:*]` sections and `[KDE] widgetStyle=kvantum`) and leaves the rest of the
 file alone; the original is saved as `~/.local/state/rice/kdeglobals.orig`.
 
+## Firefox
+
+`firefox/` is an overlay for [FF Ultima](https://github.com/soulhotel/FF-ULTIMA),
+the userChrome theme cloned into `<profile>/chrome`. FF Ultima's own files stay
+untouched: its `userChrome.css` imports `customChrome.css` and its
+`userContent.css` imports `custom.css`, and `firefox/install.sh` links the
+overlay (`customChrome.css`, `custom.css`, `rice/`) into those names. It also
+keeps a `// chawal begin/end` block in the profile's `user.js` and adds the
+links to the clone's `.git/info/exclude`. Pick another profile with
+`--profile DIR`. Restart Firefox after every CSS change: it reads chrome CSS at
+startup.
+
+Catppuccin leads and the page colour only tints. Adaptive Tab Bar Colour (ATBC)
+paints every page colour into FF Ultima's `--uc-*` palette and sets Firefox's
+theme variables as inline style on the root. `rice/bridge.css` wins on the same
+element with `!important` (`#main-window[lwtheme]`) and leaves
+`--lwt-accent-color` alone: that is the page colour, and `rice/tint.css` reads it
+as the tint. `rice/glass.css` makes the bars and the frame around the page one
+translucent layer, so Hyprland blurs the wallpaper behind them (Firefox stays at
+window opacity 1.0 in `rules.lua`, so pages stay crisp). Mocha and Latte switch
+live through `prefers-color-scheme`, which `rice-theme` sets through gsettings.
+
+| Pref (about:config) | Effect |
+|---|---|
+| `rice.tint` unset | subtle: the URL field and the selected tab's badge take the page colour |
+| `rice.tint` = `tinted` | the bars take it too |
+| `rice.tint` = `off` | no tint |
+| `rice.solid` = true | opaque bars, the escape hatch if a Firefox update breaks transparency |
+
+The window controls and FF Ultima's "N Tabs Open" counter are hidden. Gotchas:
+ATBC's inline variables are why the overrides need `!important`, and FF Ultima
+updates may move selectors. `tests/firefox/install-tests.sh` covers the
+installer.
+
 ## Right-edge gauges
 
 Touching the right edge of the screen slides out the gauge level with the

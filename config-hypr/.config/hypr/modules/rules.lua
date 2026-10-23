@@ -126,7 +126,6 @@ rule({ class = [[^(chromium)$]], fullscreen = true }, { border_size = 0 })
 rule({ class = [[^(mpv)$]], fullscreen = true }, { border_size = 0 })
 rule(class([[^(steam_app_.*)$]]), { border_size = 0 })
 
-rule(class([[^(firefox)$]]), { border_color = "rgb(" .. p.red .. ")" })
 rule(class([[^(code-oss)$]]), { border_color = "rgb(" .. p.blue .. ")" })
 rule(class([[^(thunar)$]]), { border_color = "rgb(" .. p.green .. ")" })
 rule(class([[^(discord)$]]), { border_color = "rgb(" .. p.peach .. ")" })
