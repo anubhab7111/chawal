@@ -1,10 +1,3 @@
--- Hyprland config entry point (Lua). The hyprlang config (hyprland.conf and
--- configs/*.conf) was retired in P8; hypridle and hyprlock stay hyprlang.
---
--- `rice` is the one global shared by the modules and reachable from
--- `hyprctl eval`. Each require() gets its own error scope, so a broken
--- module is reported in `hyprctl configerrors` without stopping the rest.
-
 rice = rice or {}
 
 require("modules.palette")
