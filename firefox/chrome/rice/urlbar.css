@@ -19,10 +19,17 @@
   &:has(#urlbar[open]) {
     --uc-urlbar-background: var(--rice-base) !important;
   }
+  /* the same shadow on both halves (the input half gets --uc-box-shadow from
+     FF Ultima), and none on the bar itself, so the shadow runs unbroken down
+     the sides with no horizontal step at the seam */
+  & #urlbar[open] {
+    box-shadow: none !important;
+  }
   & #urlbar[open] .urlbarView-background {
     background: var(--rice-base) !important;
     border: 1px solid var(--rice-line) !important;
     outline: none !important;
+    box-shadow: var(--uc-box-shadow) !important;
   }
 
   /* the input shares the panel's surface when open, so the box and its
