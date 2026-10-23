@@ -1,42 +1,40 @@
 /* chawal Firefox rice: the URL bar and its results as the Rofi window.
-   One glass panel holds the input (a card, like Rofi's search box) and the
-   results: tall two-line rows (title, then the URL as the dim description), a
-   rounded-square icon badge on every row, the selected row as the gradient pill
-   and the engine buttons as underline tabs. Sizes mirror themes/rice.rasi. */
+   One glass panel holds the input and the results, one surface colour: tall
+   two-line rows (title, then the URL as the dim description), a rounded-square
+   icon badge on every row, the selected row as the gradient pill and the
+   engine buttons as underline tabs. Sizes mirror themes/rice.rasi. */
 
 #main-window:is([lwtheme], :not([lwtheme])) {
-  & #urlbar-background {
+  & .urlbar-background {
     border-radius: var(--rice-radius) !important;
   }
 
-  /* open: ONE panel for input and results (Rofi's window). Firefox paints it
-     as two halves of a joint background (the input's own, and the view's
-     .urlbarView-background); both get the same fill, border and blur, and the
-     view keeps Firefox's own margin and padding, because both halves derive
-     their width from them: overriding those by hand made the two halves
-     different widths */
-  & #urlbar {
-    --urlbar-background-color-focus: var(--rice-pop);
-    --urlbar-background-border-open: 1px solid var(--rice-line);
-    --urlbar-background-box-shadow-open: 0 8px 28px var(--rice-shadow);
+  /* open: ONE panel for input and results (Rofi's window). The input's half
+     is painted by FF Ultima from --uc-urlbar-background, the results half is
+     .urlbarView-background. Both get the same opaque fill (set on the window
+     while the URL bar is open): the input half sits over the translucent
+     toolbar and the results half over the opaque page, so any alpha shows as
+     two different colours. The view keeps Firefox's own margin and padding,
+     because both halves derive their width from them. */
+  &:has(#urlbar[open]) {
+    --uc-urlbar-background: var(--rice-base) !important;
   }
-  & #urlbar[open] > #urlbar-background,
   & #urlbar[open] .urlbarView-background {
-    background: var(--rice-pop) !important;
+    background: var(--rice-base) !important;
     border: 1px solid var(--rice-line) !important;
     outline: none !important;
-    backdrop-filter: blur(24px);
   }
 
-  /* the input is the card inside the panel (Rofi's inputbar), with no ring */
-  & #urlbar[open] #urlbar-input-container {
-    background: var(--rice-card) !important;
+  /* the input shares the panel's surface when open, so the box and its
+     results are one colour (no lighter card around the input) */
+  & #urlbar[open] :is(.urlbar-input-container, #urlbar-input-container) {
+    background: transparent !important;
     border-radius: var(--rice-radius) !important;
     border: none !important;
     outline: none !important;
     box-shadow: none !important;
   }
-  & #urlbar-input {
+  & :is(.urlbar-input, #urlbar-input) {
     color: var(--rice-text) !important;
   }
 
@@ -195,3 +193,4 @@
     fill: var(--rice-mauve) !important;
   }
 }
+
