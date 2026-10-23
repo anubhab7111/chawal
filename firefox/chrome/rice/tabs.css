@@ -1,5 +1,5 @@
 /* chawal Firefox rice: vertical tabs as Rofi rows.
-   Round icon badge per tab, the selected tab is the mauve-blue gradient pill. */
+   Rounded-square icon badge per tab (like Rofi), the selected tab is the mauve-blue gradient pill. */
 
 #main-window:is([lwtheme], :not([lwtheme])) {
   & #tabbrowser-tabs[orient="vertical"],
@@ -43,8 +43,8 @@
 
     & .tab-icon-stack {
       background: var(--rice-badge);
-      border-radius: 50%;
-      /* a fixed circle: flex must not squeeze it into an oval when collapsed */
+      border-radius: var(--rice-radius-btn);
+      /* a fixed rounded square: flex must not squeeze it when collapsed */
       flex: none !important;
       box-sizing: border-box;
       width: 26px !important;
@@ -76,7 +76,7 @@
 
   & #tabs-newtab-button,
   & #vertical-tabs-newtab-button {
-    border-radius: var(--rice-radius) !important;
+    border-radius: var(--rice-radius-btn) !important;
     border: 1px dashed var(--rice-line) !important;
     color: var(--rice-dim) !important;
   }
