@@ -39,6 +39,16 @@
     box-shadow: none !important;
   }
 
+  /* Hover-expanded (expand sidebar on hover), the launcher floats over the page
+     instead of pushing it, and the page text would show through the tab titles:
+     back it with glass and blur the page behind it. Only in this state, so the
+     pushed/collapsed background stays the plain shared glass */
+  &:has(#tabbrowser-tabbox[sidebar-launcher-hovered]) #sidebar-container:is([sidebar-launcher-expanded], [sidebar-ongoing-animations]) {
+    background: var(--rice-glass) !important;
+    backdrop-filter: blur(24px);
+    border-radius: 0 var(--rice-radius) var(--rice-radius) 0 !important;
+  }
+
   /* Firefox and FF Ultima both draw a square border / frame around the page
      that shows past its rounded corners; the one glass layer behind it
      (#browser) is all that should be there */
