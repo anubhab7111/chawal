@@ -2,9 +2,22 @@
    Round icon badge per tab, the selected tab is the mauve-blue gradient pill. */
 
 #main-window:is([lwtheme], :not([lwtheme])) {
+  & #tabbrowser-tabs[orient="vertical"],
+  & #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab {
+    /* Firefox sets this on the tabs themselves, so :root can't widen the
+       collapsed strip. The 26px badge and its 2px ring need a pill this wide. */
+    --tab-collapsed-background-width: 34px !important;
+  }
+
   & #tabbrowser-tabs[orient="vertical"] {
     & .tabbrowser-tab {
       --tab-min-height: 44px;
+    }
+
+    /* collapsed strip: the badge sits centred in the pill */
+    &:not([expanded]) .tab-content {
+      padding-inline: 0 !important;
+      justify-content: center !important;
     }
 
     & .tab-background {
@@ -31,10 +44,28 @@
     & .tab-icon-stack {
       background: var(--rice-badge);
       border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      align-items: center;
-      justify-content: center;
+      /* a fixed circle: flex must not squeeze it into an oval when collapsed */
+      flex: none !important;
+      box-sizing: border-box;
+      width: 26px !important;
+      min-width: 26px !important;
+      height: 26px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      /* the icon, throbber and badges share one cell, centred in the circle */
+      display: grid !important;
+      place-items: center;
+      & > * {
+        grid-area: 1 / 1;
+        margin: 0 !important;
+      }
+    }
+
+    /* the pill marks the active tab: no disc or ring around its icon */
+    & .tabbrowser-tab[selected] .tab-icon-stack {
+      background: transparent !important;
+      box-shadow: none !important;
+      outline: none !important;
     }
 
     /* container tabs keep their colour as a small left mark on the badge */
