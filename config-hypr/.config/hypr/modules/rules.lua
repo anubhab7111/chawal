@@ -92,7 +92,7 @@ layer("wofi", { dim_around = true })
 
 layer("rofi", { blur = true, ignore_alpha = 0.3, animation = "popin 90%", dim_around = true })
 
-layer("logout_dialog", { blur = true, ignore_alpha = 0.5, animation = "popin 80%", dim_around = true })
+-- layer("logout_dialog", { animation = "popin 100%" })
 
 layer("swaync-notification-window", { blur = true, ignore_alpha = 0.3, animation = "slide right" })
 layer("swaync-control-center", { blur = true, ignore_alpha = 0.3, animation = "slide top" })

@@ -8,7 +8,7 @@
   "margin-right": 12,
   "spacing": 10,
   "modules-left": [
-    "custom/launcher",
+    // "custom/launcher",
     "clock",
     "custom/media"
   ],
@@ -20,8 +20,8 @@
     "bluetooth",
     "network",
     "custom/recording",
-    "custom/gamemode",
-    "custom/power-menu"
+    "custom/gamemode"
+    // "custom/power-menu"
   ],
   "hyprland/workspaces": {
     "on-click": "activate",

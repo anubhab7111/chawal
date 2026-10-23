@@ -1,15 +1,3 @@
-/* wlogout (SUPER+Esc and the Waybar power button), in the style of the rest of
-   the rice. A glass tile per action that fills with its Waybar pill gradient on
-   focus or hover, inside the Hyprland mauve/blue/teal ring (the same ring as
-   rofi, quick settings and the notification centre).
-
-   Colours and icons come from the active theme, so Mocha and Latte both work:
-   ~/.config/theming/current/waybar-colors.css and .../wlogout-icons (the icons
-   are drawn by tools/gen-wlogout-icons.py).
-
-   Launch it as: wlogout -b 5 -L 380 -R 380 -T 410 -B 410
-   One row of five; the margins make the panel hug the tiles. With the default
-   three per row, five buttons leave a blank sixth tile. */
 @import url("../theming/current/waybar-colors.css");
 
 * {
@@ -43,8 +31,12 @@ grid {
 button {
   background-color: @surface0;
   background-repeat: no-repeat, no-repeat;
-  background-position: center 34%, center;
-  background-size: 38%, 100% 100%;
+  background-position:
+    center 34%,
+    center;
+  background-size:
+    38%,
+    100% 100%;
   border: none;
   border-radius: 14px;
   margin: 16px;
@@ -55,11 +47,21 @@ button {
 }
 
 /* resting icons: a coloured glyph per action */
-#lock     { background-image: url("../theming/current/wlogout-icons/lock.svg"); }
-#logout   { background-image: url("../theming/current/wlogout-icons/logout.svg"); }
-#shutdown { background-image: url("../theming/current/wlogout-icons/shutdown.svg"); }
-#suspend  { background-image: url("../theming/current/wlogout-icons/suspend.svg"); }
-#reboot   { background-image: url("../theming/current/wlogout-icons/reboot.svg"); }
+#lock {
+  background-image: url("../theming/current/wlogout-icons/lock.svg");
+}
+#logout {
+  background-image: url("../theming/current/wlogout-icons/logout.svg");
+}
+#shutdown {
+  background-image: url("../theming/current/wlogout-icons/shutdown.svg");
+}
+#suspend {
+  background-image: url("../theming/current/wlogout-icons/suspend.svg");
+}
+#reboot {
+  background-image: url("../theming/current/wlogout-icons/reboot.svg");
+}
 
 /* focus or hover: the tile grows a little and fills with the gradient of its
    Waybar pill; the icon and text turn to the pill text colour */
@@ -71,8 +73,33 @@ button:focus {
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
 }
 
-#lock:hover,     #lock:focus     { background-image: url("../theming/current/wlogout-icons/lock-focus.svg"),     linear-gradient(135deg, @pill_battery_1,  @pill_battery_2); }
-#logout:hover,   #logout:focus   { background-image: url("../theming/current/wlogout-icons/logout-focus.svg"),   linear-gradient(135deg, @pill_network_1,  @pill_network_2); }
-#shutdown:hover, #shutdown:focus { background-image: url("../theming/current/wlogout-icons/shutdown-focus.svg"), linear-gradient(135deg, @pill_dnd_1,      @pill_dnd_2); }
-#suspend:hover,  #suspend:focus  { background-image: url("../theming/current/wlogout-icons/suspend-focus.svg"),  linear-gradient(135deg, @pill_caffeine_1, @pill_caffeine_2); }
-#reboot:hover,   #reboot:focus   { background-image: url("../theming/current/wlogout-icons/reboot-focus.svg"),   linear-gradient(135deg, @pill_theme_1,    @pill_theme_2); }
+#lock:hover,
+#lock:focus {
+  background-image:
+    url("../theming/current/wlogout-icons/lock-focus.svg"),
+    linear-gradient(135deg, @pill_battery_1, @pill_battery_2);
+}
+#logout:hover,
+#logout:focus {
+  background-image:
+    url("../theming/current/wlogout-icons/logout-focus.svg"),
+    linear-gradient(135deg, @pill_network_1, @pill_network_2);
+}
+#shutdown:hover,
+#shutdown:focus {
+  background-image:
+    url("../theming/current/wlogout-icons/shutdown-focus.svg"),
+    linear-gradient(135deg, @pill_dnd_1, @pill_dnd_2);
+}
+#suspend:hover,
+#suspend:focus {
+  background-image:
+    url("../theming/current/wlogout-icons/suspend-focus.svg"),
+    linear-gradient(135deg, @pill_caffeine_1, @pill_caffeine_2);
+}
+#reboot:hover,
+#reboot:focus {
+  background-image:
+    url("../theming/current/wlogout-icons/reboot-focus.svg"),
+    linear-gradient(135deg, @pill_theme_1, @pill_theme_2);
+}
