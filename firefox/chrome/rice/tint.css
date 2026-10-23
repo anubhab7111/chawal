@@ -1,0 +1,47 @@
+/* chawal Firefox rice: the page colour only tints.
+   --rice-site is the colour ATBC reads off the page. about:config rice.tint:
+   unset = subtle (URL field + selected-tab ring), "tinted" = bars too,
+   "off" = no tint. */
+
+#main-window:is([lwtheme], :not([lwtheme])) {
+  & #urlbar-background {
+    transition: background-color 300ms ease, border-color 300ms ease;
+    background-color: color-mix(in srgb, var(--rice-site) 14%, var(--rice-card)) !important;
+    border: 1px solid color-mix(in srgb, var(--rice-site) 60%, transparent) !important;
+  }
+  & #urlbar[open] > #urlbar-background {
+    background-color: var(--rice-pop) !important;
+    border-color: var(--rice-line) !important;
+  }
+  & #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab:not([selected]) .tab-icon-stack {
+    box-shadow: none;
+  }
+  & #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab[selected] .tab-icon-stack {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--rice-site) 80%, transparent);
+  }
+}
+
+@media -moz-pref("rice.tint", "tinted") {
+  #main-window:is([lwtheme], :not([lwtheme])) {
+    & #navigator-toolbox,
+    & #browser {
+      transition: background-color 300ms ease;
+      background: color-mix(in srgb, var(--rice-site) 14%, var(--rice-glass)) !important;
+    }
+    & #urlbar-background {
+      background-color: color-mix(in srgb, var(--rice-site) 24%, var(--rice-card)) !important;
+    }
+  }
+}
+
+@media -moz-pref("rice.tint", "off") {
+  #main-window:is([lwtheme], :not([lwtheme])) {
+    & #urlbar-background {
+      background-color: var(--rice-card) !important;
+      border-color: var(--rice-line) !important;
+    }
+    & #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab[selected] .tab-icon-stack {
+      box-shadow: none;
+    }
+  }
+}

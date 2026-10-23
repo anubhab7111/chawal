@@ -1,0 +1,4 @@
+/* chawal Firefox rice: loaded last by FF Ultima's userContent.css (about:newtab
+   and friends). Linked into <profile>/chrome by firefox/install.sh. */
+@import url(rice/palette.css);
+@import url(rice/content.css);

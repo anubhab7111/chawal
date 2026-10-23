@@ -1,0 +1,88 @@
+/* chawal Firefox rice: the bridge.
+   FF Ultima redefines its --uc-* palette on `#main-window[lwtheme]` (ATBC
+   paints every page colour into it), and Firefox gets its theme variables as
+   inline style on the root. Both lose to a rule on the same element with
+   !important, so the rice tokens win here and --lwt-accent-color (the page
+   colour) is left alone: tint.css reads it as --rice-site. */
+
+#main-window:is([lwtheme], :not([lwtheme])) {
+  --uc-browser-color: var(--rice-base) !important;
+  --uc-text: var(--rice-text) !important;
+  --uc-layered-background: var(--rice-mantle) !important;
+  --uc-navbar-background: transparent !important;
+  --uc-urlbar-background: var(--rice-card) !important;
+  --uc-findbar-background: var(--rice-pop) !important;
+  --uc-sidebar-background: transparent !important;
+  --uc-tabsbar-background: transparent !important;
+  --uc-tab-background: transparent !important;
+  --uc-tab-selected: var(--rice-card) !important;
+  --uc-tab-selected-text: var(--rice-ink) !important;
+  --uc-button-selected: var(--rice-card) !important;
+  --uc-context-menu: var(--rice-pop) !important;
+  --uc-panel-background: var(--rice-pop) !important;
+  --uc-panel-border: var(--rice-line) !important;
+  --uc-panel-border-ii: var(--rice-line) !important;
+  --uc-accent-color-1: var(--rice-mauve) !important;
+  --uc-accent-color-2: var(--rice-mauve) !important;
+  --uc-accent-color-3: var(--rice-blue) !important;
+  --uc-accent-color-4: var(--rice-lavender) !important;
+  --uc-accent-color-5: var(--rice-text) !important;
+  --uc-box-shadow: 0 6px 20px var(--rice-shadow) !important;
+  --uc-box-shadow-panel: 0 8px 28px var(--rice-shadow) !important;
+  --uc-all-border-radius: var(--rice-radius) !important;
+  --uc-tab-border-radius: var(--rice-radius) !important;
+  --uc-button-border-radius: var(--rice-radius-btn) !important;
+  --button-border-radius: var(--rice-radius-btn) !important;
+  --toolbarbutton-border-radius: var(--rice-radius-btn) !important;
+  --tab-selected-bgcolor: var(--rice-card) !important;
+  --tab-selected-outline-color: transparent !important;
+
+  /* Firefox's own theme variables (set inline by ATBC), except --lwt-accent-color */
+  --toolbar-background-color: transparent !important;
+  --toolbar-text-color: var(--rice-text) !important;
+  --toolbarbutton-icon-fill: var(--rice-text) !important;
+  --toolbar-field-background-color: var(--rice-card) !important;
+  --toolbar-field-focus-background-color: var(--rice-pop) !important;
+  --toolbar-field-color: var(--rice-text) !important;
+  --toolbar-field-focus-color: var(--rice-text) !important;
+  --toolbar-field-border-color: var(--rice-line) !important;
+  --toolbar-field-focus-border-color: var(--rice-mauve) !important;
+  --panel-background-color: var(--rice-pop) !important;
+  --panel-text-color: var(--rice-text) !important;
+  --sidebar-background-color: transparent !important;
+  --sidebar-text-color: var(--rice-text) !important;
+  --tab-background-color-selected: var(--rice-card) !important;
+  --urlbarview-background-color-selected: var(--rice-card) !important;
+  --chrome-content-separator-color: transparent !important;
+  /* ATBC sets this from its home colour (#2b2a33): a grey flash between loads */
+  --tabpanel-background-color: var(--rice-base) !important;
+}
+
+/* ATBC lets Firefox flip --toolbar-color-scheme to light on a light site, and
+   every light-dark() in Firefox's own CSS (hover fills, placeholders, native
+   widgets) would follow. Pin it to the rice theme (prefers-color-scheme,
+   which rice-theme sets through gsettings). */
+@media (prefers-color-scheme: dark) {
+  #main-window:is([lwtheme], :not([lwtheme])) {
+    & #navigator-toolbox,
+    & #sidebar-main,
+    & #sidebar-container,
+    & menupopup,
+    & panel {
+      --toolbar-color-scheme: dark !important;
+      color-scheme: dark !important;
+    }
+  }
+}
+@media (prefers-color-scheme: light) {
+  #main-window:is([lwtheme], :not([lwtheme])) {
+    & #navigator-toolbox,
+    & #sidebar-main,
+    & #sidebar-container,
+    & menupopup,
+    & panel {
+      --toolbar-color-scheme: light !important;
+      color-scheme: light !important;
+    }
+  }
+}

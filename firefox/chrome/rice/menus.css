@@ -1,0 +1,35 @@
+/* chawal Firefox rice: menus, panels and tooltips as glass.
+   Popups are windows of their own, so Hyprland blurs them (blur.popups); the
+   0.92 fill passes its popups_ignorealpha. */
+
+#main-window:is([lwtheme], :not([lwtheme])),
+:root {
+  & menupopup,
+  & panel,
+  & tooltip {
+    --panel-background: var(--rice-pop) !important;
+    --panel-border-color: var(--rice-line) !important;
+    --panel-border-radius: var(--rice-radius) !important;
+    --panel-color: var(--rice-text) !important;
+    --arrowpanel-background: var(--rice-pop) !important;
+    --menu-background-color: var(--rice-pop) !important;
+    --menuitem-hover-background-color: var(--rice-card) !important;
+    --panel-item-hover-bgcolor: var(--rice-card) !important;
+    color: var(--rice-text) !important;
+  }
+  & menupopup {
+    border: 1px solid var(--rice-line) !important;
+    border-radius: var(--rice-radius) !important;
+    box-shadow: 0 8px 28px var(--rice-shadow) !important;
+  }
+  & menuitem,
+  & menu {
+    border-radius: var(--rice-radius-btn) !important;
+  }
+  & menuitem:hover,
+  & menu:hover,
+  & menuitem[_moz-menuactive],
+  & menu[_moz-menuactive] {
+    background: var(--rice-card) !important;
+  }
+}
