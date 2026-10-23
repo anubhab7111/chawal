@@ -1,0 +1,13 @@
+/* chawal Firefox rice: content-side glass. Linked as custom.css, which FF
+   Ultima's userContent.css imports last. Sidebery paints its panel from
+   --frame-bg / --toolbar-bg (set opaque by Ultima); clear them so the glass
+   behind the sidebar (glass.css) shows through. */
+@-moz-document regexp("moz-extension://.*/sidebar/sidebar.html") {
+  html,
+  body,
+  #root.root {
+    background: transparent !important;
+    --frame-bg: transparent !important;
+    --toolbar-bg: transparent !important;
+  }
+}
