@@ -1,0 +1,50 @@
+/* chawal Firefox rice: translucent glass.
+   Wayland passes the alpha of the window to Hyprland, which blurs behind it
+   (decoration.blur). Firefox stays at window opacity 1.0 (rules.lua), so only
+   the pixels that are translucent here show blur; pages stay opaque.
+
+   FF Ultima paints these areas with `#main-window[lwtheme] X` or
+   `#main-window:not([lwtheme]) X` (specificity 2,1,0), so every rule here
+   matches both states with the same weight; this file loads later and wins. */
+
+#main-window:is([lwtheme], :not([lwtheme])) {
+  /* nothing paints a solid frame behind the glass */
+  & #browser,
+  & body,
+  & #appcontent,
+  & #tabbrowser-tabbox,
+  & #sidebar-box,
+  & #sidebar-wrapper {
+    background: transparent !important;
+  }
+
+  & #navigator-toolbox,
+  & #sidebar-main {
+    background: var(--rice-glass) !important;
+    border: none !important;
+  }
+
+  /* FF Ultima fakes the rounded page corners with a solid 10px outline; that
+     would paint a frame over the glass */
+  & #tabbrowser-tabpanels,
+  & #tabbrowser-tabpanels browser[type] {
+    outline: none !important;
+  }
+  & #tabbrowser-tabpanels browser[type] {
+    border-radius: var(--rice-radius) !important;
+  }
+}
+
+/* escape hatch if a Firefox update breaks transparency: about:config rice.solid */
+@media -moz-pref("rice.solid") {
+  :root,
+  #main-window {
+    --rice-glass-pct: 100%;
+  }
+  #main-window:is([lwtheme], :not([lwtheme])) {
+    & #browser,
+    & body {
+      background: var(--rice-base) !important;
+    }
+  }
+}

@@ -1,0 +1,68 @@
+/* chawal Firefox rice: Catppuccin tokens.
+   Mirrors config-theming/.config/theming/themes/{mocha,latte}/rofi-colors.rasi
+   and waybar-colors.css (the source of truth). Both palettes live here because
+   Firefox reads its CSS at startup: a rice-theme slot link would not switch
+   live, prefers-color-scheme does (rice-theme sets the gsettings color-scheme). */
+
+:root,
+#main-window {
+  --rice-glass-pct: 80%; /* glass opacity; Rofi uses 50% */
+  --rice-pop-pct: 92%;
+  --rice-radius: 14px;
+  --rice-radius-btn: 10px;
+  --rice-ease: cubic-bezier(0.13, 0.99, 0.29, 1.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root,
+  #main-window {
+    --rice-base: #1e1e2e;
+    --rice-mantle: #181825;
+    --rice-crust: #11111b;
+    --rice-text: #cdd6f4;
+    --rice-dim: #9399b2;
+    --rice-mauve: #cba6f7;
+    --rice-blue: #89b4fa;
+    --rice-teal: #94e2d5;
+    --rice-lavender: #b4befe;
+    --rice-red: #f38ba8;
+    --rice-card: rgba(205, 214, 244, 0.07);
+    --rice-badge: rgba(205, 214, 244, 0.1);
+    --rice-line: rgba(205, 214, 244, 0.2);
+    --rice-ink: #11111b;
+    --rice-sel: linear-gradient(90deg, #cba6f7, #89b4fa);
+    --rice-underline: #cba6f7;
+    --rice-shadow: rgba(0, 0, 0, 0.45);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root,
+  #main-window {
+    --rice-base: #eff1f5;
+    --rice-mantle: #e6e9ef;
+    --rice-crust: #dce0e8;
+    --rice-text: #4c4f69;
+    --rice-dim: #5c5f77;
+    --rice-mauve: #8839ef;
+    --rice-blue: #1e66f5;
+    --rice-teal: #179299;
+    --rice-lavender: #7287fd;
+    --rice-red: #d20f39;
+    --rice-card: rgba(76, 79, 105, 0.07);
+    --rice-badge: rgba(76, 79, 105, 0.09);
+    --rice-line: rgba(76, 79, 105, 0.2);
+    --rice-ink: #4c4f69;
+    --rice-sel: linear-gradient(90deg, #c4a4f2, #a9c3f8);
+    --rice-underline: #8839ef;
+    --rice-shadow: rgba(76, 79, 105, 0.3);
+  }
+}
+
+:root,
+#main-window {
+  --rice-glass: color-mix(in srgb, var(--rice-base) var(--rice-glass-pct), transparent);
+  --rice-pop: color-mix(in srgb, var(--rice-base) var(--rice-pop-pct), transparent);
+  /* the page colour ATBC sets; never redefined here, it is the tint input */
+  --rice-site: var(--lwt-accent-color, transparent);
+}
