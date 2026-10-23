@@ -31,6 +31,28 @@
     --sidebar-background-color: transparent;
   }
 
+  /* expanded, the launcher floats over the page: it needs a near-opaque glass
+     or the page shows through the tab titles */
+  & #sidebar-container:is([sidebar-launcher-expanded], [sidebar-ongoing-animations]) {
+    background: var(--rice-pop) !important;
+    border-radius: var(--rice-radius) !important;
+    box-shadow: 0 8px 28px var(--rice-shadow) !important;
+  }
+
+  /* Firefox and FF Ultima both draw a square border / frame around the page
+     that shows past its rounded corners; the one glass layer behind it
+     (#browser) is all that should be there */
+  & .browserContainer,
+  & .browserStack,
+  & #tabbrowser-tabpanels,
+  & #tabbrowser-tabbox,
+  & #appcontent {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    background: transparent !important;
+  }
+
   /* one glass layer each: the top bar, and #browser (the sidebar and the
      frame around the page, so the rounded page corners sit on the same glass
      as the bars instead of bare blur) */
