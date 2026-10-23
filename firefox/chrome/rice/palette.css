@@ -6,11 +6,18 @@
 
 :root,
 #main-window {
-  --rice-glass-pct: 80%; /* glass opacity; Rofi uses 50% */
+  --rice-glass-pct: 86%; /* glass opacity: higher = less see-through blur; Rofi uses 50% */
   --rice-pop-pct: 92%;
   --rice-radius: 14px;
   --rice-radius-btn: 10px;
   --rice-ease: cubic-bezier(0.13, 0.99, 0.29, 1.1);
+}
+
+/* bar sizes, a bit roomier than FF Ultima's (nav bar 40px, vertical tabs 35px
+   tab height); :root:root outweighs its density-specific rules */
+:root:root {
+  --uc-navbar-height: 46px !important;
+  --tab-collapsed-background-width: 44px;
 }
 
 @media (prefers-color-scheme: dark) {
