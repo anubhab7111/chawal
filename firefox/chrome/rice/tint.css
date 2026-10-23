@@ -1,7 +1,8 @@
 /* chawal Firefox rice: the page colour only tints.
    --rice-site is the colour ATBC reads off the page. about:config rice.tint:
-   unset = subtle (the URL field), "tinted" = bars too,
-   "off" = no tint. */
+   "subtle" (the default, set in firefox/user.js) = the URL field, "tinted" =
+   bars too, "off" = no tint. Set it explicitly: -moz-pref("rice.tint", "off")
+   also matches when the pref is unset. */
 
 /* The URL field is painted by FF Ultima from --uc-urlbar-background (urlbar.css
    makes it opaque while the bar is open). */
