@@ -6,7 +6,7 @@
 
 :root,
 #main-window {
-  --rice-glass-pct: 86%; /* glass opacity: higher = less see-through blur; Rofi uses 50% */
+  --rice-glass-pct: 75%; /* glass opacity: higher = less see-through blur; Rofi uses 50% */
   --rice-pop-pct: 96%;
   --rice-radius: 14px;
   --rice-radius-btn: 10px;

@@ -7,6 +7,14 @@
    `#main-window:not([lwtheme]) X` (specificity 2,1,0), so every rule here
    matches both states with the same weight; this file loads later and wins. */
 
+/* Firefox leaves --sidebar-expanded-launcher-width undefined outside compact
+   density (the expanded launcher takes its width from a shadow-DOM calc), so
+   the hover push below has nothing to resolve. Defining it once here keeps the
+   launcher's own width and the pushed page's margin on the same number. */
+:root {
+  --sidebar-expanded-launcher-width: 204px;
+}
+
 #main-window:is([lwtheme], :not([lwtheme])) {
   /* nothing paints a solid frame behind the glass */
   & body,
@@ -39,14 +47,21 @@
     box-shadow: none !important;
   }
 
-  /* Hover-expanded (expand sidebar on hover), the launcher floats over the page
-     instead of pushing it, and the page text would show through the tab titles:
-     back it with glass and blur the page behind it. Only in this state, so the
-     pushed/collapsed background stays the plain shared glass */
-  &:has(#tabbrowser-tabbox[sidebar-launcher-hovered]) #sidebar-container:is([sidebar-launcher-expanded], [sidebar-ongoing-animations]) {
-    background: var(--rice-glass) !important;
-    backdrop-filter: blur(24px);
-    border-radius: 0 var(--rice-radius) var(--rice-radius) 0 !important;
+  /* Hover-expanded (expand sidebar on hover), Firefox floats the launcher over
+     the page and pushes the content only the collapsed strip width, so the
+     launcher covers the page and the page shows through its transparent glass.
+     Push the tabbox the full expanded launcher width instead: the page moves
+     exactly like the pinned (Ctrl+Alt+Z) expansion and the launcher sits on the
+     same shared glass as the pushed state. Firefox marks the state on
+     #tabbrowser-tabbox: hovered while the cursor is on the launcher, plus
+     ongoing-animations while it expands or collapses. */
+  &:has(#tabbrowser-tabbox:is([sidebar-launcher-hovered], [sidebar-ongoing-animations])) {
+    & #tabbrowser-tabbox:not([sidebar-panel-open]):not([sidebar-positionend]) {
+      margin-inline-start: var(--sidebar-expanded-launcher-width, 204px) !important;
+    }
+    & #tabbrowser-tabbox:not([sidebar-panel-open])[sidebar-positionend] {
+      margin-inline-end: var(--sidebar-expanded-launcher-width, 204px) !important;
+    }
   }
 
   /* Firefox and FF Ultima both draw a square border / frame around the page
