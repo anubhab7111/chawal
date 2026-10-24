@@ -1,36 +1,65 @@
-/* chawal Firefox rice: menus, panels and tooltips as glass.
+/* chawal Firefox rice: menus, panels and tooltips as rofi-style glass.
    Popups are windows of their own, so Hyprland blurs them (blur.popups); the
-   0.92 fill passes its popups_ignorealpha. */
+   75% glass fill stays below popups_ignorealpha, so the blur shows through.
+   Firefox 158+ paints popup surfaces from the design-token family
+   (--panel-background-color/-text-color/-border-color/-border-radius,
+   consumed by popup ::part(content)); the older --arrowpanel-* and
+   --panel-background vars are still read by FF Ultima, so both families are
+   mapped. Items copy the rofi rows: the app menu's are cards, and hover is
+   the selected row's gradient pill (mauve to blue, ink text). */
 
 #main-window:is([lwtheme], :not([lwtheme])),
 :root {
   & menupopup,
   & panel,
   & tooltip {
-    --panel-background: var(--rice-pop) !important;
+    /* design-token family (what Firefox actually paints with) */
+    --panel-background-color: var(--rice-glass) !important;
+    --panel-text-color: var(--rice-text) !important;
     --panel-border-color: var(--rice-line) !important;
     --panel-border-radius: var(--rice-radius) !important;
-    --panel-color: var(--rice-text) !important;
-    --arrowpanel-background: var(--rice-pop) !important;
-    --menu-background-color: var(--rice-pop) !important;
-    --menuitem-hover-background-color: var(--rice-card) !important;
+    --panel-separator-color: var(--rice-line) !important;
     --panel-item-hover-bgcolor: var(--rice-card) !important;
+    --panel-item-active-bgcolor: var(--rice-card) !important;
+    /* legacy family (still read by FF Ultima and older chrome) */
+    --panel-background: var(--rice-glass) !important;
+    --arrowpanel-background: var(--rice-glass) !important;
+    --arrowpanel-color: var(--rice-text) !important;
+    --arrowpanel-border-color: var(--rice-line) !important;
+    --arrowpanel-border-radius: var(--rice-radius) !important;
+    --menu-background-color: var(--rice-glass) !important;
+    --menu-color: var(--rice-text) !important;
+    --menuitem-hover-background-color: var(--rice-card) !important;
     color: var(--rice-text) !important;
   }
-  & menupopup {
-    border: 1px solid var(--rice-line) !important;
-    border-radius: var(--rice-radius) !important;
-    box-shadow: 0 8px 28px var(--rice-shadow) !important;
-  }
-  & menuitem,
-  & menu {
+}
+
+/* app menu rows as rofi cards; hover is the rofi selected row (gradient pill,
+   ink text). Icon-only buttons (zoom row and friends) stay card hovers. */
+#main-window:is([lwtheme], :not([lwtheme])) {
+  & panel toolbarbutton.subviewbutton {
+    background: var(--rice-card) !important;
+    margin-inline: 4px !important;
+    margin-block: 2px !important;
     border-radius: var(--rice-radius-btn) !important;
   }
-  & menuitem:hover,
-  & menu:hover,
-  & menuitem[_moz-menuactive],
-  & menu[_moz-menuactive] {
+  & panel toolbarbutton.subviewbutton:is(:hover, [open], [checked]),
+  & menupopup :is(menuitem, menu):is(:hover, [_moz-menuactive]) {
+    background: var(--rice-sel) !important;
+    color: var(--rice-ink) !important;
+    /* Ultima colours labels from --toolbarbutton-icon-fill directly on
+       .toolbarbutton-text, so ink must reach the labels explicitly */
+    --toolbarbutton-icon-fill: var(--rice-ink) !important;
+  }
+  & panel toolbarbutton.subviewbutton:is(:hover, [open], [checked]) > :is(.toolbarbutton-text, .toolbarbutton-icon),
+  & menupopup :is(menuitem, menu):is(:hover, [_moz-menuactive]) .menu-text {
+    color: var(--rice-ink) !important;
+  }
+  & panel toolbarbutton.toolbarbutton-1:is(:hover, [open], [checked]) {
     background: var(--rice-card) !important;
+  }
+  & menupopup :is(menuitem, menu) {
+    border-radius: var(--rice-radius-btn) !important;
   }
 }
 
