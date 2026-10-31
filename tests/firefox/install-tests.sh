@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# firefox/install.sh: profile discovery, FF Ultima check, links, backups, user.js block, git exclude.
+# firefox/install.sh: profile discovery, links, backups, user.js block.
 # A fake HOME with a fake profile: no Firefox, nothing real.
 set -u
 
@@ -12,7 +12,7 @@ trap 'rm -rf "$T"' EXIT
 export HOME=$T/home
 PROFILE=$HOME/.mozilla/firefox/abc.default-release
 CHROME=$PROFILE/chrome
-mkdir -p "$PROFILE"
+mkdir -p "$CHROME"
 
 pass=0 fail=0
 ok() { # NAME CMD...
@@ -25,10 +25,6 @@ ok() { # NAME CMD...
         fail=$((fail + 1))
         echo "  FAIL  $name"
     fi
-}
-fake_ultima() {
-    mkdir -p "$CHROME/.git/info"
-    echo '@import url(customChrome.css);' >"$CHROME/userChrome.css"
 }
 
 cat >"$HOME/.mozilla/firefox/profiles.ini" <<INI
@@ -43,29 +39,31 @@ Path=abc.default-release
 Default=1
 INI
 
-# without FF Ultima it refuses
-ok "refuses without FF Ultima" bash -c "! '$INSTALL' >/dev/null 2>&1"
-
-fake_ultima
-echo 'user_pref("my.own", 1);' >"$PROFILE/user.js"
-echo "real file" >"$CHROME/custom.css"
+echo "real file" >"$CHROME/userChrome.css"
+echo "not ours" >"$CHROME/userContent.css"
+# a block left by the old FF Ultima overlay installer
+cat >"$PROFILE/user.js" <<'JS'
+user_pref("my.own", 1);
+// chawal begin
+user_pref("rice.tint", "subtle");
+// chawal end
+JS
 "$INSTALL" >/dev/null 2>&1
 
-ok "finds the profile from profiles.ini" test -L "$CHROME/customChrome.css"
-ok "links custom.css" test -L "$CHROME/custom.css"
-ok "links rice/" test -L "$CHROME/rice"
-ok "link points at the repo" test "$(readlink "$CHROME/rice")" = "$ROOT/firefox/chrome/rice"
-ok "real file backed up, not deleted" bash -c "cat '$HOME'/.dotfiles-backup/*/custom.css | grep -q 'real file'"
+ok "finds the profile from profiles.ini" test -L "$CHROME/userChrome.css"
+ok "link points at the repo" test "$(readlink "$CHROME/userChrome.css")" = "$ROOT/firefox/chrome/userChrome.css"
+ok "real file backed up, not deleted" bash -c "cat '$HOME'/.dotfiles-backup/*/userChrome.css | grep -q 'real file'"
+ok "other chrome files left alone" bash -c "test ! -L '$CHROME/userContent.css' && grep -q 'not ours' '$CHROME/userContent.css'"
 ok "user.js keeps the user's line" grep -q 'my.own' "$PROFILE/user.js"
-ok "user.js has the rice block" grep -q 'legacyUserProfileCustomizations' "$PROFILE/user.js"
+ok "user.js has the stylesheets pref" grep -q 'legacyUserProfileCustomizations' "$PROFILE/user.js"
+ok "old block's prefs are gone" bash -c "! grep -q 'rice.tint' '$PROFILE/user.js'"
 
 "$INSTALL" >/dev/null 2>&1
 ok "re-run keeps one begin marker" test "$(grep -c '// chawal begin' "$PROFILE/user.js")" = 1
 ok "re-run keeps the user's line" grep -q 'my.own' "$PROFILE/user.js"
-ok "exclude lists each file once" test "$(grep -cxF rice "$CHROME/.git/info/exclude")" = 1
-ok "exclude has customChrome.css" grep -qxF customChrome.css "$CHROME/.git/info/exclude"
+ok "re-run keeps the link" test "$(readlink "$CHROME/userChrome.css")" = "$ROOT/firefox/chrome/userChrome.css"
 
-ok "--profile overrides discovery" bash -c "mkdir -p '$T/p2/chrome' && echo '@import url(customChrome.css);' >'$T/p2/chrome/userChrome.css' && '$INSTALL' --profile '$T/p2' >/dev/null 2>&1 && test -L '$T/p2/chrome/rice'"
+ok "--profile overrides discovery, makes chrome/" bash -c "mkdir -p '$T/p2' && '$INSTALL' --profile '$T/p2' >/dev/null 2>&1 && test -L '$T/p2/chrome/userChrome.css'"
 
 echo "$pass passed, $fail failed"
 [ "$fail" -eq 0 ]

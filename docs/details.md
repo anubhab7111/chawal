@@ -378,37 +378,20 @@ file alone; the original is saved as `~/.local/state/rice/kdeglobals.orig`.
 
 ## Firefox
 
-`firefox/` is an overlay for [FF Ultima](https://github.com/soulhotel/FF-ULTIMA),
-the userChrome theme cloned into `<profile>/chrome`. FF Ultima's own files stay
-untouched: its `userChrome.css` imports `customChrome.css` and its
-`userContent.css` imports `custom.css`, and `firefox/install.sh` links the
-overlay (`customChrome.css`, `custom.css`, `rice/`) into those names. It also
-keeps a `// chawal begin/end` block in the profile's `user.js` and adds the
-links to the clone's `.git/info/exclude`. Pick another profile with
-`--profile DIR`. Restart Firefox after every CSS change: it reads chrome CSS at
-startup.
+`firefox/chrome/userChrome.css` is the whole Firefox theme. The window, the
+theme's frame colour (`--lwt-accent-color`) and the sidebar panel (including
+extension sidebars) are transparent, so Hyprland blurs the wallpaper behind them
+(Firefox stays at window opacity 1.0 in `rules.lua`, so pages stay crisp). The
+titlebar window controls are hidden and the page area has 16px rounded corners.
 
-Catppuccin leads and the page colour only tints. Adaptive Tab Bar Colour (ATBC)
-paints every page colour into FF Ultima's `--uc-*` palette and sets Firefox's
-theme variables as inline style on the root. `rice/bridge.css` wins on the same
-element with `!important` (`#main-window[lwtheme]`) and leaves
-`--lwt-accent-color` alone: that is the page colour, and `rice/tint.css` reads it
-as the tint. `rice/glass.css` makes the bars and the frame around the page one
-translucent layer, so Hyprland blurs the wallpaper behind them (Firefox stays at
-window opacity 1.0 in `rules.lua`, so pages stay crisp). Mocha and Latte switch
-live through `prefers-color-scheme`, which `rice-theme` sets through gsettings.
-
-| Pref (about:config) | Effect |
-|---|---|
-| `rice.tint` = `subtle` (default) | the URL field takes the page colour |
-| `rice.tint` = `tinted` | the bars take it too |
-| `rice.tint` = `off` | no tint |
-| `rice.solid` = true | opaque bars, the escape hatch if a Firefox update breaks transparency |
-
-The window controls and FF Ultima's "N Tabs Open" counter are hidden. Gotchas:
-ATBC's inline variables are why the overrides need `!important`, and FF Ultima
-updates may move selectors. `tests/firefox/install-tests.sh` covers the
-installer.
+`firefox/install.sh` links each file in `firefox/chrome/` into
+`<profile>/chrome/` (a real file in the way goes to `~/.dotfiles-backup/`) and
+keeps a `// chawal begin/end` block in the profile's `user.js` that turns on
+`toolkit.legacyUserProfileCustomizations.stylesheets`, without which Firefox
+ignores `userChrome.css`. It installs into the default profile from
+`profiles.ini`; pick another with `--profile DIR`. Restart Firefox after every
+CSS change: it reads chrome CSS at startup. `tests/firefox/install-tests.sh`
+covers the installer.
 
 ## Right-edge gauges
 
