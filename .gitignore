@@ -29,3 +29,5 @@ config-gtk-4.0/.config/gtk-4.0/assets
 config-kvantum/.config/Kvantum/kvantum.kvconfig
 # qt6ct palette slot link that rice-theme creates
 config-qt6ct/.config/qt6ct/colors/rice.conf
+# fontconfig writes a .uuid into every font dir it scans
+.uuid
