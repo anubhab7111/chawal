@@ -5,16 +5,18 @@
 #
 #   Enter    connect (asks for the password once for a new secured network);
 #            on the connected network it disconnects
-#   Alt+1    forget the saved network
-#   Alt+2    rescan
+#   Alt+1    power the radio on / off
+#   Alt+2    forget the saved network
+#   Alt+3    rescan
 #
 # Rofi calls this script back as its "net" mode (ROFI_RETV 0 open, 1 pick,
-# 10-11 the Alt+1..2 keys); the SSID arrives as ROFI_INFO. The one-shot
+# 10-12 the Alt+1..3 keys); the SSID arrives as ROFI_INFO. The one-shot
 # password prompt is this same script run as "rice-net --ask SSID".
 
 set -euo pipefail
 
-HINT="Enter connect / disconnect    Alt+1 forget    Alt+2 rescan"
+# HINT="Enter connect / disconnect    Alt+1 power    Alt+2 forget    Alt+3 rescan"
+HINT="Alt+1 power    Alt+2 forget    Alt+3 rescan"
 
 if [ "${1:-}" = --ask ]; then # detached password prompt for a new secured network
     ssid=$2
@@ -31,7 +33,7 @@ fi
 if [ -z "${ROFI_RETV:-}" ]; then
     exec rofi -show net -modes "net:$0" \
         -kb-remove-word-forward "Control+Alt+d" \
-        -kb-custom-1 "Alt+1" -kb-custom-2 "Alt+2" \
+        -kb-custom-1 "Alt+1" -kb-custom-2 "Alt+2" -kb-custom-3 "Alt+3" \
         -theme-str 'window { width: 600px; } element-icon { size: 0px; padding: 0px; background-color: transparent; } mainbox { children: [ inputbar, message, listview ]; }'
 fi
 
@@ -48,6 +50,17 @@ fi
 
 known() { nmcli -t -f NAME connection show | grep -qxF -- "$1"; }
 
+power_toggle() {
+    if [ "$(nmcli radio wifi 2>/dev/null)" = enabled ]; then
+        nmcli radio wifi off >/dev/null 2>&1 || true
+    else
+        rfkill unblock wifi 2>/dev/null || true
+        nmcli radio wifi on >/dev/null 2>&1 || true
+        nmcli device wifi rescan >/dev/null 2>&1 || true
+        sleep 2 # let the first scan land before the list is drawn
+    fi
+}
+
 bars() { # signal 0-100, result variable name -> 󰤯󰤟󰤢󰤥󰤨 (no subshell)
     local s=$1
     if ((s >= 80)); then printf -v "$2" '\U000F0928'
@@ -61,7 +74,7 @@ list() {
     local lock_g=$'\U000F033E' saved_g=$'\U000F0E1A' use ssid sig sec glyph name tags dir
     # three independent nmcli calls (each ~25 ms): run them side by side.
     # --rescan no: the default rescans when the last scan is over 30 s old and
-    # waits for it, which stalled the whole hub for seconds; Alt+2 rescans.
+    # waits for it, which stalled the whole hub for seconds; Alt+3 rescans.
     dir=$(mktemp -d)
     nmcli radio wifi >"$dir/radio" 2>/dev/null &
     nmcli -t -f NAME connection show >"$dir/saved" 2>/dev/null &
@@ -70,7 +83,7 @@ list() {
     printf '\0prompt\x1f%s\n' $'\U000F05A9  Wi-Fi'
     printf '\0no-custom\x1ftrue\n\0use-hot-keys\x1ftrue\n\0keep-selection\x1ftrue\n'
     if [ "$(<"$dir/radio")" != enabled ]; then
-        printf '\0message\x1f%s\n' "Wi-Fi is off. Turn it on in the Toggles tab."
+        printf '\0message\x1f%s\n' "Wi-Fi is off.    Alt+1 power on"
         rm -rf "$dir"
         return 0
     fi
@@ -116,9 +129,12 @@ pick() {
 
 case $ROFI_RETV in
 1) [ -n "${ROFI_INFO:-}" ] && pick ;;
-10) [ -n "${ROFI_INFO:-}" ] && nmcli connection delete id "$ROFI_INFO" >/dev/null 2>&1 || true ;;
-11) nmcli device wifi rescan >/dev/null 2>&1 || true ;;
+10) power_toggle ;;
+11) [ -n "${ROFI_INFO:-}" ] && nmcli connection delete id "$ROFI_INFO" >/dev/null 2>&1 || true ;;
+12)
+    nmcli device wifi rescan >/dev/null 2>&1 || true
+    sleep 2
+    ;;
 esac
-[ "$ROFI_RETV" = 11 ] && sleep 2
 list
 exit 0

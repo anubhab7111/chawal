@@ -194,13 +194,16 @@ running as a rofi script mode (each also works on its own: `rice-windows`, …).
 Wi-Fi and Bluetooth are not tabs: each is a small rofi window of its own, so
 they never mix with apps, windows or the clipboard.
 
-| Window | Script | Enter | Alt+1 … Alt+2 |
+| Window | Script | Enter | Alt+1 … Alt+3 |
 |---|---|---|---|
-| Wi-Fi | `rice-net` | connect / disconnect | forget · rescan |
-| Bluetooth | `rice-bt` | connect / disconnect | power · unpair |
+| Wi-Fi | `rice-net` | connect / disconnect | power · forget · rescan |
+| Bluetooth | `rice-bt` | connect / disconnect | power · unpair · rescan |
 
 `rice-hub net` and `rice-hub bt` open them (so do the Waybar Wi-Fi and Bluetooth
-pills and the right-click on the quick-settings tiles).
+pills and the right-click on the quick-settings tiles). `rice-conn` is an
+optional combined window with both lists as tabs (Wi-Fi first, Bluetooth on
+`Tab`); the other entry points keep opening the separate windows. There,
+`Alt+3` rescans whichever tab is showing (Wi-Fi waits ~2 s, Bluetooth ~5 s).
 
 Direct jumps: `SUPER+SHIFT+V` clipboard, the top-left hot corner opens Windows,
 and the Waybar Wi-Fi and Bluetooth pills open their windows. The wallpaper grid

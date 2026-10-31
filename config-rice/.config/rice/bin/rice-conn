@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# rice-conn: Wi-Fi and Bluetooth in one rofi window. Tab / Shift+Tab flip
+# between the two tabs.
+#
+#   rice-conn [TAB]   TAB is net (default, Wi-Fi) or bt (Bluetooth)
+#                     ("wifi" and "bluetooth" are accepted too)
+#
+#   Wi-Fi      Enter connect / disconnect    Alt+1 power     Alt+2 forget
+#   Bluetooth  Enter connect / disconnect    Alt+1 power     Alt+2 unpair
+#   Alt+3      rescan, whichever tab is showing (Wi-Fi ~2 s, Bluetooth ~5 s)
+#
+# The tabs are rice-net and rice-bt running as rofi modes (they detect
+# ROFI_RETV and answer rofi instead of opening their own window). Their tab
+# names are the prompts they print themselves (\0prompt "<glyph>  Name").
+#
+# This is an optional combined view: rice-hub net / rice-hub bt, the Waybar
+# pills and the quick-settings tiles keep opening the separate windows.
+
+set -euo pipefail
+
+BIN="${RICE_BIN:-$HOME/.config/rice/bin}" # RICE_BIN lets a checkout be tried before it is stowed
+tab=${1:-net}
+case $tab in
+net | wifi | wi-fi) tab=net ;;
+bt | bluetooth) tab=bt ;;
+*)
+    echo "usage: rice-conn [net|bt]" >&2
+    exit 2
+    ;;
+esac
+
+# Startup speed. Rofi runs every tab's script once at launch (it needs each
+# one's \0prompt for the tab label) and the window only appears after the last
+# one finishes, so run both here, at once, and let each script hand rofi its
+# finished output (RICE_PRE; see the top of rice-net and rice-bt).
+RICE_PRE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rice/conn-pre"
+rm -rf "$RICE_PRE"
+mkdir -p "$RICE_PRE"
+for t in net bt; do
+    (
+        ROFI_RETV=0 "$BIN/rice-$t" >"$RICE_PRE/$t.tmp" 2>/dev/null </dev/null || true
+        mv "$RICE_PRE/$t.tmp" "$RICE_PRE/$t.out"
+    ) &
+done
+export RICE_PRE
+
+# No mainbox override: the mode-switcher (the tabs) stays in the theme's
+# layout. Rows are plain text, so element-text markup stays off.
+exec rofi -show "$tab" \
+    -modes "net:$BIN/rice-net,bt:$BIN/rice-bt" \
+    -kb-remove-word-forward "Control+Alt+d" \
+    -kb-custom-1 "Alt+1" \
+    -kb-custom-2 "Alt+2" \
+    -kb-custom-3 "Alt+3" \
+    -theme-str 'window { width: 600px; } element-icon { size: 0px; padding: 0px; background-color: transparent; }'

@@ -1,6 +1,7 @@
 local terminal = "alacritty"
 local fileManager = "thunar"
 local menu = "~/.config/rice/bin/rice-hub"
+local conn = "~/.config/rice/bin/rice-conn"
 local code = "vscodium"
 local browser = "firefox"
 
@@ -22,6 +23,7 @@ bind(mainMod .. " + escape", exec("wlogout -b 5 -L 380 -R 380 -T 410 -B 410"))
 bind(mainMod .. " + Q", exec(terminal))
 bind(mainMod .. " + E", exec(fileManager))
 bind(mainMod .. " + SPACE", exec(menu))
+bind(mainMod .. " + D", exec(conn))
 bind(mainMod .. " + SHIFT + C", exec(code))
 bind(mainMod .. " + B", exec(browser))
 bind(mainMod .. " + SHIFT + B", exec("chromium"))
