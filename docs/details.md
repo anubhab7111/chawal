@@ -391,7 +391,9 @@ titlebar window controls are hidden and the page area has 16px rounded corners.
 `<profile>/chrome/` (a real file in the way goes to `~/.dotfiles-backup/`) and
 keeps a `// chawal begin/end` block in the profile's `user.js` that turns on
 `toolkit.legacyUserProfileCustomizations.stylesheets`, without which Firefox
-ignores `userChrome.css`. It installs into the default profile from
+ignores `userChrome.css`, and pins `browser.tabs.allow_transparent_browser`
+to false so pages without their own background (llvm.org, Swagger UI) render
+white instead of showing the transparent window through. It installs into the default profile from
 `profiles.ini`; pick another with `--profile DIR`. Restart Firefox after every
 CSS change: it reads chrome CSS at startup. `tests/firefox/install-tests.sh`
 covers the installer.

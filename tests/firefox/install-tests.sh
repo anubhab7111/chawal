@@ -56,6 +56,7 @@ ok "real file backed up, not deleted" bash -c "cat '$HOME'/.dotfiles-backup/*/us
 ok "other chrome files left alone" bash -c "test ! -L '$CHROME/userContent.css' && grep -q 'not ours' '$CHROME/userContent.css'"
 ok "user.js keeps the user's line" grep -q 'my.own' "$PROFILE/user.js"
 ok "user.js has the stylesheets pref" grep -q 'legacyUserProfileCustomizations' "$PROFILE/user.js"
+ok "user.js keeps pages opaque" grep -q 'allow_transparent_browser", false' "$PROFILE/user.js"
 ok "old block's prefs are gone" bash -c "! grep -q 'rice.tint' '$PROFILE/user.js'"
 
 "$INSTALL" >/dev/null 2>&1
