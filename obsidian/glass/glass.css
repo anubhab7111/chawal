@@ -1,0 +1,63 @@
+/* Glass chrome, after firefox/chrome/userChrome.css: the frame is see-through so
+   Hyprland blurs the wallpaper behind it, and the notes stay on a solid card with
+   16px corners. Colours are not set here, so rice-theme still recolours all of it.
+   Reload the window (Ctrl+P, "Reload app without saving") to pick up an edit.
+   Screen only: PDF export runs on the theme's own print styles. */
+@media screen {
+  html,
+  .app-container,
+  .horizontal-main-container,
+  .workspace {
+    background: transparent !important;
+  }
+
+  /* The only tint, so the whole frame reads as one sheet. Firefox needs none, but
+     the file tree has to stay readable over a bright wallpaper. */
+  body {
+    background: color-mix(in srgb, var(--ctp-crust) 60%, transparent) !important;
+  }
+
+  /* Sidebars: clear the variables here rather than on body, because modals,
+     menus and settings read the same ones and must stay solid. */
+  .workspace-split.mod-sidedock {
+    --background-primary: transparent;
+    --background-primary-alt: transparent;
+    --background-secondary: transparent;
+    --background-secondary-alt: transparent;
+    --tab-container-background: transparent;
+    background: transparent !important;
+  }
+
+  /* Top bar and ribbon */
+  .titlebar-button-container,
+  .sidebar-toggle-button,
+  .workspace-ribbon,
+  .workspace-ribbon::before,
+  .workspace-ribbon.is-collapsed,
+  .workspace-sidedock-vault-profile,
+  .workspace-tab-header-container,
+  .workspace-split.mod-root {
+    background: transparent !important;
+  }
+
+  /* Dividers between the panes vanish, as the sidebar borders do in Firefox */
+  .workspace-tab-header-container,
+  .workspace-sidedock-vault-profile,
+  .workspace-ribbon,
+  .workspace-leaf-resize-handle {
+    border-color: transparent !important;
+  }
+
+  /* The note area: one solid card, inset so the corners read against the glass */
+  .workspace-split.mod-root .workspace-tab-container {
+    margin: 0 8px 8px 0;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--background-primary);
+  }
+
+  /* The status bar floats inside the card */
+  .status-bar {
+    margin: 0 16px 16px 0;
+  }
+}

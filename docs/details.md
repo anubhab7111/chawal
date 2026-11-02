@@ -396,6 +396,33 @@ ignores `userChrome.css`. It installs into the default profile from
 CSS change: it reads chrome CSS at startup. `tests/firefox/install-tests.sh`
 covers the installer.
 
+## Obsidian
+
+`obsidian/glass/glass.css` gives Obsidian the same look as Firefox: the top bar,
+ribbon and sidebars are see-through so Hyprland blurs the wallpaper behind them,
+and the notes sit on a solid card with 16px corners (Obsidian stays at window
+opacity 1.0 in `rules.lua`, so notes stay crisp). One `--ctp-crust` tint on `body`
+keeps the file tree readable; its percentage is the knob for more or less glass.
+Colours come from the palette, so `rice-theme` still recolours everything.
+
+Obsidian's own translucency setting does not work on Linux, so
+`obsidian/glass/index.js` runs ahead of Obsidian and adds `transparent: true` to
+the vault window. `obsidian/install.sh` loads it by keeping a `# chawal begin/end`
+block in `~/.config/electron<N>-flags.conf`, the flags file of the electron that
+Obsidian runs on. No package file and nothing in the vault changes. Restart
+Obsidian after installing; after a CSS edit, "Reload app without saving" is enough.
+
+- `-r` names the directory on purpose: Obsidian opens any file path in its
+  arguments as a note.
+- Re-run the installer when Obsidian moves to a new electron major. Until then the
+  window is the plain opaque theme.
+- Popped-out notes and the Settings window are separate windows and stay opaque.
+- The flags file holds an absolute path into this repo. If the repo moves or goes
+  away, Obsidian exits at launch with `Cannot find module`: run the installer from
+  the new location, or delete the block from the flags file to undo the whole thing.
+
+`tests/obsidian/install-tests.sh` covers the installer.
+
 ## Right-edge gauges
 
 Touching the right edge of the screen slides out the gauge level with the

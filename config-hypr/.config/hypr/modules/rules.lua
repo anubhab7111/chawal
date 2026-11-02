@@ -71,6 +71,7 @@ rule(class([[^(com.rtosta.zapzap)$]]), { opacity = "0.96 0.92 override" })
 rule(class([[^(Signal)$]]), { opacity = "0.96 0.92 override" })
 
 rule(class([[^(firefox)$]]), { opacity = "1.00 1.00 override" })
+rule(class([[^(md.obsidian.Obsidian)$]]), { opacity = "1.00 1.00 override" })
 rule(class([[^(steam_app_default)$]]), { opacity = "1.00 1.00 override" })
 rule(class([[^(µVision)$]]), { opacity = "1.00 1.00 override" })
 
