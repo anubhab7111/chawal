@@ -403,7 +403,8 @@ ribbon and sidebars are see-through so Hyprland blurs the wallpaper behind them,
 and the notes sit on a solid card with 16px corners (Obsidian stays at window
 opacity 1.0 in `rules.lua`, so notes stay crisp). One `--ctp-crust` tint on `body`
 keeps the file tree readable; its percentage is the knob for more or less glass.
-Colours come from the palette, so `rice-theme` still recolours everything.
+Colours come from the palette, so `rice-theme` still recolours everything. The
+window buttons are hidden, as in Firefox: `SUPER+C` closes and `SUPER+F` maximizes.
 
 Obsidian's own translucency setting does not work on Linux, so
 `obsidian/glass/index.js` runs ahead of Obsidian and adds `transparent: true` to
