@@ -58,16 +58,10 @@
     border-color: transparent !important;
   }
 
-  /* The note area: one solid card, inset so the corners read against the glass */
+  /* The note area: one solid card */
   .workspace-split.mod-root .workspace-tab-container {
-    margin: 0 8px 8px 0;
     border-radius: 16px;
     overflow: hidden;
     background: var(--background-primary);
-  }
-
-  /* The status bar floats inside the card */
-  .status-bar {
-    margin: 0 16px 16px 0;
   }
 }
