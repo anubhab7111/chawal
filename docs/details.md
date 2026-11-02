@@ -407,19 +407,21 @@ Colours come from the palette, so `rice-theme` still recolours everything.
 
 Obsidian's own translucency setting does not work on Linux, so
 `obsidian/glass/index.js` runs ahead of Obsidian and adds `transparent: true` to
-the vault window. `obsidian/install.sh` loads it by keeping a `# chawal begin/end`
-block in `~/.config/electron<N>-flags.conf`, the flags file of the electron that
-Obsidian runs on. No package file and nothing in the vault changes. Restart
-Obsidian after installing; after a CSS edit, "Reload app without saving" is enough.
+the vault window. `obsidian/install.sh` loads it through a small loader in
+`~/.local/share/chawal/obsidian-glass/`, named by a `# chawal begin/end` block in
+`~/.config/electron<N>-flags.conf`, the flags file of the electron that Obsidian
+runs on. No package file and nothing in the vault changes. Restart Obsidian after
+installing; after a CSS edit, "Reload app without saving" is enough. To undo it,
+delete that block.
 
-- `-r` names the directory on purpose: Obsidian opens any file path in its
-  arguments as a note.
+- The loader is outside the repo and is a directory on purpose: electron refuses
+  to start if its `-r` target is missing, and Obsidian opens any file path in its
+  arguments as a note. So never delete the loader and leave the block behind.
+- If the repo moves, the loader finds nothing and Obsidian opens opaque. Run the
+  installer from the new location.
 - Re-run the installer when Obsidian moves to a new electron major. Until then the
   window is the plain opaque theme.
 - Popped-out notes and the Settings window are separate windows and stay opaque.
-- The flags file holds an absolute path into this repo. If the repo moves or goes
-  away, Obsidian exits at launch with `Cannot find module`: run the installer from
-  the new location, or delete the block from the flags file to undo the whole thing.
 
 `tests/obsidian/install-tests.sh` covers the installer.
 

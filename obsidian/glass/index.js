@@ -2,12 +2,11 @@
 // glass.css into it, so Hyprland blurs the wallpaper behind the chrome.
 //
 // Obsidian has no switch for this on Linux, so it is done from the outside:
-// install.sh puts `-r <this directory>` in electron's flags file, which runs
-// this before Obsidian's main process. `-r` must name the directory, not this
-// file: Obsidian treats every file path in argv as a note to open.
+// install.sh puts a small loader in electron's flags file (`-r`), which requires
+// this before Obsidian's main process starts.
 //
-// Only the window that gets transparency gets the CSS, so if this stops loading
-// Obsidian falls back to the plain opaque theme.
+// Only the window that gets transparency gets the CSS, so if the loader cannot
+// find this file Obsidian opens with the plain opaque theme.
 'use strict';
 
 const Module = require('module');

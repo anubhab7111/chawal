@@ -41,6 +41,7 @@ line_after() { # FILE LINE EXPECTED: EXPECTED is the line right after LINE
 }
 
 GLASS=$ROOT/obsidian/glass
+LOADER=$HOME/.local/share/chawal/obsidian-glass
 CONF=$CONFIG/electron43-flags.conf
 
 launcher electron43
@@ -56,10 +57,15 @@ CONF
 ok "exit 0 and flags file named after the electron" test -f "$CONF"
 ok "keeps other flags" grep -qxF -- "--ozone-platform=wayland" "$CONF"
 ok "drops the old block" test "$(grep -cF /old/path "$CONF")" = 0
-ok "-r and the path are separate lines" line_after "$CONF" "-r" "$GLASS"
-ok "path is absolute, to a directory" test -d "$GLASS"
-ok "preload is in that directory" test -f "$GLASS/index.js"
-ok "css is in that directory" test -f "$GLASS/glass.css"
+ok "-r and the path are separate lines" line_after "$CONF" "-r" "$LOADER"
+ok "-r names a directory, or Obsidian opens it as a note" test -d "$LOADER"
+ok "loader requires the repo's glass" grep -qF "require('$GLASS')" "$LOADER/index.js"
+ok "preload is in the repo" test -f "$GLASS/index.js"
+ok "css is next to it" test -f "$GLASS/glass.css"
+
+# A missing repo must cost the glass, not the app.
+sed "s#require('$GLASS')#require('$T/gone')#" "$LOADER/index.js" >"$T/loader-gone.js"
+ok "loader survives a missing repo" bash -c 'node "$1" 2>/dev/null' _ "$T/loader-gone.js"
 
 "$INSTALL" >/dev/null
 ok "second run leaves one block" test "$(count "$CONF" "# chawal begin")" = 1
@@ -70,14 +76,14 @@ ok "second run leaves one -r" test "$(count "$CONF" "-r")" = 1
 launcher electron44
 echo "--from-fallback" >"$CONFIG/electron-flags.conf"
 "$INSTALL" >/dev/null
-ok "new electron gets its own file" line_after "$CONFIG/electron44-flags.conf" "-r" "$GLASS"
+ok "new electron gets its own file" line_after "$CONFIG/electron44-flags.conf" "-r" "$LOADER"
 ok "new file keeps the fallback's flags" grep -qxF -- "--from-fallback" "$CONFIG/electron44-flags.conf"
 ok "fallback file itself untouched" test "$(cat "$CONFIG/electron-flags.conf")" = "--from-fallback"
 
 # XDG_CONFIG_HOME is what the electron wrapper reads too.
 launcher electron43
-XDG_CONFIG_HOME=$T/xdg "$INSTALL" >/dev/null
-ok "honours XDG_CONFIG_HOME" line_after "$T/xdg/electron43-flags.conf" "-r" "$GLASS"
+XDG_CONFIG_HOME=$T/xdg XDG_DATA_HOME=$T/data "$INSTALL" >/dev/null
+ok "honours XDG_CONFIG_HOME and XDG_DATA_HOME" line_after "$T/xdg/electron43-flags.conf" "-r" "$T/data/chawal/obsidian-glass"
 
 # Refuses rather than guesses.
 printf '#!/bin/bash\nexec /opt/Obsidian/obsidian "$@"\n' >"$BIN/obsidian"
