@@ -229,9 +229,14 @@ nvidia-hibernate` (the driver keeps video memory across sleep, which those units
 save and restore), and the embedded controller must not wake the machine, as it
 fires about 80 events a second and woke suspend at once. That is
 `echo 'w /sys/module/acpi/parameters/ec_no_wakeup - - - - Y' | sudo tee
-/etc/tmpfiles.d/ec-no-wakeup.conf`. If the screen stays frozen after a resume,
-power-cycling it from another tty brings it back: `hyprctl dispatch
-'hl.dsp.dpms({ action = "disable" })'`, then the same with `"enable"`.
+/etc/tmpfiles.d/ec-no-wakeup.conf`. The NVIDIA units switch to VT 63 before
+suspend and back after resume; if the panel is lit at that moment (a manual
+`systemctl suspend`, not the idle one, which turns the screen off first), Hyprland
+comes back showing a frozen frame and hyprlock seems to ignore typing. hypridle's
+`after_sleep_cmd` (`rice-idle wake`) therefore waits for the session to be active
+again and power-cycles the screens. If it still sticks, do the same by hand from
+another tty: `hyprctl -i 0 dispatch 'hl.dsp.dpms({ action = "disable" })'`, then
+the same with `"enable"`, then Ctrl+Alt+F2.
 The old rofi `rice-power` script is still in `config-rice` but nothing calls it.
 Optional dependency: `cliphist` + `wl-clipboard` (Clip). Switches live in the
 quick-settings panel (`SUPER+N`) and the sliders in the right-edge gauges, not

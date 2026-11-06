@@ -5,6 +5,8 @@
 #   rice-idle undim   restore the brightness saved by dim
 #   rice-idle quiet   exit 0 when no audio is playing (the listeners'
 #                     condition_cmd: playing audio defers idle)
+#   rice-idle wake    after a resume: wait for the seat, then power-cycle the
+#                     screens (after_sleep_cmd)
 
 set -euo pipefail
 
@@ -29,8 +31,28 @@ undim)
 quiet)
     ! pactl list sinks short 2>/dev/null | grep -q RUNNING
     ;;
+wake)
+    # nvidia-sleep.sh switches to VT 63 before suspend and back after resume.
+    # If the panel was lit at that moment, Hyprland comes back showing its last
+    # frame and never updates it (hyprlock looks dead to typing); a DPMS
+    # off/on gives the output a fresh modeset. hypridle runs this before
+    # nvidia-resume has switched back, so first wait (10 s at most) for logind
+    # to report this session active again, then let Hyprland finish restoring.
+    dpms() { hyprctl -q dispatch "hl.dsp.dpms({ action = \"$1\" })" || true; }
+    session=${XDG_SESSION_ID:-$(sed -n 's/.*session-\(.*\)\.scope.*/\1/p' /proc/self/cgroup)}
+    active() { [ -z "$session" ] || [ "$(loginctl show-session "$session" -p Active --value 2>/dev/null)" = yes ]; }
+    for ((i = 0; i < 50; i++)); do
+        active && break
+        sleep 0.2
+    done
+    ((i < 50)) || exit 0 # still on another VT: leave the screen alone
+    sleep 1
+    dpms disable
+    sleep 0.5
+    dpms enable
+    ;;
 *)
-    sed -n '3,8s/^# \{0,1\}//p' "$0" >&2
+    sed -n '3,10s/^# \{0,1\}//p' "$0" >&2
     exit 2
     ;;
 esac
