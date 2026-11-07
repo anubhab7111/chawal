@@ -8,7 +8,8 @@ require("modules.input")
 require("modules.rules")
 require("modules.binds")
 require("modules.qs")
-require("modules.modes") -- after look: captures its values as the baseline
+require("modules.modes")
 require("modules.lid")
-require("modules.pointer") -- after modes: reads rice.modes.game
+require("modules.pointer")
 require("modules.autostart")
+require("modules.kbdlight")

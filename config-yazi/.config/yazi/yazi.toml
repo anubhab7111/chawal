@@ -44,7 +44,7 @@ ueberzug_offset = [0, 0, 0, 0]
 # Text files
 edit = [
 	{ run = 'nvim %s', block = true, for = "unix" },
-	{ run = 'code %s', orphan = true, for = "windows" },
+	# { run = 'code %s', orphan = true, for = "windows" },
 ]
 
 # Images. imv-dir opens one image together with its whole folder, so h/l in

@@ -231,6 +231,7 @@ reload_apps() {
     pkill -USR2 -x waybar >/dev/null 2>&1 || true # full reload: config + css
     pkill -USR2 -x cava >/dev/null 2>&1 || true   # colours only
     swaync-client -rs -sw >/dev/null 2>&1 || true # reload the stylesheet (colours)
+    ~/.local/bin/omen-kbd reload >/dev/null 2>&1 || true # keyboard colors follow the theme
 
     # the one eww daemon (edge gauges); a reload re-reads the stylesheet
     if eww ping >/dev/null 2>&1; then

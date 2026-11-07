@@ -16,6 +16,7 @@
     "hyprland/workspaces"
   ],
   "modules-right": [
+    "custom/kbd",
     "battery",
     "bluetooth",
     "network",
@@ -121,6 +122,15 @@
     "signal": 10,
     "on-click": "~/.config/rice/bin/rice-gamemode toggle",
     "tooltip": true
+  },
+  "custom/kbd": {
+    "exec": "~/.local/bin/omen-kbd waybar",
+    "return-type": "json",
+    "tooltip": true,
+    "on-click": "~/.local/bin/omen-kbd profile next",
+    "on-click-right": "~/.local/bin/omen-kbd toggle",
+    "on-scroll-up": "~/.local/bin/omen-kbd brightness +10",
+    "on-scroll-down": "~/.local/bin/omen-kbd brightness -10"
   },
   "custom/media": {
     "format": "{}",

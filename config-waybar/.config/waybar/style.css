@@ -352,3 +352,22 @@ tooltip {
   border-radius: 14px;
   padding: 10px;
 }
+
+/* omen-kbd keyboard colors */
+#custom-kbd {
+  color: @pill_fg;
+  background: linear-gradient(135deg, @pill_theme_1 0%, @pill_theme_2 100%);
+}
+#custom-kbd.off {
+  opacity: 0.55;
+}
+#custom-kbd.hint {
+  background: linear-gradient(135deg, @mauve 0%, @pink 100%);
+}
+#custom-kbd.effect {
+  background: linear-gradient(135deg, @teal 0%, @sky 100%);
+}
+#custom-kbd.error {
+  color: @base;
+  background: @red;
+}

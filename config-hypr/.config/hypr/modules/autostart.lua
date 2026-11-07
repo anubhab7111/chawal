@@ -22,6 +22,7 @@ local commands = {
 
 	"wl-paste --type text --watch cliphist store",
 	"wl-paste --type image --watch cliphist store",
+	"systemctl --user start omen-kbd.service",
 }
 
 hl.on("hyprland.start", function()

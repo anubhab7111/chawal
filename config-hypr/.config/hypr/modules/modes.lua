@@ -133,6 +133,7 @@ function rice.gamemode.toggle()
 		os.remove(game_flag)
 	end
 	rice.set_mode("game", on)
+	hl.exec_cmd("~/.local/bin/omen-kbd flag gamemode " .. (on and "on" or "off")) -- keyboard: "game" profile
 	hl.exec_cmd(
 		bin
 			.. "rice-dnd "
