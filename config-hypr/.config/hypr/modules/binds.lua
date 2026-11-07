@@ -121,6 +121,7 @@ bind("CTRL + SHIFT + PRINT", exec("~/.config/rice/bin/rice-record toggle screen"
 bind("SUPER + SHIFT + V", exec("~/.config/rice/bin/rice-hub clip")) -- Clipboard history (hub tab)
 bind("SUPER + W", exec("~/.config/rice/bin/rice-wall")) -- Wallpaper picker
 bind("SUPER + N", exec("~/.config/eww/scripts/qs-ctl toggle")) -- Quick settings (eww)
+bind("SUPER + K", exec("~/.local/bin/omen-kbd-menu")) -- Keyboard lighting menu (omen-kbd)
 
 -- Zoom
 local function zoom_by(factor)
