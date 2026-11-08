@@ -12,7 +12,6 @@
 set -euo pipefail
 
 CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/rice/clip"
-HINT="Enter copy    Ctrl+Del delete    Ctrl+Shift+Del wipe all"
 
 if [ -z "${ROFI_RETV:-}" ]; then
     exec rofi -show clip -modes "clip:$0" \
@@ -47,7 +46,7 @@ esc() { # text, result variable name
 list() {
     printf '\0use-hot-keys\x1ftrue\n\0no-custom\x1ftrue\n'
     printf '\0prompt\x1f%s\n' $'\U000F014C  Clip'
-    printf '\0message\x1f%s\n' "${1:-$HINT}"
+    [ -z "${1:-}" ] || printf '\0message\x1f%s\n' "$1"
     printf '\0data\x1f%s\n' "${2:-}"
 
     mkdir -p "$CACHE"

@@ -15,12 +15,9 @@
 
 set -euo pipefail
 
-# HINT="Enter connect / disconnect    Alt+1 power    Alt+2 forget    Alt+3 rescan"
-HINT="Alt+1 power    Alt+2 forget    Alt+3 rescan"
-
 if [ "${1:-}" = --ask ]; then # detached password prompt for a new secured network
     ssid=$2
-    pw=$(rofi -dmenu -password -p "󰌾  $ssid" -mesg "Wi-Fi password for $ssid" \
+    pw=$(rofi -dmenu -password -p "󰌾  $ssid" \
         -theme-str 'window { width: 480px; } listview { enabled: false; }' </dev/null) || exit 0
     if out=$(nmcli device wifi connect "$ssid" password "$pw" 2>&1); then
         notify-send -i network-wireless "Wi-Fi" "Connected to $ssid"
@@ -83,11 +80,10 @@ list() {
     printf '\0prompt\x1f%s\n' $'\U000F05A9  Wi-Fi'
     printf '\0no-custom\x1ftrue\n\0use-hot-keys\x1ftrue\n\0keep-selection\x1ftrue\n'
     if [ "$(<"$dir/radio")" != enabled ]; then
-        printf '\0message\x1f%s\n' "Wi-Fi is off.    Alt+1 power on"
+        printf '\0message\x1f%s\n' "Wi-Fi is off."
         rm -rf "$dir"
         return 0
     fi
-    printf '\0message\x1f%s\n' "$HINT"
     # saved profiles, read once (a lookup per network would fork nmcli per row)
     local -A saved=()
     while IFS= read -r name; do saved[$name]=1; done <"$dir/saved"

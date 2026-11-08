@@ -14,9 +14,6 @@
 
 set -euo pipefail
 
-# HINT="Enter connect / disconnect    Alt+1 power    Alt+2 unpair    Alt+3 rescan"
-HINT="Alt+1 power    Alt+2 unpair    Alt+3 rescan"
-
 if [ -z "${ROFI_RETV:-}" ]; then
     exec rofi -show bt -modes "bt:$0" \
         -kb-remove-word-forward "Control+Alt+d" \
@@ -54,10 +51,9 @@ list() {
     printf '\0prompt\x1f%s\n' $'\U000F00AF  BT'
     printf '\0no-custom\x1ftrue\n\0use-hot-keys\x1ftrue\n\0keep-selection\x1ftrue\n'
     if ! powered; then
-        printf '\0message\x1f%s\n' "Bluetooth is off.    Alt+1 power on"
+        printf '\0message\x1f%s\n' "Bluetooth is off."
         return 0
     fi
-    printf '\0message\x1f%s\n' "$HINT"
     local line mac name info conn bat icon icon_name tmp pass dir i=0
     local -a recs=() macs=() names=()
     # bash builtins past one bluetoothctl call per device, and those calls run

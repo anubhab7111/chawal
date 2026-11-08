@@ -25,12 +25,13 @@ fi
 # run a command detached, with stdout off rofi's pipe, or rofi never closes
 go() { setsid -f "$@" >/dev/null 2>&1 </dev/null; }
 
-screen() { # print rofi's mode options for a screen
-    printf '\0prompt\x1f%s\n\0no-custom\x1ftrue\n\0message\x1f%s\n\0data\x1f%s\n' $'\U000F0425  Power' "$1" "${2:-}"
+screen() { # print rofi's mode options for a screen ([message] [data])
+    printf '\0prompt\x1f%s\n\0no-custom\x1ftrue\n\0data\x1f%s\n' $'\U000F0425  Power' "${2:-}"
+    [ -z "${1:-}" ] || printf '\0message\x1f%s\n' "$1"
 }
 
 menu() {
-    screen "Esc closes"
+    screen
     printf '%s\n' "$lock" "$suspend" "$logout" "$reboot" "$poweroff"
 }
 
