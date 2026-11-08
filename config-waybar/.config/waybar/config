@@ -16,7 +16,7 @@
     "hyprland/workspaces"
   ],
   "modules-right": [
-    "custom/kbd",
+    // "custom/kbd",
     "battery",
     "bluetooth",
     "network",
